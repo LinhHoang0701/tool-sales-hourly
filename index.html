@@ -1,0 +1,982 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Giao diện Kiểm thử API POS SalesHourly v2.5</title>
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/xlsx/dist/xlsx.full.min.js"></script>
+  <style>
+    :root { --primary: #2c3e50; --secondary: #2980b9; --bg: #ecf0f1; --card: #ffffff; --text: #2c3e50; --border-radius: 8px; --padding: 16px; }
+    * { box-sizing: border-box; }
+    body { margin: 0; font-family: 'Roboto', sans-serif; background: var(--bg); color: var(--text); }
+    .container { max-width: 1200px; margin: 40px auto; padding: var(--padding); }
+    h1 { text-align: center; font-weight: 700; color: var(--primary); margin-bottom: 24px; }
+    .card { background: var(--card); border-radius: var(--border-radius); padding: var(--padding); margin-bottom: 24px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+    .card h2 { margin-top: 0; color: var(--secondary); }
+    .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+    @media (max-width: 768px) { .grid-2 { grid-template-columns: 1fr; } }
+    label { display: block; margin: 8px 0 4px; font-weight: 500; }
+    input[type=text], input[type=password], input[type=date], input[type=number], textarea, select { 
+      width: 100%; padding: 8px; border: 1px solid #bdc3c7; border-radius: 4px; font-family: inherit; margin-bottom: 8px;
+    }
+    textarea { height: 120px; resize: vertical; font-family: monospace; }
+    button { background: var(--secondary); color: #fff; border: none; padding: 10px 16px; border-radius: 4px; font-size: 1rem; cursor: pointer; margin-top: 8px; transition: background 0.2s; }
+    button:hover { background: #1f6391; }
+    pre { background: #f5f5f5; padding: 12px; border-radius: 4px; overflow-x: auto; max-height: 200px; font-size: 12px; }
+    .file-input { margin-top: 8px; }
+    .info-box { background: #f8f9fa; padding: 10px; border-radius: 4px; margin-top: 10px; }
+    .info-box h3 { margin-top: 0; color: var(--secondary); font-size: 14px; }
+    .info-box p { margin: 4px 0; font-size: 14px; }
+    .preview-section { margin-top: 16px; }
+    .preview-section h3 { color: var(--secondary); font-size: 14px; margin-bottom: 8px; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Kiểm thử API POS SalesHourly v2.5</h1>
+
+    <div class="card">
+      <h2>1. Lấy OAuth2 Token</h2>
+      <label for="username">Tên người dùng</label>
+      <input type="text" id="username" value="postestuservn">
+      <label for="password">Mật khẩu</label>
+      <input type="password" id="password" value="@APITest1234">
+      <button id="btnToken">Lấy Token</button>
+      <label for="token">Token truy cập</label>
+      <input type="text" id="token" readonly placeholder="Token sẽ xuất hiện tại đây">
+      <label for="tokenResponse">Phản hồi thô / Lỗi</label>
+      <pre id="tokenResponse"></pre>
+    </div>
+
+    <div class="card">
+      <h2>2. Cấu hình thông tin mặc định</h2>
+      <p style="color: #666; font-size: 14px; margin-bottom: 16px;">
+        <strong>Payment Methods:</strong> Nhập số tiền thực tế cho từng phương thức thanh toán. 
+        Nếu tất cả = 0, toàn bộ doanh thu sau chiết khấu sẽ được gán vào Cash. 
+        Tổng các payment methods không được vượt quá (GTO - Discount). GST rate cố định 7%.
+      </p>
+      <div class="grid-2">
+        <div>
+          <label for="machineId">Machine ID <span style="color: red;">*</span></label>
+          <input type="text" id="machineId" value="50100904" required>
+          
+          <label for="batchId">Batch ID (ZReport closing number) <span style="color: red;">*</span></label>
+          <input type="text" id="batchId" value="1" required>
+          
+          <label for="reportDate">Ngày báo cáo <span style="color: red;">*</span></label>
+          <input type="date" id="reportDate" required>
+          
+          <label for="receiptCount">Receipt Count (mặc định)</label>
+          <input type="number" id="receiptCount" value="10" min="0">
+          
+          <label for="vatPercent">GST % (mặc định) <span style="color: red;">*</span></label>
+          <input type="number" id="vatPercent" value="7" step="0.1" min="0" max="100" required>
+          
+          <label for="serviceCharge">Service Charge (F&B only)</label>
+          <input type="number" id="serviceCharge" value="0" step="0.01" min="0">
+          
+          <label for="noofpax">Number of Pax (F&B only)</label>
+          <input type="number" id="noofpax" value="0" min="0">
+        </div>
+        
+        <div>
+          <label for="cash">Cash (after discount, before GST)</label>
+          <input type="number" id="cash" value="0" step="0.01" min="0" placeholder="0 = auto assign all">
+          
+          <label for="atm">ATM (after discount, before GST)</label>
+          <input type="number" id="atm" value="0" step="0.01" min="0">
+          
+          <label for="visa">Visa (after discount, before GST)</label>
+          <input type="number" id="visa" value="0" step="0.01" min="0">
+          
+          <label for="mastercard">Mastercard (after discount, before GST)</label>
+          <input type="number" id="mastercard" value="0" step="0.01" min="0">
+          
+          <label for="amex">Amex (after discount, before GST)</label>
+          <input type="number" id="amex" value="0" step="0.01" min="0">
+          
+          <label for="voucher">Voucher (after discount, before GST)</label>
+          <input type="number" id="voucher" value="0" step="0.01" min="0">
+          
+          <label for="vatRegistered">VAT Registered <span style="color: red;">*</span></label>
+          <select id="vatRegistered" required>
+            <option value="Y">Yes (Y)</option>
+            <option value="N" selected>No (N)</option>
+          </select>
+        </div>
+      </div>
+      
+      <div style="margin-top: 16px;">
+        <button type="button" onclick="resetForm()" style="background: #95a5a6;">🔄 Reset Form</button>
+        <button type="button" onclick="validateAndShowPreview()" style="background: #27ae60;">✓ Validate Form</button>
+        <button type="button" onclick="generateEmpty24Hours()" style="background: #f39c12;">⏰ Generate 24 Hours (Empty)</button>
+      </div>
+      
+      <div style="margin-top: 12px; padding: 10px; background: #e8f5e8; border-radius: 4px; font-size: 13px;">
+        <strong>📋 Logic tính toán:</strong><br>
+        • <strong>GTO:</strong> Tổng doanh thu từ file Excel<br>
+        • <strong>GST:</strong> (GTO - Discount) × 7% (fixed rate)<br>
+        • <strong>Payment Methods:</strong> Nếu tất cả = 0, toàn bộ net amount sẽ vào Cash. Nếu có giá trị, sử dụng số tiền đã cấu hình<br>
+        • <strong>Others Amount:</strong> Phần còn lại = (GTO - Discount) - tổng payment methods<br>
+        • <strong>⚠️ API yêu cầu đủ 24 records (hour 00-23) cho mỗi ngày!</strong>
+      </div>
+      
+      <!-- Thêm example payload -->
+      <details style="margin-top: 12px;">
+        <summary style="cursor: pointer; font-weight: 500; color: var(--secondary);">📖 Xem example payload đúng format (theo API response)</summary>
+        <pre style="margin-top: 8px; font-size: 11px; background: #f8f9fa; border: 1px solid #e9ecef;">
+{
+  "sales": [
+    {
+      "sale": {
+        "machineid": "50100904",
+        "batchid": "1",
+        "date": "20220125",              // yyyyMMdd format
+        "hour": "01",                   // HH format (24 hour)
+        "receiptcount": "5",            // Số giao dịch trong giờ
+        "gto": "191.54",               // Tổng doanh thu từ Excel
+        "gst": "13.41",                // (gto - discount) × 7%
+        "discount": "0.00",            // Chiết khấu từ Excel
+        "servicecharge": "5.00",       // F&B only
+        "noofpax": "0",               // F&B only
+        "cash": "172.39",             // After discount, before GST
+        "atm": "0.00",                // After discount, before GST
+        "visa": "0.00",               // After discount, before GST
+        "mastercard": "0.00",         // After discount, before GST
+        "amex": "0.00",               // After discount, before GST
+        "voucher": "0.00",            // After discount, before GST
+        "othersamount": "0.00",       // Phần còn lại
+        "vatregistered": "N"          // lowercase
+      }
+    }
+  ]
+}
+
+⚠️ Lỗi thường gặp:
+{
+  "status": "error",
+  "errors": [
+    {
+      "status_code": "Daily records",
+      "message": "ERROR: Every day should have 24 Records. Hour 00 to 23. Date :20220125"
+    }
+  ]
+}
+
+Giải thích tính toán:
+• gto: 191.54 (từ Excel)
+• discount: 0.00 (từ Excel)  
+• Net amount: 191.54 - 0.00 = 191.54
+• gst: 191.54 × 7% = 13.41 (fixed 7%)
+• cash: 191.54 (vì tất cả payment = 0)
+• othersamount: 191.54 - 191.54 = 0.00
+        </pre>
+      </details>
+    </div>
+
+    <div class="card">
+      <h2>3. Manual Entry Management</h2>
+      <p style="color: #666; font-size: 14px; margin-bottom: 16px;">
+        Thêm/sửa entries thủ công để đảm bảo có đủ 24 records (hour 00-23). API yêu cầu strict 24 hours data.
+      </p>
+      
+      <div style="margin-bottom: 16px;">
+        <button type="button" onclick="addManualEntry()" style="background: #3498db;">➕ Add Manual Entry</button>
+        <button type="button" onclick="validatePayload()" style="background: #e74c3c;">🔍 Validate Payload (Check 24 Hours)</button>
+        <button type="button" onclick="fillMissingHours()" style="background: #f39c12;">⚡ Auto Fill Missing Hours</button>
+        <button type="button" onclick="sortPayloadByHour()" style="background: #9b59b6;">🔢 Sort by Hour</button>
+      </div>
+      
+      <div id="manualEntryForm" style="display:none; background: #f8f9fa; padding: 16px; border-radius: 4px; margin-bottom: 16px;">
+        <h3 style="margin-top: 0;">Add/Edit Entry</h3>
+        <div class="grid-2">
+          <div>
+            <label for="entryHour">Hour (00-23) <span style="color: red;">*</span></label>
+            <select id="entryHour">
+              <option value="">Select Hour</option>
+            </select>
+            
+            <label for="entryReceiptCount">Receipt Count</label>
+            <input type="number" id="entryReceiptCount" value="0" min="0">
+            
+            <label for="entryGTO">GTO</label>
+            <input type="number" id="entryGTO" value="0" step="0.01" min="0">
+            
+            <label for="entryDiscount">Discount</label>
+            <input type="number" id="entryDiscount" value="0" step="0.01" min="0">
+          </div>
+          <div>
+            <label for="entryCash">Cash</label>
+            <input type="number" id="entryCash" value="0" step="0.01" min="0">
+            
+            <label for="entryATM">ATM</label>
+            <input type="number" id="entryATM" value="0" step="0.01" min="0">
+            
+            <label for="entryVisa">Visa</label>
+            <input type="number" id="entryVisa" value="0" step="0.01" min="0">
+            
+            <label for="entryOthers">Others Amount</label>
+            <input type="number" id="entryOthers" value="0" step="0.01" min="0">
+          </div>
+        </div>
+        
+        <div style="margin-top: 12px;">
+          <button type="button" onclick="saveManualEntry()" style="background: #27ae60;">💾 Save Entry</button>
+          <button type="button" onclick="cancelManualEntry()" style="background: #95a5a6;">❌ Cancel</button>
+        </div>
+      </div>
+      
+      <div id="validationResult" style="display:none; padding: 12px; border-radius: 4px; margin-bottom: 16px;">
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>4. Upload và xử lý file</h2>
+      <label for="fileInput">Chọn file CSV hoặc Excel</label>
+      <input type="file" id="fileInput" accept=".csv, .xls, .xlsx" class="file-input">
+      
+      <!-- Thêm khu vực hiển thị thông tin file -->
+      <div id="fileInfo" class="info-box" style="display:none;">
+        <h3>Thông tin file:</h3>
+        <p id="fileName"></p>
+        <p id="fileSize"></p>
+        <p id="recordCount"></p>
+      </div>
+      
+      <!-- Thêm khu vực preview dữ liệu -->
+      <div id="dataPreview" class="preview-section" style="display:none;">
+        <h3>Preview dữ liệu gốc (5 dòng đầu):</h3>
+        <pre id="rawDataPreview" style="max-height: 150px; overflow-y: auto;"></pre>
+        
+        <h3>Preview dữ liệu đã xử lý (5 giờ đầu):</h3>
+        <pre id="processedDataPreview" style="max-height: 150px; overflow-y: auto;"></pre>
+      </div>
+      
+      <label for="salesData">Dữ liệu SalesHourly (JSON Payload)</label>
+      <textarea id="salesData">{"sales":[]}</textarea>
+      <button id="btnSales">Gửi SalesHourly</button>
+      <label for="salesResponse">Phản hồi thô / Lỗi</label>
+      <pre id="salesResponse"></pre>
+    </div>
+  </div>
+
+  <script>
+    const baseUrl = 'https://staging.synthesis.bz/posvn/v1/api';
+
+    document.getElementById('btnToken').addEventListener('click', async () => {
+      const user = document.getElementById('username').value.trim();
+      const pass = document.getElementById('password').value.trim();
+      try {
+        const res = await fetch(`${baseUrl}/token`, {
+          method: 'POST', headers: {'Content-Type':'application/x-www-form-urlencoded'},
+          body: `grant_type=password&username=${encodeURIComponent(user)}&password=${encodeURIComponent(pass)}`, mode: 'cors'
+        }); if(!res.ok) throw new Error(res.status+' '+res.statusText);
+        const data = await res.json();
+        document.getElementById('tokenResponse').textContent = JSON.stringify(data,null,2);
+        document.getElementById('token').value = data.access_token||'';
+      } catch(err) {
+        document.getElementById('tokenResponse').textContent = 'Lỗi: '+err.message;
+      }
+    });
+
+    function parseCSV(text) {
+      const lines = text.trim().split(/\r?\n/);
+      const headers = lines.shift().split(/,|;|\t/).map(h=>h.trim());
+      return lines.map(line=>{
+        const cols = line.split(/,|;|\t/).map(c=>c.trim());
+        const obj = {}; headers.forEach((h,i)=>obj[h]=isNaN(cols[i])?cols[i]:Number(cols[i])); return obj;
+      });
+    }
+
+    function transformToHourly(raw) {
+      const date = document.getElementById('reportDate').value;
+      const machineid = document.getElementById('machineId').value.trim();
+      const batchid = document.getElementById('batchId').value.trim();
+      const receiptCountDefault = Number(document.getElementById('receiptCount').value);
+      const vatPercent = Number(document.getElementById('vatPercent').value);
+      const serviceChargeDefault = Number(document.getElementById('serviceCharge').value);
+      const noofpaxDefault = Number(document.getElementById('noofpax').value);
+      const cashDefault = Number(document.getElementById('cash').value);
+      const atmDefault = Number(document.getElementById('atm').value);
+      const visaDefault = Number(document.getElementById('visa').value);
+      const mastercardDefault = Number(document.getElementById('mastercard').value);
+      const amexDefault = Number(document.getElementById('amex').value);
+      const voucherDefault = Number(document.getElementById('voucher').value);
+      const vatRegistered = document.getElementById('vatRegistered').value;
+      
+      // Thử nhiều format date khác nhau
+      function formatDateForAPI(dateStr) {
+        if (!dateStr) return '';
+        
+        // Format theo document: yyyyMMdd (VD: "20220125")
+        const dateObj = new Date(dateStr);
+        if (isNaN(dateObj.getTime())) return dateStr;
+        
+        const year = dateObj.getFullYear();
+        const month = (dateObj.getMonth() + 1).toString().padStart(2, '0');
+        const day = dateObj.getDate().toString().padStart(2, '0');
+        
+        // Format yyyyMMdd theo document
+        const yyyymmdd = `${year}${month}${day}`;
+        console.log(`Date conversion: ${dateStr} -> ${yyyymmdd}`);
+        
+        return yyyymmdd;
+      }
+      
+      const formattedDate = formatDateForAPI(date);
+      
+      // Khởi tạo dữ liệu cho 24 giờ
+      const hourlyData = {};
+      for (let i = 0; i < 24; i++) {
+        hourlyData[i.toString().padStart(2, '0')] = {
+          receiptcount: 0,
+          gto: 0, // gross turnover (tổng doanh thu)
+          discount: 0,
+          sales: [], // lưu danh sách các sale để tính toán
+        };
+      }
+      
+      // Tìm cột thời gian với nhiều pattern khác nhau
+      const timeKey = Object.keys(raw[0]||{}).find(k => 
+        /thời\s*gian|time|ngày|date|datetime|timestamp|created|order_time/i.test(k)
+      );
+      
+      console.log('Raw data sample:', raw.slice(0, 3));
+      console.log('Time key found:', timeKey);
+      
+      raw.forEach((order, index) => {
+        // Xử lý nhiều cách tìm cột tổng tiền
+        const sale = Number(
+          order['Tổng tiền'] || 
+          order['Total'] || 
+          order['Amount'] || 
+          order['Subtotal'] || 
+          order['__EMPTY_8'] || 
+          order['Doanh thu'] ||
+          order['Revenue'] ||
+          0
+        );
+        
+        // Xử lý nhiều cách tìm cột chiết khấu
+        const discount = Number(
+          order['CK đơn hàng(VNĐ)'] || 
+          order['Discount'] || 
+          order['Chiết khấu'] || 
+          order['__EMPTY_9'] || 
+          order['Giảm giá'] ||
+          0
+        );
+        
+        // Xử lý thời gian thông minh hơn
+        let hour = '00';
+        if (timeKey && order[timeKey]) {
+          const timeStr = order[timeKey].toString();
+          
+          // Thử parse theo nhiều format khác nhau
+          let dateObj = null;
+          
+          // Format: DD/MM/YYYY HH:mm:ss
+          if (timeStr.match(/\d{1,2}\/\d{1,2}\/\d{4}\s+\d{1,2}:\d{2}/)) {
+            const parts = timeStr.split(' ');
+            const datePart = parts[0].split('/');
+            const timePart = parts[1] || '00:00';
+            dateObj = new Date(`${datePart[2]}-${datePart[1].padStart(2,'0')}-${datePart[0].padStart(2,'0')}T${timePart}`);
+          }
+          // Format: YYYY-MM-DD HH:mm:ss
+          else if (timeStr.match(/\d{4}-\d{1,2}-\d{1,2}/)) {
+            dateObj = new Date(timeStr);
+          }
+          // Format: chỉ có giờ HH:mm
+          else if (timeStr.match(/^\d{1,2}:\d{2}/)) {
+            const today = new Date();
+            dateObj = new Date(`${today.getFullYear()}-${(today.getMonth()+1).toString().padStart(2,'0')}-${today.getDate().toString().padStart(2,'0')}T${timeStr}`);
+          }
+          // Thử parse trực tiếp
+          else {
+            dateObj = new Date(timeStr);
+          }
+          
+          // Kiểm tra ngày hợp lệ
+          if (dateObj && !isNaN(dateObj.getTime())) {
+            const hourNum = dateObj.getHours();
+            if (hourNum >= 0 && hourNum <= 23) {
+              hour = hourNum.toString().padStart(2, '0');
+            }
+          } else {
+            console.warn(`Cannot parse time: ${timeStr} at row ${index + 1}`);
+          }
+        }
+        
+        // Cộng dồn dữ liệu vào giờ tương ứng
+        if (sale > 0 || discount > 0) {
+          hourlyData[hour].receiptcount += 1;
+          hourlyData[hour].gto += sale;
+          hourlyData[hour].discount += discount;
+          hourlyData[hour].sales.push({ sale, discount });
+        }
+        
+        if (index < 5) { // Log một vài dòng đầu để debug
+          console.log(`Row ${index + 1}: Time=${order[timeKey]}, Hour=${hour}, Sale=${sale}, Discount=${discount}`);
+        }
+      });
+      
+      // Tạo payload theo format API SalesHourly
+      const salesArray = [];
+      
+      // Đảm bảo tạo đủ 24 giờ (00-23) để tránh lỗi "Daily records"
+      for (let i = 0; i < 24; i++) {
+        const hour = i.toString().padStart(2, '0');
+        const data = hourlyData[hour];
+        
+        const netSale = data.gto - data.discount; // after discount, before GST
+        const gstAmount = (netSale * vatPercent / 100);
+        
+        // Payment methods phải là "after discount and before GST"
+        let actualCash = cashDefault;
+        let actualATM = atmDefault;
+        let actualVisa = visaDefault;
+        let actualMastercard = mastercardDefault;
+        let actualAmex = amexDefault;
+        let actualVoucher = voucherDefault;
+        
+        // Nếu tất cả payment methods đều = 0, phân bổ toàn bộ netSale vào cash
+        const totalPaymentDefaults = cashDefault + atmDefault + visaDefault + mastercardDefault + amexDefault + voucherDefault;
+        
+        if (totalPaymentDefaults === 0) {
+          // Phân bổ toàn bộ netSale vào cash nếu không có cấu hình payment methods
+          actualCash = netSale;
+          actualATM = 0;
+          actualVisa = 0;
+          actualMastercard = 0;
+          actualAmex = 0;
+          actualVoucher = 0;
+        } else {
+          // Sử dụng giá trị đã cấu hình (nhưng không vượt quá netSale)
+          const totalConfigured = totalPaymentDefaults;
+          if (totalConfigured > netSale) {
+            // Nếu tổng cấu hình > netSale, scale down theo tỷ lệ
+            const scale = netSale / totalConfigured;
+            actualCash = cashDefault * scale;
+            actualATM = atmDefault * scale;
+            actualVisa = visaDefault * scale;
+            actualMastercard = mastercardDefault * scale;
+            actualAmex = amexDefault * scale;
+            actualVoucher = voucherDefault * scale;
+          }
+          // Nếu totalConfigured <= netSale, giữ nguyên giá trị cấu hình
+        }
+        
+        // Tính othersamount (phần còn lại)
+        const totalKnownPayments = actualCash + actualATM + actualVisa + actualMastercard + actualAmex + actualVoucher;
+        const othersamount = Math.max(0, netSale - totalKnownPayments);
+        
+        salesArray.push({
+          sale: {
+            machineid: machineid,
+            batchid: batchid,
+            date: formattedDate, // Sử dụng date đã được format
+            hour: hour,
+            receiptcount: data.receiptcount.toString(),
+            gto: data.gto.toFixed(2),
+            gst: gstAmount.toFixed(2),                // Field name: gst
+            discount: data.discount.toFixed(2),
+            servicecharge: serviceChargeDefault.toFixed(2),
+            noofpax: noofpaxDefault.toString(),
+            cash: actualCash.toFixed(2),              // after discount, before GST
+            atm: actualATM.toFixed(2),               // Field name: atm (lowercase)
+            visa: actualVisa.toFixed(2),             // after discount, before GST
+            mastercard: actualMastercard.toFixed(2), // after discount, before GST
+            amex: actualAmex.toFixed(2),             // after discount, before GST
+            voucher: actualVoucher.toFixed(2),       // after discount, before GST
+            othersamount: othersamount.toFixed(2),   // after discount, before GST
+            vatregistered: vatRegistered              // Field name: vatregistered (lowercase)
+          }
+        });
+      }
+      
+      console.log(`Generated ${salesArray.length} entries for 24 hours`);
+      console.log('First 3 entries:', salesArray.slice(0, 3));
+      
+      return {
+        sales: salesArray
+      };
+    }
+
+    document.getElementById('fileInput').addEventListener('change', e=>{
+      const file = e.target.files[0]; 
+      if(!file) {
+        document.getElementById('fileInfo').style.display = 'none';
+        document.getElementById('dataPreview').style.display = 'none';
+        return;
+      }
+      
+      // Hiển thị thông tin file
+      document.getElementById('fileName').textContent = `Tên file: ${file.name}`;
+      document.getElementById('fileSize').textContent = `Kích thước: ${(file.size / 1024).toFixed(2)} KB`;
+      document.getElementById('fileInfo').style.display = 'block';
+      
+      const reader = new FileReader(); 
+      reader.onload = evt => {
+        try {
+          let arr = file.name.endsWith('.csv') ? parseCSV(evt.target.result)
+            : XLSX.utils.sheet_to_json(XLSX.read(evt.target.result,{type:'binary'}).Sheets[XLSX.read(evt.target.result,{type:'binary'}).SheetNames[0]],{raw:false});
+          
+          // Cập nhật số lượng record
+          document.getElementById('recordCount').textContent = `Số dòng dữ liệu: ${arr.length}`;
+          
+          // Hiển thị preview dữ liệu gốc
+          document.getElementById('rawDataPreview').textContent = JSON.stringify(arr.slice(0, 5), null, 2);
+          
+          // Transform dữ liệu
+          const hourly = transformToHourly(arr);
+          
+          // Hiển thị preview dữ liệu đã xử lý (chỉ những giờ có dữ liệu)
+          const salesData = hourly.sales.slice(0, 5);
+          document.getElementById('processedDataPreview').textContent = JSON.stringify(salesData.length > 0 ? salesData : [{"message": "Không có dữ liệu sau khi xử lý"}], null, 2);
+          
+          // Hiển thị khu vực preview
+          document.getElementById('dataPreview').style.display = 'block';
+          
+          // Cập nhật textarea với dữ liệu đã xử lý
+          document.getElementById('salesData').value = JSON.stringify(hourly, null, 2);
+          
+        } catch (error) {
+          console.error('Error processing file:', error);
+          document.getElementById('salesResponse').textContent = `Lỗi xử lý file: ${error.message}`;
+        }
+      };
+      
+      if (file.name.endsWith('.csv')) {
+        reader.readAsText(file);
+      } else {
+        reader.readAsBinaryString(file);
+      }
+    });
+
+    document.getElementById('btnSales').addEventListener('click', async ()=>{
+      const token = document.getElementById('token').value.trim();
+      
+      if (!token) {
+        document.getElementById('salesResponse').textContent = '❌ Vui lòng lấy token trước khi gửi dữ liệu!';
+        return;
+      }
+      
+      try {
+        const payload = document.getElementById('salesData').value;
+        console.log('Sending payload:', payload);
+        
+        const res = await fetch(`${baseUrl}/SalesHourly`,{
+          method:'POST',
+          headers:{
+            'Content-Type':'application/json',
+            'Authorization':'Bearer '+token
+          },
+          body: payload,
+          mode:'cors'
+        }); 
+        
+        const responseData = await res.json();
+        
+        if(!res.ok) {
+          // API returned error
+          if (responseData.errors && responseData.errors.length > 0) {
+            const errorMessage = responseData.errors[0].message;
+            const statusCode = responseData.errors[0].status_code;
+            
+            if (statusCode === 'Daily records') {
+              document.getElementById('salesResponse').innerHTML = 
+                `❌ <strong>Lỗi Daily Records!</strong>\n\n` +
+                `${errorMessage}\n\n` +
+                `🔧 <strong>Cách khắc phục:</strong>\n` +
+                `1. Nhấn nút "🔍 Validate Payload" để kiểm tra\n` +
+                `2. Nhấn nút "⚡ Auto Fill Missing Hours" để tự động thêm giờ thiếu\n` +
+                `3. Hoặc dùng "➕ Add Manual Entry" để thêm từng giờ thủ công\n\n` +
+                `📋 <strong>Full response:</strong>\n` +
+                JSON.stringify(responseData, null, 2);
+            } else {
+              document.getElementById('salesResponse').textContent = 
+                `❌ API Error: ${statusCode}\n${errorMessage}\n\nFull response:\n` +
+                JSON.stringify(responseData, null, 2);
+            }
+          } else {
+            throw new Error(`${res.status} ${res.statusText}`);
+          }
+        } else {
+          // Success
+          document.getElementById('salesResponse').textContent = 
+            `✅ Thành công!\n\n` +
+            JSON.stringify(responseData, null, 2);
+        }
+        
+      } catch(err) {
+        document.getElementById('salesResponse').textContent = 
+          `❌ Network/Connection Error: ${err.message}\n\n` +
+          `Có thể do:\n` +
+          `- Mất kết nối internet\n` +
+          `- Token hết hạn\n` +
+          `- Server không phản hồi\n` +
+          `- CORS policy`;
+        console.error('API call failed:', err);
+      }
+    });
+
+    // Thêm các hàm helper
+    function resetForm() {
+      document.getElementById('machineId').value = '50100904';
+      document.getElementById('batchId').value = '1';
+      document.getElementById('reportDate').value = '';
+      document.getElementById('receiptCount').value = '10';
+      document.getElementById('vatPercent').value = '7';
+      document.getElementById('serviceCharge').value = '0';
+      document.getElementById('noofpax').value = '0';
+      document.getElementById('cash').value = '0';
+      document.getElementById('atm').value = '0';
+      document.getElementById('visa').value = '0';
+      document.getElementById('mastercard').value = '0';
+      document.getElementById('amex').value = '0';
+      document.getElementById('voucher').value = '0';
+      document.getElementById('vatRegistered').value = 'N';
+      
+      // Clear file input và previews
+      document.getElementById('fileInput').value = '';
+      document.getElementById('fileInfo').style.display = 'none';
+      document.getElementById('dataPreview').style.display = 'none';
+      document.getElementById('salesData').value = '{"sales":[]}';
+      document.getElementById('salesResponse').textContent = '';
+      
+      console.log('Form đã được reset');
+    }
+
+    function validateAndShowPreview() {
+      const requiredFields = [
+        {id: 'machineId', name: 'Machine ID'},
+        {id: 'batchId', name: 'Batch ID'},
+        {id: 'reportDate', name: 'Ngày báo cáo'},
+        {id: 'vatPercent', name: 'VAT %'}
+      ];
+      
+      let isValid = true;
+      let errors = [];
+      
+      requiredFields.forEach(field => {
+        const element = document.getElementById(field.id);
+        const value = element.value.trim();
+        
+        if (!value) {
+          isValid = false;
+          errors.push(`${field.name} là bắt buộc`);
+          element.style.borderColor = '#e74c3c';
+        } else {
+          element.style.borderColor = '#bdc3c7';
+        }
+      });
+      
+      // Validate VAT percentage
+      const vatPercent = Number(document.getElementById('vatPercent').value);
+      if (vatPercent < 0 || vatPercent > 100) {
+        isValid = false;
+        errors.push('GST % phải từ 0 đến 100');
+        document.getElementById('vatPercent').style.borderColor = '#e74c3c';
+      }
+      
+      if (isValid) {
+        alert('✅ Form hợp lệ! Bạn có thể upload file để xử lý dữ liệu.');
+        console.log('Form validation passed');
+      } else {
+        alert('❌ Có lỗi trong form:\n' + errors.join('\n'));
+        console.log('Form validation errors:', errors);
+      }
+      
+      return isValid;
+    }
+    
+    function generateEmpty24Hours() {
+      const machineId = document.getElementById('machineId').value.trim();
+      const batchId = document.getElementById('batchId').value.trim();
+      const reportDate = document.getElementById('reportDate').value;
+      const serviceCharge = document.getElementById('serviceCharge').value;
+      const noofpax = document.getElementById('noofpax').value;
+      const vatRegistered = document.getElementById('vatRegistered').value;
+      
+      if (!machineId || !batchId || !reportDate) {
+        alert('Vui lòng điền đầy đủ Machine ID, Batch ID và Ngày báo cáo trước!');
+        return;
+      }
+      
+      // Format date to yyyyMMdd
+      function formatDateForAPI(dateStr) {
+        const dateObj = new Date(dateStr);
+        if (isNaN(dateObj.getTime())) return dateStr;
+        
+        const year = dateObj.getFullYear();
+        const month = (dateObj.getMonth() + 1).toString().padStart(2, '0');
+        const day = dateObj.getDate().toString().padStart(2, '0');
+        
+        return `${year}${month}${day}`;
+      }
+      
+      const formattedDate = formatDateForAPI(reportDate);
+      const salesArray = [];
+      
+      // Generate 24 empty entries
+      for (let i = 0; i < 24; i++) {
+        const hour = i.toString().padStart(2, '0');
+        
+        salesArray.push({
+          sale: {
+            machineid: machineId,
+            batchid: batchId,
+            date: formattedDate,
+            hour: hour,
+            receiptcount: "0",
+            gto: "0.00",
+            gst: "0.00",
+            discount: "0.00",
+            servicecharge: serviceCharge,
+            noofpax: noofpax,
+            cash: "0.00",
+            atm: "0.00",
+            visa: "0.00",
+            mastercard: "0.00",
+            amex: "0.00",
+            voucher: "0.00",
+            othersamount: "0.00",
+            vatregistered: vatRegistered
+          }
+        });
+      }
+      
+      const payload = { sales: salesArray };
+      document.getElementById('salesData').value = JSON.stringify(payload, null, 2);
+      
+      alert(`✅ Đã tạo 24 entries trống cho ngày ${formattedDate}. Bạn có thể chỉnh sửa từng entry thủ công.`);
+      console.log('Generated 24 empty hours data');
+    }
+
+    // Auto-set ngày hiện tại khi trang load
+    window.addEventListener('load', () => {
+      if (!document.getElementById('reportDate').value) {
+        document.getElementById('reportDate').value = new Date().toISOString().slice(0,10);
+      }
+    });
+
+    // Manual Entry Management
+    function addManualEntry() {
+      const form = document.getElementById('manualEntryForm');
+      form.style.display = 'block';
+      document.getElementById('entryHour').innerHTML = ''; // Clear previous options
+      for (let i = 0; i < 24; i++) {
+        const option = document.createElement('option');
+        option.value = i.toString().padStart(2, '0');
+        option.textContent = `Hour ${i.toString().padStart(2, '0')}`;
+        document.getElementById('entryHour').appendChild(option);
+      }
+      document.getElementById('entryReceiptCount').value = '0';
+      document.getElementById('entryGTO').value = '0';
+      document.getElementById('entryDiscount').value = '0';
+      document.getElementById('entryCash').value = '0';
+      document.getElementById('entryATM').value = '0';
+      document.getElementById('entryVisa').value = '0';
+      document.getElementById('entryOthers').value = '0';
+      document.getElementById('validationResult').style.display = 'none';
+      document.getElementById('validationResult').textContent = '';
+    }
+
+    function cancelManualEntry() {
+      document.getElementById('manualEntryForm').style.display = 'none';
+    }
+
+    function saveManualEntry() {
+      const hour = document.getElementById('entryHour').value;
+      const receiptCount = document.getElementById('entryReceiptCount').value;
+      const gto = document.getElementById('entryGTO').value;
+      const discount = document.getElementById('entryDiscount').value;
+      const cash = document.getElementById('entryCash').value;
+      const atm = document.getElementById('entryATM').value;
+      const visa = document.getElementById('entryVisa').value;
+      const others = document.getElementById('entryOthers').value;
+      const vatRegistered = document.getElementById('vatRegistered').value;
+
+      if (!hour) {
+        alert('Vui lòng chọn giờ!');
+        return;
+      }
+      
+      // Format date to yyyyMMdd
+      function formatDateForAPI(dateStr) {
+        if (!dateStr) return '';
+        const dateObj = new Date(dateStr);
+        if (isNaN(dateObj.getTime())) return dateStr;
+        
+        const year = dateObj.getFullYear();
+        const month = (dateObj.getMonth() + 1).toString().padStart(2, '0');
+        const day = dateObj.getDate().toString().padStart(2, '0');
+        
+        return `${year}${month}${day}`;
+      }
+      
+      const formattedDate = formatDateForAPI(document.getElementById('reportDate').value);
+
+      const newEntry = {
+        sale: {
+          machineid: document.getElementById('machineId').value.trim(),
+          batchid: document.getElementById('batchId').value.trim(),
+          date: formattedDate,
+          hour: hour,
+          receiptcount: receiptCount,
+          gto: gto,
+          gst: ((Number(gto) - Number(discount)) * 0.07).toFixed(2), // Calculate GST at 7%
+          discount: discount,
+          servicecharge: document.getElementById('serviceCharge').value,
+          noofpax: document.getElementById('noofpax').value,
+          cash: cash,
+          atm: atm,
+          visa: visa,
+          mastercard: document.getElementById('mastercard').value,
+          amex: document.getElementById('amex').value,
+          voucher: document.getElementById('voucher').value,
+          othersamount: others,
+          vatregistered: vatRegistered
+        }
+      };
+
+      const salesData = JSON.parse(document.getElementById('salesData').value);
+      const existingEntryIndex = salesData.sales.findIndex(s => s.sale.date === newEntry.sale.date && s.sale.hour === newEntry.sale.hour);
+
+      if (existingEntryIndex !== -1) {
+        salesData.sales[existingEntryIndex] = newEntry;
+      } else {
+        salesData.sales.push(newEntry);
+      }
+
+      document.getElementById('salesData').value = JSON.stringify(salesData, null, 2);
+      document.getElementById('manualEntryForm').style.display = 'none';
+      alert('Entry đã được lưu.');
+    }
+
+    function validatePayload() {
+      const salesData = JSON.parse(document.getElementById('salesData').value);
+      const rawDate = document.getElementById('reportDate').value;
+      
+      // Format date to yyyyMMdd để match với payload
+      function formatDateForAPI(dateStr) {
+        if (!dateStr) return '';
+        const dateObj = new Date(dateStr);
+        if (isNaN(dateObj.getTime())) return dateStr;
+        
+        const year = dateObj.getFullYear();
+        const month = (dateObj.getMonth() + 1).toString().padStart(2, '0');
+        const day = dateObj.getDate().toString().padStart(2, '0');
+        
+        return `${year}${month}${day}`;
+      }
+      
+      const date = formatDateForAPI(rawDate);
+      const requiredHours = [];
+
+      for (let i = 0; i < 24; i++) {
+        const hour = i.toString().padStart(2, '0');
+        if (!salesData.sales.some(s => s.sale.date === date && s.sale.hour === hour)) {
+          requiredHours.push(hour);
+        }
+      }
+
+      if (requiredHours.length === 0) {
+        document.getElementById('validationResult').textContent = `✅ Payload đã đủ 24 giờ cho ngày ${date}.`;
+        document.getElementById('validationResult').style.backgroundColor = '#d4edda';
+        document.getElementById('validationResult').style.color = '#155724';
+      } else {
+        document.getElementById('validationResult').innerHTML = `❌ Payload thiếu ${requiredHours.length} giờ: ${requiredHours.join(', ')}<br><strong>Lỗi API sẽ là:</strong><br><code>{"status": "error", "errors": [{"status_code": "Daily records", "message": "ERROR: Every day should have 24 Records. Hour 00 to 23. Date :${date}"}]}</code>`;
+        document.getElementById('validationResult').style.backgroundColor = '#f8d7da';
+        document.getElementById('validationResult').style.color = '#721c24';
+      }
+      document.getElementById('validationResult').style.display = 'block';
+    }
+
+    function fillMissingHours() {
+      const salesData = JSON.parse(document.getElementById('salesData').value);
+      const rawDate = document.getElementById('reportDate').value;
+      
+      // Format date to yyyyMMdd
+      function formatDateForAPI(dateStr) {
+        if (!dateStr) return '';
+        const dateObj = new Date(dateStr);
+        if (isNaN(dateObj.getTime())) return dateStr;
+        
+        const year = dateObj.getFullYear();
+        const month = (dateObj.getMonth() + 1).toString().padStart(2, '0');
+        const day = dateObj.getDate().toString().padStart(2, '0');
+        
+        return `${year}${month}${day}`;
+      }
+      
+      const date = formatDateForAPI(rawDate);
+      const missingHours = [];
+
+      for (let i = 0; i < 24; i++) {
+        const hour = i.toString().padStart(2, '0');
+        if (!salesData.sales.some(s => s.sale.date === date && s.sale.hour === hour)) {
+          missingHours.push(hour);
+        }
+      }
+
+      if (missingHours.length === 0) {
+        alert('Không có giờ nào thiếu trong payload.');
+        return;
+      }
+
+      if (confirm(`Bạn có chắc chắn muốn thêm ${missingHours.length} giờ vào payload không?\n\nCác giờ thiếu: ${missingHours.join(', ')}`)) {
+        missingHours.forEach(hour => {
+          const newEntry = {
+            sale: {
+              machineid: document.getElementById('machineId').value.trim(),
+              batchid: document.getElementById('batchId').value.trim(),
+              date: date,
+              hour: hour,
+              receiptcount: '0',
+              gto: '0.00',
+              gst: '0.00',
+              discount: '0.00',
+              servicecharge: document.getElementById('serviceCharge').value,
+              noofpax: document.getElementById('noofpax').value,
+              cash: '0.00',
+              atm: '0.00',
+              visa: '0.00',
+              mastercard: document.getElementById('mastercard').value,
+              amex: document.getElementById('amex').value,
+              voucher: document.getElementById('voucher').value,
+              othersamount: '0.00',
+              vatregistered: document.getElementById('vatRegistered').value
+            }
+          };
+          salesData.sales.push(newEntry);
+        });
+        
+        // Sort by hour để đảm bảo thứ tự
+        salesData.sales.sort((a, b) => a.sale.hour.localeCompare(b.sale.hour));
+        
+        document.getElementById('salesData').value = JSON.stringify(salesData, null, 2);
+        alert(`✅ Đã thêm ${missingHours.length} giờ vào payload. Total entries: ${salesData.sales.length}`);
+      }
+    }
+
+    function sortPayloadByHour() {
+      try {
+        const salesData = JSON.parse(document.getElementById('salesData').value);
+        if (!salesData.sales || salesData.sales.length === 0) {
+          alert('Không có dữ liệu để sắp xếp.');
+          return;
+        }
+        
+        salesData.sales.sort((a, b) => a.sale.hour.localeCompare(b.sale.hour));
+        document.getElementById('salesData').value = JSON.stringify(salesData, null, 2);
+        alert(`✅ Đã sắp xếp ${salesData.sales.length} entries theo thứ tự giờ (00-23).`);
+      } catch (error) {
+        alert('❌ Lỗi khi parse JSON payload!');
+        console.error('Sort error:', error);
+      }
+    }
+  </script>
+</body>
+</html>
