@@ -3,81 +3,688 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Giao diện Kiểm thử API POS SalesHourly v2.5</title>
-  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+  <title>🚀 API POS SalesHourly v2.5 Testing Dashboard</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Fira+Code:wght@300;400;500&display=swap" rel="stylesheet">
   <script src="https://cdn.jsdelivr.net/npm/xlsx/dist/xlsx.full.min.js"></script>
   <style>
-    :root { --primary: #2c3e50; --secondary: #2980b9; --bg: #ecf0f1; --card: #ffffff; --text: #2c3e50; --border-radius: 8px; --padding: 16px; }
-    * { box-sizing: border-box; }
-    body { margin: 0; font-family: 'Roboto', sans-serif; background: var(--bg); color: var(--text); }
-    .container { max-width: 1200px; margin: 40px auto; padding: var(--padding); }
-    h1 { text-align: center; font-weight: 700; color: var(--primary); margin-bottom: 24px; }
-    .card { background: var(--card); border-radius: var(--border-radius); padding: var(--padding); margin-bottom: 24px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
-    .card h2 { margin-top: 0; color: var(--secondary); }
-    .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
-    @media (max-width: 768px) { .grid-2 { grid-template-columns: 1fr; } }
-    label { display: block; margin: 8px 0 4px; font-weight: 500; }
-    input[type=text], input[type=password], input[type=date], input[type=number], textarea, select { 
-      width: 100%; padding: 8px; border: 1px solid #bdc3c7; border-radius: 4px; font-family: inherit; margin-bottom: 8px;
+    :root { 
+      --primary: #3498db; 
+      --secondary: #2c3e50; 
+      --success: #27ae60;
+      --warning: #f39c12;
+      --danger: #e74c3c;
+      --info: #17a2b8;
+      --light: #f8f9fa;
+      --dark: #343a40;
+      --bg: #f5f7fa; 
+      --card: #ffffff; 
+      --text: #2c3e50; 
+      --text-muted: #6c757d;
+      --border: #dee2e6;
+      --border-radius: 12px; 
+      --padding: 20px; 
+      --shadow: 0 4px 16px rgba(0,0,0,0.1);
+      --shadow-hover: 0 8px 24px rgba(0,0,0,0.15);
+      --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     }
-    textarea { height: 120px; resize: vertical; font-family: monospace; }
-    button { background: var(--secondary); color: #fff; border: none; padding: 10px 16px; border-radius: 4px; font-size: 1rem; cursor: pointer; margin-top: 8px; transition: background 0.2s; }
-    button:hover { background: #1f6391; }
-    pre { background: #f5f5f5; padding: 12px; border-radius: 4px; overflow-x: auto; max-height: 200px; font-size: 12px; }
-    .file-input { margin-top: 8px; }
-    .info-box { background: #f8f9fa; padding: 10px; border-radius: 4px; margin-top: 10px; }
-    .info-box h3 { margin-top: 0; color: var(--secondary); font-size: 14px; }
-    .info-box p { margin: 4px 0; font-size: 14px; }
-    .preview-section { margin-top: 16px; }
-    .preview-section h3 { color: var(--secondary); font-size: 14px; margin-bottom: 8px; }
+    
+    [data-theme="dark"] {
+      --bg: #1a1a1a;
+      --card: #2d2d2d;
+      --text: #ffffff;
+      --text-muted: #adb5bd;
+      --border: #495057;
+      --secondary: #495057;
+    }
+    
+    * { box-sizing: border-box; }
+    
+    body { 
+      margin: 0; 
+      font-family: 'Inter', 'Segoe UI', 'Roboto', sans-serif; 
+      background: var(--bg); 
+      color: var(--text); 
+      line-height: 1.6;
+      font-size: 14px;
+      transition: var(--transition);
+    }
+    
+    .container { 
+      max-width: 1400px; 
+      margin: 0 auto; 
+      padding: var(--padding); 
+    }
+    
+    .header {
+      background: linear-gradient(135deg, var(--primary), var(--secondary));
+      color: white;
+      padding: 24px 0;
+      margin-bottom: 32px;
+      box-shadow: var(--shadow);
+    }
+    
+    .header-content {
+      max-width: 1400px;
+      margin: 0 auto;
+      padding: 0 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    
+    h1 { 
+      margin: 0;
+      font-weight: 700; 
+      font-size: 2rem;
+      background: linear-gradient(45deg, #fff, #e3f2fd);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    
+    .theme-toggle {
+      background: rgba(255,255,255,0.2);
+      border: none;
+      color: white;
+      padding: 10px 16px;
+      border-radius: 24px;
+      cursor: pointer;
+      font-size: 14px;
+      transition: var(--transition);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    
+    .theme-toggle:hover {
+      background: rgba(255,255,255,0.3);
+      transform: translateY(-1px);
+    }
+    
+    .card { 
+      background: var(--card); 
+      border-radius: var(--border-radius); 
+      padding: var(--padding); 
+      margin-bottom: 24px; 
+      box-shadow: var(--shadow);
+      border: 1px solid var(--border);
+      transition: var(--transition);
+      position: relative;
+      overflow: hidden;
+    }
+    
+    .card:hover {
+      box-shadow: var(--shadow-hover);
+      transform: translateY(-2px);
+    }
+    
+    .card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 4px;
+      background: linear-gradient(90deg, var(--primary), var(--success));
+    }
+    
+    .card h2 { 
+      margin-top: 0; 
+      margin-bottom: 16px;
+      color: var(--secondary); 
+      font-weight: 600;
+      font-size: 1.25rem;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    
+    .card h2::before {
+      content: attr(data-icon);
+      font-size: 1.5rem;
+    }
+    
+    .grid-2 { 
+      display: grid; 
+      grid-template-columns: 1fr 1fr; 
+      gap: 20px; 
+    }
+    
+    .grid-3 { 
+      display: grid; 
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); 
+      gap: 16px; 
+    }
+    
+    @media (max-width: 768px) { 
+      .grid-2, .grid-3 { grid-template-columns: 1fr; }
+      .header-content { flex-direction: column; gap: 16px; text-align: center; }
+      h1 { font-size: 1.5rem; }
+      .container { padding: 16px; }
+    }
+    
+    .form-group {
+      position: relative;
+      margin-bottom: 20px;
+    }
+    
+    label { 
+      display: block; 
+      margin-bottom: 6px; 
+      font-weight: 500;
+      color: var(--text);
+      font-size: 13px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    
+    .required { color: var(--danger); }
+    
+    input[type=text], input[type=password], input[type=date], input[type=number], input[type=file], textarea, select { 
+      width: 100%; 
+      padding: 12px 16px; 
+      border: 2px solid var(--border); 
+      border-radius: 8px; 
+      font-family: inherit; 
+      font-size: 14px;
+      background: var(--card);
+      color: var(--text);
+      transition: var(--transition);
+      margin-bottom: 4px;
+    }
+    
+    input:focus, textarea:focus, select:focus {
+      outline: none;
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.1);
+      transform: translateY(-1px);
+    }
+    
+    input:invalid:not(:focus) {
+      border-color: var(--danger);
+    }
+    
+    input:valid:not(:focus):not([value=""]) {
+      border-color: var(--success);
+    }
+    
+    textarea { 
+      height: 120px; 
+      resize: vertical; 
+      font-family: 'Fira Code', monospace;
+      font-size: 12px;
+    }
+    
+    .btn {
+      background: var(--primary); 
+      color: #fff; 
+      border: none; 
+      padding: 12px 20px; 
+      border-radius: 8px; 
+      font-size: 14px; 
+      font-weight: 500;
+      cursor: pointer; 
+      margin: 4px 4px 4px 0; 
+      transition: var(--transition);
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      text-decoration: none;
+      position: relative;
+      overflow: hidden;
+    }
+    
+    .btn::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+      transition: left 0.5s;
+    }
+    
+    .btn:hover::before {
+      left: 100%;
+    }
+    
+    .btn:hover { 
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+    }
+    
+    .btn:active {
+      transform: translateY(0);
+    }
+    
+    .btn-success { background: var(--success); }
+    .btn-warning { background: var(--warning); }
+    .btn-danger { background: var(--danger); }
+    .btn-secondary { background: var(--text-muted); }
+    .btn-info { background: var(--info); }
+    
+    .btn-group {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin: 16px 0;
+    }
+    
+    pre { 
+      background: var(--light); 
+      border: 1px solid var(--border);
+      padding: 16px; 
+      border-radius: 8px; 
+      overflow-x: auto; 
+      max-height: 300px; 
+      font-size: 12px;
+      font-family: 'Fira Code', monospace;
+      line-height: 1.4;
+      margin: 16px 0;
+      position: relative;
+    }
+    
+    [data-theme="dark"] pre {
+      background: var(--dark);
+      color: #e9ecef;
+    }
+    
+    .copy-btn {
+      position: absolute;
+      top: 8px;
+      right: 8px;
+      background: rgba(0,0,0,0.1);
+      border: none;
+      padding: 6px 10px;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 12px;
+      transition: var(--transition);
+    }
+    
+    .copy-btn:hover {
+      background: rgba(0,0,0,0.2);
+    }
+    
+    .info-box { 
+      background: var(--light); 
+      border: 1px solid var(--border);
+      padding: 16px; 
+      border-radius: 8px; 
+      margin: 16px 0;
+      position: relative;
+      border-left: 4px solid var(--primary);
+    }
+    
+    .info-box.success { border-left-color: var(--success); background: rgba(39, 174, 96, 0.1); }
+    .info-box.warning { border-left-color: var(--warning); background: rgba(243, 156, 18, 0.1); }
+    .info-box.danger { border-left-color: var(--danger); background: rgba(231, 76, 60, 0.1); }
+    
+    .info-box h3 { 
+      margin-top: 0; 
+      color: var(--text); 
+      font-size: 14px; 
+      font-weight: 600;
+    }
+    
+    .info-box p { 
+      margin: 6px 0; 
+      font-size: 13px; 
+      color: var(--text-muted);
+    }
+    
+    .preview-section { 
+      margin-top: 20px; 
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      overflow: hidden;
+    }
+    
+    .preview-header {
+      background: var(--light);
+      padding: 12px 16px;
+      border-bottom: 1px solid var(--border);
+      font-weight: 500;
+      font-size: 13px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    
+    .preview-content {
+      padding: 16px;
+      max-height: 200px;
+      overflow-y: auto;
+    }
+    
+    .file-drop-zone {
+      border: 2px dashed var(--border);
+      border-radius: 8px;
+      padding: 32px;
+      text-align: center;
+      transition: var(--transition);
+      cursor: pointer;
+      background: var(--light);
+      margin: 16px 0;
+    }
+    
+    .file-drop-zone:hover {
+      border-color: var(--primary);
+      background: rgba(52, 152, 219, 0.05);
+    }
+    
+    .file-drop-zone.dragover {
+      border-color: var(--primary);
+      background: rgba(52, 152, 219, 0.1);
+      transform: scale(1.02);
+    }
+    
+    .file-icon {
+      font-size: 3rem;
+      color: var(--text-muted);
+      margin-bottom: 16px;
+      display: block;
+    }
+    
+    .progress-bar {
+      width: 100%;
+      height: 6px;
+      background: var(--border);
+      border-radius: 3px;
+      overflow: hidden;
+      margin: 16px 0;
+    }
+    
+    .progress-fill {
+      height: 100%;
+      background: linear-gradient(90deg, var(--primary), var(--success));
+      width: 0%;
+      transition: width 0.3s ease;
+    }
+    
+    .status-indicator {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 4px 8px;
+      border-radius: 12px;
+      font-size: 12px;
+      font-weight: 500;
+    }
+    
+    .status-success { background: rgba(39, 174, 96, 0.1); color: var(--success); }
+    .status-warning { background: rgba(243, 156, 18, 0.1); color: var(--warning); }
+    .status-danger { background: rgba(231, 76, 60, 0.1); color: var(--danger); }
+    
+    .loading {
+      display: inline-block;
+      width: 16px;
+      height: 16px;
+      border: 2px solid var(--border);
+      border-radius: 50%;
+      border-top-color: var(--primary);
+      animation: spin 1s ease-in-out infinite;
+    }
+    
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+    
+    .slide-in {
+      animation: slideIn 0.3s ease-out;
+    }
+    
+    @keyframes slideIn {
+      from { transform: translateY(20px); opacity: 0; }
+      to { transform: translateY(0); opacity: 1; }
+    }
+    
+    .fade-in {
+      animation: fadeIn 0.3s ease-out;
+    }
+    
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+    
+    .collapsible-header {
+      cursor: pointer;
+      user-select: none;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 16px;
+      background: var(--light);
+      border-radius: 8px;
+      margin-bottom: 8px;
+      transition: var(--transition);
+    }
+    
+    .collapsible-header:hover {
+      background: var(--border);
+    }
+    
+    .collapsible-content {
+      max-height: 0;
+      overflow: hidden;
+      transition: max-height 0.3s ease;
+    }
+    
+    .collapsible-content.open {
+      max-height: 2000px;
+    }
+    
+    .chevron {
+      transition: transform 0.3s ease;
+    }
+    
+    .chevron.open {
+      transform: rotate(180deg);
+    }
+    
+    .tooltip {
+      position: relative;
+      cursor: help;
+    }
+    
+    .tooltip::after {
+      content: attr(data-tooltip);
+      position: absolute;
+      bottom: 100%;
+      left: 50%;
+      transform: translateX(-50%);
+      background: var(--dark);
+      color: white;
+      padding: 6px 8px;
+      border-radius: 4px;
+      font-size: 12px;
+      white-space: nowrap;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.3s;
+      z-index: 1000;
+    }
+    
+    .tooltip:hover::after {
+      opacity: 1;
+    }
+    
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 16px;
+      margin: 20px 0;
+    }
+    
+    .stat-card {
+      background: var(--card);
+      padding: 20px;
+      border-radius: 8px;
+      border: 1px solid var(--border);
+      text-align: center;
+      transition: var(--transition);
+    }
+    
+    .stat-card:hover {
+      transform: translateY(-2px);
+      box-shadow: var(--shadow);
+    }
+    
+    .stat-value {
+      font-size: 2rem;
+      font-weight: 700;
+      color: var(--primary);
+      display: block;
+    }
+    
+    .stat-label {
+      font-size: 12px;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-top: 4px;
+    }
+    
+    .toast {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 16px 20px;
+      box-shadow: var(--shadow-hover);
+      z-index: 1000;
+      max-width: 400px;
+      transform: translateX(100%);
+      transition: transform 0.3s ease;
+    }
+    
+    .toast.show {
+      transform: translateX(0);
+    }
+    
+    .toast.success {
+      border-left: 4px solid var(--success);
+      background: rgba(39, 174, 96, 0.05);
+    }
+    
+    .toast.error {
+      border-left: 4px solid var(--danger);
+      background: rgba(231, 76, 60, 0.05);
+    }
+    
+    .toast.warning {
+      border-left: 4px solid var(--warning);
+      background: rgba(243, 156, 18, 0.05);
+    }
+    
+    .toast.info {
+      border-left: 4px solid var(--info);
+      background: rgba(23, 162, 184, 0.05);
+    }
   </style>
 </head>
 <body>
-  <div class="container">
-    <h1>Kiểm thử API POS SalesHourly v2.5</h1>
+  <div class="header">
+    <div class="header-content">
+      <h1>🚀 API POS SalesHourly v2.5 Testing Dashboard</h1>
+      <button class="theme-toggle" onclick="toggleTheme()">
+        <span id="themeIcon">🌙</span>
+        <span id="themeText">Dark Mode</span>
+      </button>
+    </div>
+  </div>
 
-    <div class="card">
-      <h2>1. Lấy OAuth2 Token</h2>
-      <label for="username">Tên người dùng</label>
-      <input type="text" id="username" value="postestuservn">
-      <label for="password">Mật khẩu</label>
-      <input type="password" id="password" value="@APITest1234">
-      <button id="btnToken">Lấy Token</button>
-      <label for="token">Token truy cập</label>
-      <input type="text" id="token" readonly placeholder="Token sẽ xuất hiện tại đây">
-      <label for="tokenResponse">Phản hồi thô / Lỗi</label>
-      <pre id="tokenResponse"></pre>
+  <div class="container">
+    <!-- Toast Notification -->
+    <div id="toast" class="toast" style="display: none;"></div>
+
+    <div class="card slide-in">
+      <h2 data-icon="🔐">OAuth2 Token Authentication</h2>
+      <div class="grid-2">
+        <div class="form-group">
+          <label for="username">Tên người dùng <span class="required">*</span></label>
+          <input type="text" id="username" value="postestuservn" required>
+        </div>
+        <div class="form-group">
+          <label for="password">Mật khẩu <span class="required">*</span></label>
+          <input type="password" id="password" value="@APITest1234" required>
+        </div>
+      </div>
+      
+      <div class="btn-group">
+        <button id="btnToken" class="btn btn-primary">
+          <span class="loading" id="tokenLoading" style="display: none;"></span>
+          🔑 Lấy Token
+        </button>
+      </div>
+      
+      <div class="form-group">
+        <label for="token">Token truy cập</label>
+        <input type="text" id="token" readonly placeholder="Token sẽ xuất hiện tại đây">
+        <div class="progress-bar" id="tokenProgress" style="display: none;">
+          <div class="progress-fill"></div>
+        </div>
+      </div>
+      
+      <div class="collapsible-header" onclick="toggleCollapsible('tokenResponse')">
+        <span>🔍 Phản hồi thô / Lỗi</span>
+        <span class="chevron" id="tokenResponseChevron">▼</span>
+      </div>
+      <div class="collapsible-content" id="tokenResponseContent">
+        <pre id="tokenResponse">
+          <button class="copy-btn" onclick="copyToClipboard('tokenResponse')">📋 Copy</button>
+        </pre>
+      </div>
     </div>
 
-    <div class="card">
-      <h2>2. Cấu hình thông tin mặc định</h2>
-      <p style="color: #666; font-size: 14px; margin-bottom: 16px;">
-        <strong>Payment Methods:</strong> Nhập số tiền thực tế cho từng phương thức thanh toán. 
+    <div class="card slide-in">
+      <h2 data-icon="⚙️">Cấu hình thông tin mặc định</h2>
+      <div class="info-box warning">
+        <h3>💡 Payment Methods Logic</h3>
+        <p><strong>Payment Methods:</strong> Nhập số tiền thực tế cho từng phương thức thanh toán. 
         Nếu tất cả = 0, toàn bộ doanh thu sau chiết khấu sẽ được gán vào Cash. 
-        Tổng các payment methods không được vượt quá (GTO - Discount). GST rate cố định 7%.
-      </p>
+        Tổng các payment methods không được vượt quá (GTO - Discount). GST rate cố định 7%.</p>
+      </div>
       <div class="grid-2">
         <div>
-          <label for="machineId">Machine ID <span style="color: red;">*</span></label>
-          <input type="text" id="machineId" value="50100904" required>
+          <div class="form-group">
+            <label for="machineId">Machine ID <span class="required">*</span></label>
+            <input type="text" id="machineId" value="50100904" required class="tooltip" data-tooltip="Unique identifier for POS machine">
+          </div>
           
-          <label for="batchId">Batch ID (ZReport closing number) <span style="color: red;">*</span></label>
-          <input type="text" id="batchId" value="1" required>
+          <div class="form-group">
+            <label for="batchId">Batch ID (ZReport closing number) <span class="required">*</span></label>
+            <input type="text" id="batchId" value="1" required class="tooltip" data-tooltip="ZReport closing sequence number">
+          </div>
           
-          <label for="reportDate">Ngày báo cáo <span style="color: red;">*</span></label>
-          <input type="date" id="reportDate" required>
+          <div class="form-group">
+            <label for="reportDate">Ngày báo cáo <span class="required">*</span></label>
+            <input type="date" id="reportDate" required>
+          </div>
           
-          <label for="receiptCount">Receipt Count (mặc định)</label>
-          <input type="number" id="receiptCount" value="10" min="0">
+          <div class="form-group">
+            <label for="receiptCount">Receipt Count (mặc định)</label>
+            <input type="number" id="receiptCount" value="10" min="0" class="tooltip" data-tooltip="Default number of receipts per hour">
+          </div>
           
-          <label for="vatPercent">GST % (mặc định) <span style="color: red;">*</span></label>
-          <input type="number" id="vatPercent" value="7" step="0.1" min="0" max="100" required>
+          <div class="form-group">
+            <label for="vatPercent">GST % (mặc định) <span class="required">*</span></label>
+            <input type="number" id="vatPercent" value="7" step="0.1" min="0" max="100" required class="tooltip" data-tooltip="Fixed GST rate at 7%">
+          </div>
           
-          <label for="serviceCharge">Service Charge (F&B only)</label>
-          <input type="number" id="serviceCharge" value="0" step="0.01" min="0">
+          <div class="form-group">
+            <label for="serviceCharge">Service Charge (F&B only)</label>
+            <input type="number" id="serviceCharge" value="0" step="0.01" min="0">
+          </div>
           
-          <label for="noofpax">Number of Pax (F&B only)</label>
-          <input type="number" id="noofpax" value="0" min="0">
+          <div class="form-group">
+            <label for="noofpax">Number of Pax (F&B only)</label>
+            <input type="number" id="noofpax" value="0" min="0">
+          </div>
         </div>
         
         <div>
@@ -107,10 +714,10 @@
         </div>
       </div>
       
-      <div style="margin-top: 16px;">
-        <button type="button" onclick="resetForm()" style="background: #95a5a6;">🔄 Reset Form</button>
-        <button type="button" onclick="validateAndShowPreview()" style="background: #27ae60;">✓ Validate Form</button>
-        <button type="button" onclick="generateEmpty24Hours()" style="background: #f39c12;">⏰ Generate 24 Hours (Empty)</button>
+      <div class="btn-group">
+        <button type="button" onclick="resetForm()" class="btn btn-secondary">🔄 Reset Form</button>
+        <button type="button" onclick="validateAndShowPreview()" class="btn btn-success">✓ Validate Form</button>
+        <button type="button" onclick="generateEmpty24Hours()" class="btn btn-warning">⏰ Generate 24 Hours (Empty)</button>
       </div>
       
       <div style="margin-top: 12px; padding: 10px; background: #e8f5e8; border-radius: 4px; font-size: 13px;">
@@ -175,17 +782,18 @@ Giải thích tính toán:
       </details>
     </div>
 
-    <div class="card">
-      <h2>3. Manual Entry Management</h2>
-      <p style="color: #666; font-size: 14px; margin-bottom: 16px;">
-        Thêm/sửa entries thủ công để đảm bảo có đủ 24 records (hour 00-23). API yêu cầu strict 24 hours data.
-      </p>
+    <div class="card slide-in">
+      <h2 data-icon="✏️">Manual Entry Management</h2>
+      <div class="info-box danger">
+        <h3>⚠️ 24 Hours Requirement</h3>
+        <p>Thêm/sửa entries thủ công để đảm bảo có đủ 24 records (hour 00-23). API yêu cầu strict 24 hours data.</p>
+      </div>
       
-      <div style="margin-bottom: 16px;">
-        <button type="button" onclick="addManualEntry()" style="background: #3498db;">➕ Add Manual Entry</button>
-        <button type="button" onclick="validatePayload()" style="background: #e74c3c;">🔍 Validate Payload (Check 24 Hours)</button>
-        <button type="button" onclick="fillMissingHours()" style="background: #f39c12;">⚡ Auto Fill Missing Hours</button>
-        <button type="button" onclick="sortPayloadByHour()" style="background: #9b59b6;">🔢 Sort by Hour</button>
+      <div class="btn-group">
+        <button type="button" onclick="addManualEntry()" class="btn btn-info">➕ Add Manual Entry</button>
+        <button type="button" onclick="validatePayload()" class="btn btn-danger">🔍 Validate Payload (Check 24 Hours)</button>
+        <button type="button" onclick="fillMissingHours()" class="btn btn-warning">⚡ Auto Fill Missing Hours</button>
+        <button type="button" onclick="sortPayloadByHour()" class="btn btn-secondary">🔢 Sort by Hour</button>
       </div>
       
       <div id="manualEntryForm" style="display:none; background: #f8f9fa; padding: 16px; border-radius: 4px; margin-bottom: 16px;">
@@ -231,10 +839,15 @@ Giải thích tính toán:
       </div>
     </div>
 
-    <div class="card">
-      <h2>4. Upload và xử lý file</h2>
-      <label for="fileInput">Chọn file CSV hoặc Excel</label>
-      <input type="file" id="fileInput" accept=".csv, .xls, .xlsx" class="file-input">
+    <div class="card slide-in">
+      <h2 data-icon="📁">Upload và xử lý file</h2>
+      
+      <div class="file-drop-zone" id="fileDropZone" onclick="document.getElementById('fileInput').click()">
+        <div class="file-icon">📄</div>
+        <p><strong>Kéo thả file vào đây hoặc click để chọn</strong></p>
+        <p style="color: var(--text-muted); font-size: 12px;">Hỗ trợ: .csv, .xls, .xlsx (Max: 10MB)</p>
+        <input type="file" id="fileInput" accept=".csv, .xls, .xlsx" style="display: none;">
+      </div>
       
       <!-- Thêm khu vực hiển thị thông tin file -->
       <div id="fileInfo" class="info-box" style="display:none;">
@@ -253,11 +866,28 @@ Giải thích tính toán:
         <pre id="processedDataPreview" style="max-height: 150px; overflow-y: auto;"></pre>
       </div>
       
-      <label for="salesData">Dữ liệu SalesHourly (JSON Payload)</label>
-      <textarea id="salesData">{"sales":[]}</textarea>
-      <button id="btnSales">Gửi SalesHourly</button>
-      <label for="salesResponse">Phản hồi thô / Lỗi</label>
-      <pre id="salesResponse"></pre>
+      <div class="form-group">
+        <label for="salesData">Dữ liệu SalesHourly (JSON Payload)</label>
+        <textarea id="salesData">{"sales":[]}</textarea>
+        <div class="btn-group">
+          <button id="btnSales" class="btn btn-primary">
+            <span class="loading" id="salesLoading" style="display: none;"></span>
+            🚀 Gửi SalesHourly
+          </button>
+          <button onclick="copyToClipboard('salesData')" class="btn btn-secondary">📋 Copy Payload</button>
+          <button onclick="validateJSON()" class="btn btn-info">✓ Validate JSON</button>
+        </div>
+      </div>
+      
+      <div class="collapsible-header" onclick="toggleCollapsible('salesResponse')">
+        <span>🔍 Phản hồi API / Lỗi</span>
+        <span class="chevron" id="salesResponseChevron">▼</span>
+      </div>
+      <div class="collapsible-content" id="salesResponseContent">
+        <pre id="salesResponse">
+          <button class="copy-btn" onclick="copyToClipboard('salesResponse')">📋 Copy</button>
+        </pre>
+      </div>
     </div>
   </div>
 
@@ -267,16 +897,40 @@ Giải thích tính toán:
     document.getElementById('btnToken').addEventListener('click', async () => {
       const user = document.getElementById('username').value.trim();
       const pass = document.getElementById('password').value.trim();
+      
+      if (!user || !pass) {
+        showToast('Vui lòng nhập đầy đủ username và password!', 'warning');
+        return;
+      }
+      
+      setButtonLoading('btnToken', true);
+      animateProgressBar('tokenProgress', 100, 2000);
+      
       try {
         const res = await fetch(`${baseUrl}/token`, {
-          method: 'POST', headers: {'Content-Type':'application/x-www-form-urlencoded'},
-          body: `grant_type=password&username=${encodeURIComponent(user)}&password=${encodeURIComponent(pass)}`, mode: 'cors'
-        }); if(!res.ok) throw new Error(res.status+' '+res.statusText);
+          method: 'POST', 
+          headers: {'Content-Type':'application/x-www-form-urlencoded'},
+          body: `grant_type=password&username=${encodeURIComponent(user)}&password=${encodeURIComponent(pass)}`, 
+          mode: 'cors'
+        }); 
+        
+        if(!res.ok) throw new Error(`${res.status} ${res.statusText}`);
+        
         const data = await res.json();
         document.getElementById('tokenResponse').textContent = JSON.stringify(data,null,2);
         document.getElementById('token').value = data.access_token||'';
+        
+        if (data.access_token) {
+          showToast('Token lấy thành công! 🎉', 'success');
+        } else {
+          showToast('Không nhận được token từ API', 'warning');
+        }
+        
       } catch(err) {
         document.getElementById('tokenResponse').textContent = 'Lỗi: '+err.message;
+        showToast(`Lỗi khi lấy token: ${err.message}`, 'error');
+      } finally {
+        setButtonLoading('btnToken', false);
       }
     });
 
@@ -558,12 +1212,23 @@ Giải thích tính toán:
       const token = document.getElementById('token').value.trim();
       
       if (!token) {
-        document.getElementById('salesResponse').textContent = '❌ Vui lòng lấy token trước khi gửi dữ liệu!';
+        showToast('Vui lòng lấy token trước khi gửi dữ liệu!', 'warning');
         return;
       }
       
+      const payload = document.getElementById('salesData').value;
+      
+      // Validate JSON first
       try {
-        const payload = document.getElementById('salesData').value;
+        JSON.parse(payload);
+      } catch (error) {
+        showToast(`JSON payload không hợp lệ: ${error.message}`, 'error');
+        return;
+      }
+      
+      setButtonLoading('btnSales', true);
+      
+      try {
         console.log('Sending payload:', payload);
         
         const res = await fetch(`${baseUrl}/SalesHourly`,{
@@ -585,6 +1250,7 @@ Giải thích tính toán:
             const statusCode = responseData.errors[0].status_code;
             
             if (statusCode === 'Daily records') {
+              showToast('Lỗi Daily Records! Thiếu entries cho một số giờ.', 'error');
               document.getElementById('salesResponse').innerHTML = 
                 `❌ <strong>Lỗi Daily Records!</strong>\n\n` +
                 `${errorMessage}\n\n` +
@@ -595,6 +1261,7 @@ Giải thích tính toán:
                 `📋 <strong>Full response:</strong>\n` +
                 JSON.stringify(responseData, null, 2);
             } else {
+              showToast(`API Error: ${statusCode}`, 'error');
               document.getElementById('salesResponse').textContent = 
                 `❌ API Error: ${statusCode}\n${errorMessage}\n\nFull response:\n` +
                 JSON.stringify(responseData, null, 2);
@@ -604,12 +1271,14 @@ Giải thích tính toán:
           }
         } else {
           // Success
+          showToast('SalesHourly API call thành công! 🎉', 'success');
           document.getElementById('salesResponse').textContent = 
             `✅ Thành công!\n\n` +
             JSON.stringify(responseData, null, 2);
         }
         
       } catch(err) {
+        showToast(`Network/Connection Error: ${err.message}`, 'error');
         document.getElementById('salesResponse').textContent = 
           `❌ Network/Connection Error: ${err.message}\n\n` +
           `Có thể do:\n` +
@@ -618,6 +1287,8 @@ Giải thích tính toán:
           `- Server không phản hồi\n` +
           `- CORS policy`;
         console.error('API call failed:', err);
+      } finally {
+        setButtonLoading('btnSales', false);
       }
     });
 
@@ -759,6 +1430,221 @@ Giải thích tính toán:
       if (!document.getElementById('reportDate').value) {
         document.getElementById('reportDate').value = new Date().toISOString().slice(0,10);
       }
+    });
+    
+    // Theme Toggle
+    function toggleTheme() {
+      const body = document.body;
+      const themeIcon = document.getElementById('themeIcon');
+      const themeText = document.getElementById('themeText');
+      
+      if (body.getAttribute('data-theme') === 'dark') {
+        body.removeAttribute('data-theme');
+        themeIcon.textContent = '🌙';
+        themeText.textContent = 'Dark Mode';
+        localStorage.setItem('theme', 'light');
+      } else {
+        body.setAttribute('data-theme', 'dark');
+        themeIcon.textContent = '☀️';
+        themeText.textContent = 'Light Mode';
+        localStorage.setItem('theme', 'dark');
+      }
+    }
+    
+    // Load saved theme
+    const savedTheme = localStorage.getItem('theme');
+    if (savedTheme === 'dark') {
+      document.body.setAttribute('data-theme', 'dark');
+      document.getElementById('themeIcon').textContent = '☀️';
+      document.getElementById('themeText').textContent = 'Light Mode';
+    }
+    
+    // Toast Notifications
+    function showToast(message, type = 'info', duration = 5000) {
+      const toast = document.getElementById('toast');
+      toast.className = `toast ${type}`;
+      toast.innerHTML = `
+        <div style="display: flex; align-items: center; gap: 8px;">
+          <span style="font-size: 18px;">
+            ${type === 'success' ? '✅' : type === 'error' ? '❌' : type === 'warning' ? '⚠️' : 'ℹ️'}
+          </span>
+          <span>${message}</span>
+          <button onclick="hideToast()" style="background: none; border: none; font-size: 16px; cursor: pointer; margin-left: auto;">✕</button>
+        </div>
+      `;
+      toast.style.display = 'block';
+      
+      setTimeout(() => {
+        toast.classList.add('show');
+      }, 100);
+      
+      setTimeout(() => {
+        hideToast();
+      }, duration);
+    }
+    
+    function hideToast() {
+      const toast = document.getElementById('toast');
+      toast.classList.remove('show');
+      setTimeout(() => {
+        toast.style.display = 'none';
+      }, 300);
+    }
+    
+    // Collapsible Sections
+    function toggleCollapsible(id) {
+      const content = document.getElementById(id + 'Content');
+      const chevron = document.getElementById(id + 'Chevron');
+      
+      if (content.classList.contains('open')) {
+        content.classList.remove('open');
+        chevron.textContent = '▼';
+        chevron.classList.remove('open');
+      } else {
+        content.classList.add('open');
+        chevron.textContent = '▲';
+        chevron.classList.add('open');
+      }
+    }
+    
+    // Copy to Clipboard
+    async function copyToClipboard(elementId) {
+      const element = document.getElementById(elementId);
+      let text = '';
+      
+      if (element.tagName === 'TEXTAREA' || element.tagName === 'INPUT') {
+        text = element.value;
+      } else {
+        text = element.textContent;
+      }
+      
+      try {
+        await navigator.clipboard.writeText(text);
+        showToast('Đã copy vào clipboard!', 'success', 2000);
+      } catch (err) {
+        console.error('Failed to copy: ', err);
+        showToast('Không thể copy. Hãy copy thủ công.', 'error');
+      }
+    }
+    
+    // JSON Validation
+    function validateJSON() {
+      const salesData = document.getElementById('salesData').value;
+      try {
+        JSON.parse(salesData);
+        showToast('JSON hợp lệ! ✓', 'success');
+      } catch (error) {
+        showToast(`JSON không hợp lệ: ${error.message}`, 'error');
+      }
+    }
+    
+    // Drag & Drop for file upload
+    const fileDropZone = document.getElementById('fileDropZone');
+    const fileInput = document.getElementById('fileInput');
+    
+    fileDropZone.addEventListener('dragover', (e) => {
+        e.stopPropagation();
+      e.preventDefault();
+      fileDropZone.classList.add('dragover');
+    });
+    
+    fileDropZone.addEventListener('dragleave', (e) => {
+        e.stopPropagation();
+
+      e.preventDefault();
+      fileDropZone.classList.remove('dragover');
+    });
+    
+    fileDropZone.addEventListener('drop', (e) => {
+        e.stopPropagation();
+
+      e.preventDefault();
+      fileDropZone.classList.remove('dragover');
+      
+      const files = e.dataTransfer.files;
+      if (files.length > 0) {
+        const file = files[0];
+        if (file.name.match(/\.(csv|xls|xlsx)$/i)) {
+          if (file.size <= 10 * 1024 * 1024) { // 10MB limit
+            fileInput.files = files;
+            fileInput.dispatchEvent(new Event('change'));
+            showToast(`File "${file.name}" đã được chọn!`, 'success');
+          } else {
+            showToast('File quá lớn! Giới hạn 10MB.', 'error');
+          }
+        } else {
+          showToast('File không được hỗ trợ! Chỉ chấp nhận .csv, .xls, .xlsx', 'error');
+        }
+      }
+    });
+    
+    // Enhanced button loading states
+    function setButtonLoading(buttonId, isLoading) {
+      const button = document.getElementById(buttonId);
+      const loadingSpinner = button.querySelector('.loading');
+      
+      if (isLoading) {
+        button.disabled = true;
+        if (loadingSpinner) loadingSpinner.style.display = 'inline-block';
+      } else {
+        button.disabled = false;
+        if (loadingSpinner) loadingSpinner.style.display = 'none';
+      }
+    }
+    
+    // Progress bar animation
+    function animateProgressBar(progressBarId, targetPercent, duration = 1000) {
+      const progressBar = document.getElementById(progressBarId);
+      const progressFill = progressBar.querySelector('.progress-fill');
+      
+      progressBar.style.display = 'block';
+      progressFill.style.width = '0%';
+      
+      setTimeout(() => {
+        progressFill.style.width = targetPercent + '%';
+      }, 100);
+      
+      setTimeout(() => {
+        progressBar.style.display = 'none';
+      }, duration + 500);
+    }
+    
+    // Replace alert with toast notifications
+    window.alert = function(message) {
+      if (message.includes('✅')) {
+        showToast(message.replace('✅', ''), 'success');
+      } else if (message.includes('❌')) {
+        showToast(message.replace('❌', ''), 'error');
+      } else if (message.includes('⚠️')) {
+        showToast(message.replace('⚠️', ''), 'warning');
+      } else {
+        showToast(message, 'info');
+      }
+    };
+    
+    // Enhanced form validation with real-time feedback
+    function addRealTimeValidation() {
+      const inputs = document.querySelectorAll('input[required], select[required]');
+      inputs.forEach(input => {
+        input.addEventListener('blur', () => {
+          if (input.validity.valid) {
+            input.style.borderColor = 'var(--success)';
+          } else {
+            input.style.borderColor = 'var(--danger)';
+          }
+        });
+        
+        input.addEventListener('input', () => {
+          if (input.style.borderColor === 'var(--danger)' && input.validity.valid) {
+            input.style.borderColor = 'var(--success)';
+          }
+        });
+      });
+    }
+    
+    // Initialize real-time validation when page loads
+    window.addEventListener('load', () => {
+      addRealTimeValidation();
     });
 
     // Manual Entry Management
