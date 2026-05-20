@@ -633,18 +633,24 @@
 
       <!-- BẢNG 24 GIỜ (dùng chung cả 2 tab) -->
       <div class="hour-header-row">
-        <div class="hour-header-title">
-          Dữ liệu theo giờ
-          <span class="text-xs text-muted" id="hourTableSummary" style="margin-left:8px;font-weight:400">0 / 24 giờ có dữ liệu</span>
+        <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
+          <span class="hour-header-title">Dữ liệu theo giờ</span>
+          <span class="text-xs text-muted" id="hourTableSummary" style="font-weight:400">0 / 24 giờ có dữ liệu</span>
         </div>
-        <div class="hour-progress-wrap">
-          <div class="hour-progress-bar">
-            <div class="hour-progress-fill" id="hourProgressFill" style="width:0%"></div>
+        <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
+          <div class="hour-progress-wrap" style="min-width:160px">
+            <div class="hour-progress-bar">
+              <div class="hour-progress-fill" id="hourProgressFill" style="width:0%"></div>
+            </div>
+            <span class="hour-count-badge empty" id="hourCountBadge">0 / 24</span>
           </div>
-          <span class="hour-count-badge empty" id="hourCountBadge">0 / 24</span>
+          <button class="toggle-hours-btn" id="toggleHoursBtn" onclick="toggleAllHours()">
+            <svg id="toggleHoursIcon" width="11" height="11" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+            <span id="toggleHoursLabel">Hiện tất cả 24 giờ</span>
+          </button>
         </div>
       </div>
-      <div class="hour-table-wrap">
+      <div class="hour-table-wrap" id="hourTableWrap">
         <table class="hour-table">
           <thead>
             <tr>
@@ -1332,6 +1338,19 @@
   }
 
   // ── 24H TABLE ──────────────────────────────────────────────────
+  let _showAllHours = false;
+
+  function toggleAllHours() {
+    _showAllHours = !_showAllHours;
+    const lbl  = document.getElementById('toggleHoursLabel');
+    const icon = document.getElementById('toggleHoursIcon');
+    if (lbl)  lbl.textContent  = _showAllHours ? 'Chỉ giờ đã nhập' : 'Hiện tất cả 24 giờ';
+    if (icon) icon.innerHTML   = _showAllHours
+      ? '<path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/>'
+      : '<path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/>';
+    renderHourTable();
+  }
+
   function renderHourTable() {
     const data = getSalesData();
     const date = formatDateForAPI(document.getElementById('reportDate').value);
@@ -1350,30 +1369,64 @@
     for (let i = 0; i < 24; i++) {
       const h = String(i).padStart(2, '0');
       const s = map[`${date}-${h}`];
-      const hasData = s && parseFloat(s.gto) > 0;
-      const inPayload = !!s;
-      if (hasData) {
+      if (s) addedHours.push(h);
+      if (s && parseFloat(s.gto) > 0) {
         count++;
         totalGTO += parseFloat(s.gto) || 0;
         totalDisc += parseFloat(s.discount) || 0;
         totalCash += parseFloat(s.cash) || 0;
         totalReceipts += parseInt(s.receiptcount) || 0;
       }
+    }
+
+    const tableWrap = document.getElementById('hourTableWrap');
+    const tbody = document.getElementById('hourTableBody');
+    const tfoot = document.getElementById('hourTableFoot');
+
+    // Empty state: no hours added yet
+    if (addedHours.length === 0 && !_showAllHours) {
+      tableWrap.innerHTML = `<div class="hour-empty-state">
+        <div class="hour-empty-icon">
+          <svg width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+        </div>
+        <div class="hour-empty-title">Chưa có dữ liệu giờ nào</div>
+        <div class="hour-empty-desc">Nhập dữ liệu từng giờ ở form bên trên rồi nhấn <strong>Thêm vào bảng</strong>, hoặc tải file Excel.</div>
+      </div>`;
+      // Update progress
+      _updateHourProgress(count, 0);
+      return;
+    }
+
+    // Restore table markup if empty state was shown before
+    if (!tableWrap.querySelector('table')) {
+      tableWrap.innerHTML = `<table class="hour-table">
+        <thead><tr>
+          <th>Giờ</th><th class="center">Phiếu</th><th class="right">Doanh thu</th>
+          <th class="right">Chiết khấu</th><th class="right">Tiền mặt</th>
+          <th>Trạng thái</th><th></th>
+        </tr></thead>
+        <tbody id="hourTableBody"></tbody>
+        <tfoot id="hourTableFoot"></tfoot>
+      </table>`;
+    }
+
+    const hoursToRender = _showAllHours
+      ? Array.from({length:24}, (_,i) => String(i).padStart(2,'0'))
+      : addedHours;
+
+    for (const h of hoursToRender) {
+      const s = map[`${date}-${h}`];
+      const hasData = s && parseFloat(s.gto) > 0;
+      const inPayload = !!s;
       const rowClass = hasData ? 'row-data' : (inPayload ? 'row-empty' : 'row-missing');
       const statusHtml = hasData
         ? `<span class="status-badge has-data"><svg width="9" height="9" fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg> Có dữ liệu</span>`
         : (inPayload
           ? `<span class="status-badge is-empty">— Trống</span>`
-          : `<span class="status-badge is-missing"><svg width="9" height="9" fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg> Thiếu</span>`);
-
-      const gtoVal = s ? (parseFloat(s.gto) || 0) : 0;
-      const barPct = maxGTO > 0 ? Math.round((gtoVal / maxGTO) * 100) : 0;
-      const gtoFormatted = gtoVal > 0
-        ? gtoVal.toLocaleString('vi-VN') + ' ₫'
-        : (s ? '<span class="tbl-zero">0 ₫</span>' : '<span class="tbl-dash">—</span>');
-      const discFmt = s ? (parseFloat(s.discount) > 0 ? parseFloat(s.discount).toLocaleString('vi-VN') + ' ₫' : '<span class="tbl-zero">0 ₫</span>') : '<span class="tbl-dash">—</span>';
-      const cashFmt = s ? (parseFloat(s.cash) > 0 ? parseFloat(s.cash).toLocaleString('vi-VN') + ' ₫' : '<span class="tbl-zero">0 ₫</span>') : '<span class="tbl-dash">—</span>';
-
+          : `<span class="status-badge is-missing">✕ Thiếu</span>`);
+      const gtoFmt  = s && parseFloat(s.gto) > 0  ? parseFloat(s.gto).toLocaleString('vi-VN') + ' ₫' : (s ? '<span style="color:var(--text-subtle)">0 ₫</span>' : '<span style="color:var(--text-subtle)">—</span>');
+      const discFmt = s && parseFloat(s.discount) > 0 ? parseFloat(s.discount).toLocaleString('vi-VN') + ' ₫' : (s ? '<span style="color:var(--text-subtle)">0 ₫</span>' : '<span style="color:var(--text-subtle)">—</span>');
+      const cashFmt = s && parseFloat(s.cash) > 0  ? parseFloat(s.cash).toLocaleString('vi-VN') + ' ₫' : (s ? '<span style="color:var(--text-subtle)">0 ₫</span>' : '<span style="color:var(--text-subtle)">—</span>');
       rows += `<tr class="${rowClass}">
         <td><span class="hour-chip ${hasData ? 'hour-chip-active' : ''}">${h}:00</span></td>
         <td class="mono center">${s ? s.receiptcount : '<span class="tbl-dash">—</span>'}</td>
@@ -1392,31 +1445,35 @@
         </button></td>
       </tr>`;
     }
+
     document.getElementById('hourTableBody').innerHTML = rows;
 
-    // Totals footer
-    const tfoot = document.getElementById('hourTableFoot');
-    if (tfoot) {
-      tfoot.innerHTML = `<tr class="total-row">
-        <td><span class="total-label">Tổng / 24h</span></td>
-        <td class="mono center">${totalReceipts > 0 ? totalReceipts : '—'}</td>
-        <td class="mono right total-gto">${totalGTO > 0 ? totalGTO.toLocaleString('vi-VN') + ' ₫' : '—'}</td>
+    // Footer: totals only when there's data
+    const tfootEl = document.getElementById('hourTableFoot');
+    if (tfootEl && totalGTO > 0) {
+      tfootEl.innerHTML = `<tr class="total-row">
+        <td>Tổng${_showAllHours ? ' / 24h' : ` (${addedHours.length} giờ)`}</td>
+        <td class="mono center">${totalReceipts || '—'}</td>
+        <td class="mono right" style="color:var(--primary)">${totalGTO.toLocaleString('vi-VN')} ₫</td>
         <td class="mono right">${totalDisc > 0 ? totalDisc.toLocaleString('vi-VN') + ' ₫' : '—'}</td>
         <td class="mono right">${totalCash > 0 ? totalCash.toLocaleString('vi-VN') + ' ₫' : '—'}</td>
         <td colspan="2"></td>
       </tr>`;
+    } else if (tfootEl) {
+      tfootEl.innerHTML = '';
     }
 
-    // Progress bar & badge
-    const pct = Math.round((count / 24) * 100);
+    _updateHourProgress(count, addedHours.length);
+  }
+
+  function _updateHourProgress(count, addedCount) {
+    const pct  = Math.round((count / 24) * 100);
     const fill = document.getElementById('hourProgressFill');
     const badge = document.getElementById('hourCountBadge');
-    if (fill) { fill.style.width = pct + '%'; fill.className = 'hour-progress-fill' + (count === 24 ? ' complete' : ''); }
-    if (badge) {
-      badge.textContent = `${count} / 24`;
-      badge.className = 'hour-count-badge ' + (count === 24 ? 'complete' : count > 0 ? 'partial' : 'empty');
-    }
-    document.getElementById('hourTableSummary').textContent = `${count} / 24 giờ có dữ liệu`;
+    if (fill)  { fill.style.width = pct + '%'; fill.className = 'hour-progress-fill' + (count === 24 ? ' complete' : ''); }
+    if (badge) { badge.textContent = `${count} / 24`; badge.className = 'hour-count-badge ' + (count === 24 ? 'complete' : count > 0 ? 'partial' : 'empty'); }
+    document.getElementById('hourTableSummary').textContent =
+      addedCount > 0 ? `${addedCount} giờ đã nhập · ${count} giờ có doanh thu` : `0 giờ đã nhập`;
   }
 
   // ── DRAWER ─────────────────────────────────────────────────────
