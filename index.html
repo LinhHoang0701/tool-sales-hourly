@@ -60,15 +60,22 @@
       </div>
       <div>
         <div class="logo-title">POS SalesHourly</div>
-        <div class="logo-sub">Gửi dữ liệu bán hàng theo giờ</div>
+        <div class="logo-sub">Tangent 360 · v2.5</div>
       </div>
     </div>
-    <button class="btn btn-ghost btn-sm" onclick="toggleTheme()">
-      <svg id="themeIcon" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-        <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
-      </svg>
-      <span id="themeLabel">Tối</span>
-    </button>
+    <div style="display:flex;align-items:center;gap:10px">
+      <div id="headerAuthChip" class="header-auth-chip hidden">
+        <span class="header-auth-dot"></span>
+        <span id="headerAuthText">Đã đăng nhập</span>
+        <span id="headerAuthCountdown" class="header-auth-countdown"></span>
+      </div>
+      <button class="btn btn-ghost btn-sm" onclick="toggleTheme()">
+        <svg id="themeIcon" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+          <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
+        </svg>
+        <span id="themeLabel">Tối</span>
+      </button>
+    </div>
   </div>
 </header>
 
@@ -199,15 +206,13 @@
     </div>
     <div class="step-connector"></div>
     <div class="step" id="s3">
-      <div class="step-num" id="sn3">2</div>
+      <div class="step-num" id="sn3">3</div>
       <div>
         <div class="step-label">Tải dữ liệu & Gửi</div>
         <div class="step-desc">Upload Excel, nhấn Gửi</div>
       </div>
     </div>
   </div>
-  <!-- hidden anchor for scroll/JS compat -->
-  <div id="s1" style="display:none"><span id="sn1"></span></div>
 
   <!-- BƯỚC 1: TOKEN — ẩn khỏi UI, JS vẫn xử lý ngầm -->
   <div id="section-1" style="display:none" aria-hidden="true">
@@ -568,12 +573,15 @@
 
       <!-- GỬI -->
       <div class="divider"></div>
-      <div class="flex items-center justify-between" style="flex-wrap:wrap;gap:12px;">
+      <div class="send-section">
         <div>
-          <div style="font-size:15px;font-weight:600;">Gửi báo cáo lên hệ thống</div>
-          <div class="text-xs text-muted mt-2">ℹ️ Đảm bảo đã đăng nhập (Bước 1) và tải file (Bước 2) trước khi gửi</div>
+          <div class="send-section-title">Gửi báo cáo lên hệ thống</div>
+          <div class="send-section-hint">
+            <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+            Đảm bảo đã đăng nhập và tải đủ 24 giờ trước khi nhấn Gửi
+          </div>
         </div>
-        <button class="btn btn-primary btn-lg" id="btnSales" onclick="submitSales()" style="min-width:160px">
+        <button class="btn btn-primary btn-lg" id="btnSales" onclick="submitSales()" style="min-width:180px">
           <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
             <line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/>
           </svg>
@@ -798,6 +806,10 @@
     badge.className = 'token-status ok';
     badge.innerHTML = `<svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg> Đã đăng nhập`;
     stepDone(1); stepActive(2);
+    // Update header auth chip
+    const chip = document.getElementById('headerAuthChip');
+    if (chip) { chip.classList.remove('hidden'); chip.classList.add('auth-ok'); }
+    document.getElementById('headerAuthText').textContent = 'Đã đăng nhập';
     startCountdown(new Date(expiresISO));
     scheduleRenewPrompt(expiresISO);
   }
@@ -817,6 +829,8 @@
       const m = Math.floor(secsLeft / 60), s = secsLeft % 60;
       txt.textContent = `Hết hạn sau ${m}:${String(s).padStart(2,'0')}`;
       chip.className = 'token-countdown' + (secsLeft < 300 ? ' danger' : secsLeft < 600 ? ' warn' : '');
+      const hcd = document.getElementById('headerAuthCountdown');
+      if (hcd) hcd.textContent = secsLeft > 0 ? `${m}:${String(s).padStart(2,'0')}` : '';
     }
     tick();
     _countdownTimer = setInterval(tick, 1000);
@@ -1121,6 +1135,14 @@
     const map = {};
     (data.sales || []).forEach(s => { map[`${s.sale.date}-${s.sale.hour}`] = s.sale; });
 
+    // Compute max GTO for bar scaling
+    let maxGTO = 0;
+    for (let i = 0; i < 24; i++) {
+      const h = String(i).padStart(2, '0');
+      const s = map[`${date}-${h}`];
+      if (s) maxGTO = Math.max(maxGTO, parseFloat(s.gto) || 0);
+    }
+
     let count = 0, totalGTO = 0, totalDisc = 0, totalCash = 0, totalReceipts = 0, rows = '';
     for (let i = 0; i < 24; i++) {
       const h = String(i).padStart(2, '0');
@@ -1136,17 +1158,28 @@
       }
       const rowClass = hasData ? 'row-data' : (inPayload ? 'row-empty' : 'row-missing');
       const statusHtml = hasData
-        ? `<span class="status-badge has-data">✓ Có dữ liệu</span>`
+        ? `<span class="status-badge has-data"><svg width="9" height="9" fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg> Có dữ liệu</span>`
         : (inPayload
           ? `<span class="status-badge is-empty">— Trống</span>`
-          : `<span class="status-badge is-missing">✕ Thiếu</span>`);
-      const gtoFmt = s && parseFloat(s.gto) > 0 ? parseFloat(s.gto).toLocaleString('vi-VN') + ' ₫' : (s ? '<span style="color:var(--text-subtle)">0 ₫</span>' : '<span style="color:var(--text-subtle)">—</span>');
-      const discFmt = s ? (parseFloat(s.discount) > 0 ? parseFloat(s.discount).toLocaleString('vi-VN') + ' ₫' : '<span style="color:var(--text-subtle)">0 ₫</span>') : '<span style="color:var(--text-subtle)">—</span>';
-      const cashFmt = s ? (parseFloat(s.cash) > 0 ? parseFloat(s.cash).toLocaleString('vi-VN') + ' ₫' : '<span style="color:var(--text-subtle)">0 ₫</span>') : '<span style="color:var(--text-subtle)">—</span>';
+          : `<span class="status-badge is-missing"><svg width="9" height="9" fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg> Thiếu</span>`);
+
+      const gtoVal = s ? (parseFloat(s.gto) || 0) : 0;
+      const barPct = maxGTO > 0 ? Math.round((gtoVal / maxGTO) * 100) : 0;
+      const gtoFormatted = gtoVal > 0
+        ? gtoVal.toLocaleString('vi-VN') + ' ₫'
+        : (s ? '<span class="tbl-zero">0 ₫</span>' : '<span class="tbl-dash">—</span>');
+      const discFmt = s ? (parseFloat(s.discount) > 0 ? parseFloat(s.discount).toLocaleString('vi-VN') + ' ₫' : '<span class="tbl-zero">0 ₫</span>') : '<span class="tbl-dash">—</span>';
+      const cashFmt = s ? (parseFloat(s.cash) > 0 ? parseFloat(s.cash).toLocaleString('vi-VN') + ' ₫' : '<span class="tbl-zero">0 ₫</span>') : '<span class="tbl-dash">—</span>';
+
       rows += `<tr class="${rowClass}">
-        <td class="mono" style="font-weight:${hasData?'700':'400'};color:${hasData?'var(--text)':'var(--text-muted)'}">${h}:00</td>
-        <td class="mono center">${s ? s.receiptcount : '<span style="color:var(--text-subtle)">—</span>'}</td>
-        <td class="mono right">${gtoFmt}</td>
+        <td><span class="hour-chip ${hasData ? 'hour-chip-active' : ''}">${h}:00</span></td>
+        <td class="mono center">${s ? s.receiptcount : '<span class="tbl-dash">—</span>'}</td>
+        <td class="right">
+          <div class="revenue-cell">
+            <div class="revenue-bar-bg" style="width:${barPct}%"></div>
+            <span class="mono revenue-value">${gtoFormatted}</span>
+          </div>
+        </td>
         <td class="mono right">${discFmt}</td>
         <td class="mono right">${cashFmt}</td>
         <td>${statusHtml}</td>
@@ -1162,9 +1195,9 @@
     const tfoot = document.getElementById('hourTableFoot');
     if (tfoot) {
       tfoot.innerHTML = `<tr class="total-row">
-        <td>Tổng / 24h</td>
+        <td><span class="total-label">Tổng / 24h</span></td>
         <td class="mono center">${totalReceipts > 0 ? totalReceipts : '—'}</td>
-        <td class="mono right" style="color:var(--primary)">${totalGTO > 0 ? totalGTO.toLocaleString('vi-VN') + ' ₫' : '—'}</td>
+        <td class="mono right total-gto">${totalGTO > 0 ? totalGTO.toLocaleString('vi-VN') + ' ₫' : '—'}</td>
         <td class="mono right">${totalDisc > 0 ? totalDisc.toLocaleString('vi-VN') + ' ₫' : '—'}</td>
         <td class="mono right">${totalCash > 0 ? totalCash.toLocaleString('vi-VN') + ' ₫' : '—'}</td>
         <td colspan="2"></td>
