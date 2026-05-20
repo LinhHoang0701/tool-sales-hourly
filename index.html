@@ -3,1866 +3,1574 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>🚀 API POS SalesHourly v2.5 Testing Dashboard</title>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Fira+Code:wght@300;400;500&display=swap" rel="stylesheet">
+  <title>POS SalesHourly v2.5 — Bảng điều khiển</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
   <script src="https://cdn.jsdelivr.net/npm/xlsx/dist/xlsx.full.min.js"></script>
   <style>
-    :root { 
-      --primary: #3498db; 
-      --secondary: #2c3e50; 
-      --success: #27ae60;
-      --warning: #f39c12;
-      --danger: #e74c3c;
-      --info: #17a2b8;
-      --light: #f8f9fa;
-      --dark: #343a40;
-      --bg: #f5f7fa; 
-      --card: #ffffff; 
-      --text: #2c3e50; 
-      --text-muted: #6c757d;
-      --border: #dee2e6;
-      --border-radius: 12px; 
-      --padding: 20px; 
-      --shadow: 0 4px 16px rgba(0,0,0,0.1);
-      --shadow-hover: 0 8px 24px rgba(0,0,0,0.15);
-      --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    :root {
+      --primary: #0d9488;
+      --primary-dark: #0f766e;
+      --primary-light: #f0fdfa;
+      --primary-border: #5eead4;
+      --bg: #f8fafc;
+      --bg-subtle: #f1f5f9;
+      --card: #ffffff;
+      --text: #0f172a;
+      --text-muted: #64748b;
+      --text-subtle: #94a3b8;
+      --border: #e2e8f0;
+      --success: #16a34a;
+      --success-bg: #f0fdf4;
+      --success-border: #bbf7d0;
+      --danger: #dc2626;
+      --danger-bg: #fef2f2;
+      --danger-border: #fecaca;
+      --warning: #d97706;
+      --warning-bg: #fffbeb;
+      --warning-border: #fde68a;
+      --shadow: 0 1px 3px rgba(0,0,0,0.08), 0 1px 2px rgba(0,0,0,0.04);
+      --shadow-md: 0 4px 6px -1px rgba(0,0,0,0.1), 0 2px 4px -1px rgba(0,0,0,0.06);
+      --shadow-lg: 0 10px 15px -3px rgba(0,0,0,0.1), 0 4px 6px -2px rgba(0,0,0,0.05);
+      --radius: 12px;
+      --radius-sm: 8px;
+      --radius-xs: 6px;
+      --transition: 0.15s ease;
+      --font: 'Inter', system-ui, -apple-system, sans-serif;
+      --font-mono: 'JetBrains Mono', 'Fira Code', monospace;
     }
-    
     [data-theme="dark"] {
-      --bg: #1a1a1a;
-      --card: #2d2d2d;
-      --text: #ffffff;
-      --text-muted: #adb5bd;
-      --border: #495057;
-      --secondary: #495057;
+      --bg: #0f172a;
+      --bg-subtle: #1e293b;
+      --card: #1e293b;
+      --text: #f1f5f9;
+      --text-muted: #94a3b8;
+      --text-subtle: #64748b;
+      --border: #334155;
+      --primary-light: #042f2e;
+      --primary-border: #0f766e;
+      --success-bg: #052e16;
+      --success-border: #166534;
+      --danger-bg: #450a0a;
+      --danger-border: #991b1b;
+      --warning-bg: #451a03;
+      --warning-border: #92400e;
     }
-    
-    * { box-sizing: border-box; }
-    
-    body { 
-      margin: 0; 
-      font-family: 'Inter', 'Segoe UI', 'Roboto', sans-serif; 
-      background: var(--bg); 
-      color: var(--text); 
-      line-height: 1.6;
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: var(--font);
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.5;
       font-size: 14px;
-      transition: var(--transition);
+      min-height: 100vh;
+      transition: background var(--transition), color var(--transition);
     }
-    
-    .container { 
-      max-width: 1400px; 
-      margin: 0 auto; 
-      padding: var(--padding); 
-    }
-    
+
+    /* HEADER */
     .header {
-      background: linear-gradient(135deg, var(--primary), var(--secondary));
-      color: white;
-      padding: 24px 0;
-      margin-bottom: 32px;
-      box-shadow: var(--shadow);
-    }
-    
-    .header-content {
-      max-width: 1400px;
-      margin: 0 auto;
-      padding: 0 20px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-    }
-    
-    h1 { 
-      margin: 0;
-      font-weight: 700; 
-      font-size: 2rem;
-      background: linear-gradient(45deg, #fff, #e3f2fd);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      background-clip: text;
-    }
-    
-    .theme-toggle {
-      background: rgba(255,255,255,0.2);
-      border: none;
-      color: white;
-      padding: 10px 16px;
-      border-radius: 24px;
-      cursor: pointer;
-      font-size: 14px;
-      transition: var(--transition);
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
-    
-    .theme-toggle:hover {
-      background: rgba(255,255,255,0.3);
-      transform: translateY(-1px);
-    }
-    
-    .card { 
-      background: var(--card); 
-      border-radius: var(--border-radius); 
-      padding: var(--padding); 
-      margin-bottom: 24px; 
-      box-shadow: var(--shadow);
-      border: 1px solid var(--border);
-      transition: var(--transition);
-      position: relative;
-      overflow: hidden;
-    }
-    
-    .card:hover {
-      box-shadow: var(--shadow-hover);
-      transform: translateY(-2px);
-    }
-    
-    .card::before {
-      content: '';
-      position: absolute;
-      top: 0;
-      left: 0;
-      right: 0;
-      height: 4px;
-      background: linear-gradient(90deg, var(--primary), var(--success));
-    }
-    
-    .card h2 { 
-      margin-top: 0; 
-      margin-bottom: 16px;
-      color: var(--secondary); 
-      font-weight: 600;
-      font-size: 1.25rem;
-      display: flex;
-      align-items: center;
-      gap: 12px;
-    }
-    
-    .card h2::before {
-      content: attr(data-icon);
-      font-size: 1.5rem;
-    }
-    
-    .grid-2 { 
-      display: grid; 
-      grid-template-columns: 1fr 1fr; 
-      gap: 20px; 
-    }
-    
-    .grid-3 { 
-      display: grid; 
-      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); 
-      gap: 16px; 
-    }
-    
-    @media (max-width: 768px) { 
-      .grid-2, .grid-3 { grid-template-columns: 1fr; }
-      .header-content { flex-direction: column; gap: 16px; text-align: center; }
-      h1 { font-size: 1.5rem; }
-      .container { padding: 16px; }
-    }
-    
-    .form-group {
-      position: relative;
-      margin-bottom: 20px;
-    }
-    
-    label { 
-      display: block; 
-      margin-bottom: 6px; 
-      font-weight: 500;
-      color: var(--text);
-      font-size: 13px;
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
-    }
-    
-    .required { color: var(--danger); }
-    
-    input[type=text], input[type=password], input[type=date], input[type=number], input[type=file], textarea, select { 
-      width: 100%; 
-      padding: 12px 16px; 
-      border: 2px solid var(--border); 
-      border-radius: 8px; 
-      font-family: inherit; 
-      font-size: 14px;
       background: var(--card);
-      color: var(--text);
-      transition: var(--transition);
-      margin-bottom: 4px;
-    }
-    
-    input:focus, textarea:focus, select:focus {
-      outline: none;
-      border-color: var(--primary);
-      box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.1);
-      transform: translateY(-1px);
-    }
-    
-    input:invalid:not(:focus) {
-      border-color: var(--danger);
-    }
-    
-    input:valid:not(:focus):not([value=""]) {
-      border-color: var(--success);
-    }
-    
-    textarea { 
-      height: 120px; 
-      resize: vertical; 
-      font-family: 'Fira Code', monospace;
-      font-size: 12px;
-    }
-    
-    .btn {
-      background: var(--primary); 
-      color: #fff; 
-      border: none; 
-      padding: 12px 20px; 
-      border-radius: 8px; 
-      font-size: 14px; 
-      font-weight: 500;
-      cursor: pointer; 
-      margin: 4px 4px 4px 0; 
-      transition: var(--transition);
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-      text-decoration: none;
-      position: relative;
-      overflow: hidden;
-    }
-    
-    .btn::before {
-      content: '';
-      position: absolute;
-      top: 0;
-      left: -100%;
-      width: 100%;
-      height: 100%;
-      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
-      transition: left 0.5s;
-    }
-    
-    .btn:hover::before {
-      left: 100%;
-    }
-    
-    .btn:hover { 
-      transform: translateY(-2px);
-      box-shadow: 0 4px 12px rgba(0,0,0,0.2);
-    }
-    
-    .btn:active {
-      transform: translateY(0);
-    }
-    
-    .btn-success { background: var(--success); }
-    .btn-warning { background: var(--warning); }
-    .btn-danger { background: var(--danger); }
-    .btn-secondary { background: var(--text-muted); }
-    .btn-info { background: var(--info); }
-    
-    .btn-group {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 8px;
-      margin: 16px 0;
-    }
-    
-    pre { 
-      background: var(--light); 
-      border: 1px solid var(--border);
-      padding: 16px; 
-      border-radius: 8px; 
-      overflow-x: auto; 
-      max-height: 300px; 
-      font-size: 12px;
-      font-family: 'Fira Code', monospace;
-      line-height: 1.4;
-      margin: 16px 0;
-      position: relative;
-    }
-    
-    [data-theme="dark"] pre {
-      background: var(--dark);
-      color: #e9ecef;
-    }
-    
-    .copy-btn {
-      position: absolute;
-      top: 8px;
-      right: 8px;
-      background: rgba(0,0,0,0.1);
-      border: none;
-      padding: 6px 10px;
-      border-radius: 4px;
-      cursor: pointer;
-      font-size: 12px;
-      transition: var(--transition);
-    }
-    
-    .copy-btn:hover {
-      background: rgba(0,0,0,0.2);
-    }
-    
-    .info-box { 
-      background: var(--light); 
-      border: 1px solid var(--border);
-      padding: 16px; 
-      border-radius: 8px; 
-      margin: 16px 0;
-      position: relative;
-      border-left: 4px solid var(--primary);
-    }
-    
-    .info-box.success { border-left-color: var(--success); background: rgba(39, 174, 96, 0.1); }
-    .info-box.warning { border-left-color: var(--warning); background: rgba(243, 156, 18, 0.1); }
-    .info-box.danger { border-left-color: var(--danger); background: rgba(231, 76, 60, 0.1); }
-    
-    .info-box h3 { 
-      margin-top: 0; 
-      color: var(--text); 
-      font-size: 14px; 
-      font-weight: 600;
-    }
-    
-    .info-box p { 
-      margin: 6px 0; 
-      font-size: 13px; 
-      color: var(--text-muted);
-    }
-    
-    .preview-section { 
-      margin-top: 20px; 
-      border: 1px solid var(--border);
-      border-radius: 8px;
-      overflow: hidden;
-    }
-    
-    .preview-header {
-      background: var(--light);
-      padding: 12px 16px;
       border-bottom: 1px solid var(--border);
-      font-weight: 500;
-      font-size: 13px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
+      position: sticky; top: 0; z-index: 100;
     }
-    
-    .preview-content {
-      padding: 16px;
-      max-height: 200px;
-      overflow-y: auto;
+    .header-inner {
+      max-width: 1200px; margin: 0 auto; padding: 0 24px;
+      height: 64px; display: flex; align-items: center; justify-content: space-between; gap: 16px;
     }
-    
-    .file-drop-zone {
-      border: 2px dashed var(--border);
-      border-radius: 8px;
-      padding: 32px;
-      text-align: center;
-      transition: var(--transition);
-      cursor: pointer;
-      background: var(--light);
-      margin: 16px 0;
+    .logo { display: flex; align-items: center; gap: 12px; }
+    .logo-icon {
+      width: 36px; height: 36px; background: var(--primary); border-radius: 8px;
+      display: flex; align-items: center; justify-content: center; color: white; flex-shrink: 0;
     }
-    
-    .file-drop-zone:hover {
+    .logo-title { font-size: 15px; font-weight: 600; line-height: 1.2; }
+    .logo-sub { font-size: 11px; color: var(--text-muted); }
+
+    /* BUTTONS */
+    .btn {
+      display: inline-flex; align-items: center; gap: 6px;
+      padding: 8px 16px; border-radius: var(--radius-xs);
+      font-size: 13px; font-weight: 500; font-family: var(--font);
+      border: 1px solid transparent; cursor: pointer;
+      transition: all var(--transition); white-space: nowrap; line-height: 1;
+    }
+    .btn:disabled { opacity: 0.5; cursor: not-allowed; }
+    .btn-primary { background: var(--primary); color: white; border-color: var(--primary); }
+    .btn-primary:hover:not(:disabled) { background: var(--primary-dark); border-color: var(--primary-dark); }
+    .btn-secondary { background: var(--bg-subtle); color: var(--text); border-color: var(--border); }
+    .btn-secondary:hover:not(:disabled) { background: var(--border); }
+    .btn-ghost { background: transparent; color: var(--text-muted); border-color: transparent; }
+    .btn-ghost:hover:not(:disabled) { background: var(--bg-subtle); color: var(--text); }
+    .btn-success { background: var(--success); color: white; }
+    .btn-success:hover:not(:disabled) { opacity: 0.9; }
+    .btn-outline { background: transparent; color: var(--primary); border-color: var(--primary); }
+    .btn-outline:hover:not(:disabled) { background: var(--primary-light); }
+    .btn-sm { padding: 6px 12px; font-size: 12px; }
+    .btn-lg { padding: 12px 24px; font-size: 15px; font-weight: 600; }
+    .btn-icon { padding: 8px; }
+    .btn-group { display: flex; flex-wrap: wrap; gap: 8px; }
+
+    /* LAYOUT */
+    .container { max-width: 1200px; margin: 0 auto; padding: 24px; }
+
+    /* STEP BAR */
+    .steps {
+      display: flex; align-items: center;
+      background: var(--card); border: 1px solid var(--border);
+      border-radius: var(--radius); padding: 16px 24px;
+      box-shadow: var(--shadow); margin-bottom: 24px;
+      gap: 8px;
+    }
+    .step { display: flex; align-items: center; gap: 10px; flex: 1; min-width: 0; }
+    .step-connector { flex: 1; height: 1px; background: var(--border); min-width: 16px; }
+    .step-num {
+      width: 30px; height: 30px; border-radius: 50%;
+      border: 2px solid var(--border); display: flex; align-items: center; justify-content: center;
+      font-size: 12px; font-weight: 600; color: var(--text-muted); flex-shrink: 0;
+      transition: all var(--transition);
+    }
+    .step.active .step-num { background: var(--primary); color: white; border-color: var(--primary); }
+    .step.done .step-num { background: var(--success); color: white; border-color: var(--success); }
+    .step-label { font-size: 13px; font-weight: 500; color: var(--text-muted); white-space: nowrap; }
+    .step-desc { font-size: 11px; color: var(--text-subtle); white-space: nowrap; }
+    .step.active .step-label { color: var(--primary); font-weight: 600; }
+    .step.done .step-label { color: var(--success); }
+
+    /* SECTION */
+    .section {
+      background: var(--card); border: 1px solid var(--border);
+      border-radius: var(--radius); box-shadow: var(--shadow); margin-bottom: 24px; overflow: hidden;
+    }
+    .section-header {
+      padding: 18px 24px; border-bottom: 1px solid var(--border);
+      display: flex; align-items: center; justify-content: space-between;
+    }
+    .section-title { display: flex; align-items: center; gap: 10px; }
+    .section-badge {
+      width: 26px; height: 26px; border-radius: 6px;
+      background: var(--primary-light); color: var(--primary);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 12px; font-weight: 700; flex-shrink: 0;
+    }
+    .section-name { font-size: 15px; font-weight: 600; }
+    .section-body { padding: 24px; }
+
+    /* FORMS */
+    .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+    .form-grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; }
+    .field { display: flex; flex-direction: column; gap: 5px; }
+    .field label { font-size: 11px; font-weight: 600; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; }
+    .required { color: var(--danger); }
+    .field input, .field select, .field textarea {
+      width: 100%; padding: 9px 12px; border: 1px solid var(--border);
+      border-radius: var(--radius-xs); font-family: var(--font); font-size: 14px;
+      background: var(--card); color: var(--text);
+      transition: border-color var(--transition), box-shadow var(--transition); outline: none;
+    }
+    .field input:focus, .field select:focus, .field textarea:focus {
       border-color: var(--primary);
-      background: rgba(52, 152, 219, 0.05);
+      box-shadow: 0 0 0 3px rgba(13,148,136,0.12);
     }
-    
-    .file-drop-zone.dragover {
-      border-color: var(--primary);
-      background: rgba(52, 152, 219, 0.1);
-      transform: scale(1.02);
+    .field input.error { border-color: var(--danger); }
+    .field textarea { resize: vertical; font-family: var(--font-mono); font-size: 12px; line-height: 1.6; min-height: 220px; }
+    .field-hint { font-size: 11px; color: var(--text-subtle); }
+
+    /* TOKEN DISPLAY */
+    .token-row { display: flex; margin-top: 12px; }
+    .token-row input {
+      flex: 1; padding: 9px 12px; border: 1px solid var(--border);
+      border-radius: var(--radius-xs) 0 0 var(--radius-xs); border-right: none;
+      font-family: var(--font-mono); font-size: 12px;
+      background: var(--bg-subtle); color: var(--text-muted); outline: none;
     }
-    
-    .file-icon {
-      font-size: 3rem;
-      color: var(--text-muted);
-      margin-bottom: 16px;
-      display: block;
+    .token-row input.has-token { color: var(--success); border-color: var(--success-border); background: var(--success-bg); }
+    .token-copy {
+      padding: 9px 14px; background: var(--bg-subtle); border: 1px solid var(--border);
+      border-radius: 0 var(--radius-xs) var(--radius-xs) 0; cursor: pointer;
+      color: var(--text-muted); transition: all var(--transition);
+      display: flex; align-items: center; gap: 5px; font-size: 12px; font-family: var(--font); white-space: nowrap;
     }
-    
-    .progress-bar {
-      width: 100%;
-      height: 6px;
-      background: var(--border);
-      border-radius: 3px;
-      overflow: hidden;
-      margin: 16px 0;
+    .token-copy:hover { background: var(--border); color: var(--text); }
+    .token-status { display: flex; align-items: center; gap: 6px; font-size: 12px; margin-top: 6px; color: var(--text-subtle); }
+    .token-status.ok { color: var(--success); }
+
+    /* INFOBOX */
+    .infobox {
+      padding: 13px 16px; border-radius: var(--radius-xs);
+      border: 1px solid var(--primary-border); background: var(--primary-light);
     }
-    
-    .progress-fill {
-      height: 100%;
-      background: linear-gradient(90deg, var(--primary), var(--success));
-      width: 0%;
-      transition: width 0.3s ease;
+    .infobox-title { font-weight: 600; color: var(--primary); font-size: 13px; margin-bottom: 4px; }
+    .infobox p { color: var(--text-muted); font-size: 13px; margin: 2px 0; }
+    .infobox.warning { border-color: var(--warning-border); background: var(--warning-bg); }
+    .infobox.warning .infobox-title { color: var(--warning); }
+    .infobox.danger { border-color: var(--danger-border); background: var(--danger-bg); }
+    .infobox.danger .infobox-title { color: var(--danger); }
+    .infobox.success { border-color: var(--success-border); background: var(--success-bg); }
+    .infobox.success .infobox-title { color: var(--success); }
+
+    /* PAYMENT */
+    .payment-total {
+      display: flex; justify-content: space-between; align-items: center;
+      padding: 9px 12px; background: var(--bg-subtle);
+      border-radius: var(--radius-xs); border: 1px solid var(--border);
+      margin-top: 10px; font-size: 13px;
     }
-    
-    .status-indicator {
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      padding: 4px 8px;
-      border-radius: 12px;
-      font-size: 12px;
-      font-weight: 500;
+    .payment-total-label { color: var(--text-muted); }
+    .payment-total-value { font-weight: 600; font-family: var(--font-mono); }
+
+    /* FILE DROP */
+    .drop-zone {
+      border: 2px dashed var(--border); border-radius: var(--radius-sm);
+      padding: 36px 24px; text-align: center; cursor: pointer;
+      background: var(--bg-subtle); transition: all var(--transition);
     }
-    
-    .status-success { background: rgba(39, 174, 96, 0.1); color: var(--success); }
-    .status-warning { background: rgba(243, 156, 18, 0.1); color: var(--warning); }
-    .status-danger { background: rgba(231, 76, 60, 0.1); color: var(--danger); }
-    
-    .loading {
-      display: inline-block;
-      width: 16px;
-      height: 16px;
-      border: 2px solid var(--border);
-      border-radius: 50%;
-      border-top-color: var(--primary);
-      animation: spin 1s ease-in-out infinite;
+    .drop-zone:hover, .drop-zone.dragover { border-color: var(--primary); background: var(--primary-light); }
+    .drop-icon {
+      width: 46px; height: 46px; background: var(--card); border: 1px solid var(--border);
+      border-radius: 10px; display: flex; align-items: center; justify-content: center;
+      margin: 0 auto 14px; color: var(--text-muted);
     }
-    
-    @keyframes spin {
-      to { transform: rotate(360deg); }
+    .drop-zone p { color: var(--text-muted); font-size: 13px; margin: 3px 0; }
+    .drop-zone strong { color: var(--text); }
+    .file-meta {
+      display: flex; align-items: center; gap: 10px; padding: 11px 14px;
+      background: var(--success-bg); border: 1px solid var(--success-border);
+      border-radius: var(--radius-xs); margin-top: 10px;
     }
-    
-    .slide-in {
-      animation: slideIn 0.3s ease-out;
+    .file-meta-icon { color: var(--success); flex-shrink: 0; }
+    .file-meta-name { font-weight: 500; font-size: 13px; }
+    .file-meta-detail { font-size: 12px; color: var(--text-muted); }
+
+    /* COLUMN MAPPING */
+    .col-map {
+      padding: 14px 16px; background: var(--warning-bg);
+      border: 1px solid var(--warning-border); border-radius: var(--radius-xs); margin-top: 10px;
     }
-    
-    @keyframes slideIn {
-      from { transform: translateY(20px); opacity: 0; }
-      to { transform: translateY(0); opacity: 1; }
+    .col-map-title { font-weight: 600; color: var(--warning); font-size: 13px; margin-bottom: 10px; display: flex; align-items: center; gap: 6px; }
+
+    /* TABS */
+    .tabs { display: flex; border-bottom: 1px solid var(--border); }
+    .tab {
+      padding: 11px 20px; font-size: 13px; font-weight: 500; color: var(--text-muted);
+      cursor: pointer; border-bottom: 2px solid transparent; margin-bottom: -1px;
+      transition: all var(--transition); display: flex; align-items: center; gap: 6px;
     }
-    
-    .fade-in {
-      animation: fadeIn 0.3s ease-out;
+    .tab:hover { color: var(--text); }
+    .tab.active { color: var(--primary); border-bottom-color: var(--primary); }
+    .tab-panel { display: none; padding-top: 20px; }
+    .tab-panel.active { display: block; }
+
+    /* 24H TABLE */
+    .hour-table-wrap { border: 1px solid var(--border); border-radius: var(--radius-sm); overflow: hidden; }
+    .hour-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+    .hour-table thead tr { background: var(--bg-subtle); border-bottom: 1px solid var(--border); }
+    .hour-table th {
+      padding: 9px 12px; text-align: left;
+      font-size: 11px; font-weight: 600; color: var(--text-muted);
+      text-transform: uppercase; letter-spacing: 0.4px; white-space: nowrap;
     }
-    
-    @keyframes fadeIn {
-      from { opacity: 0; }
-      to { opacity: 1; }
+    .hour-table td { padding: 7px 12px; border-bottom: 1px solid var(--border); vertical-align: middle; }
+    .hour-table tbody tr:last-child td { border-bottom: none; }
+    .hour-table tbody tr:hover td { background: var(--bg-subtle); }
+    .mono { font-family: var(--font-mono); font-size: 12px; }
+    .dot { width: 7px; height: 7px; border-radius: 50%; display: inline-block; }
+    .dot-empty { background: var(--border); }
+    .dot-data { background: var(--success); }
+
+    /* COLLAPSIBLE */
+    .collapse-btn {
+      display: flex; align-items: center; justify-content: space-between; width: 100%;
+      padding: 11px 14px; background: var(--bg-subtle); border: 1px solid var(--border);
+      border-radius: var(--radius-xs); cursor: pointer; font-size: 13px; font-weight: 500;
+      color: var(--text); transition: background var(--transition); font-family: var(--font);
     }
-    
-    .collapsible-header {
-      cursor: pointer;
-      user-select: none;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      padding: 16px;
-      background: var(--light);
-      border-radius: 8px;
-      margin-bottom: 8px;
-      transition: var(--transition);
+    .collapse-btn:hover { background: var(--border); }
+    .chevron { transition: transform 0.2s ease; color: var(--text-muted); }
+    .chevron.open { transform: rotate(180deg); }
+    .collapse-body { max-height: 0; overflow: hidden; transition: max-height 0.3s ease; }
+    .collapse-body.open { max-height: 3000px; }
+    .collapse-inner { padding: 12px 0 0; }
+
+    /* CODE BLOCK */
+    .code-block { background: #0f172a; border-radius: var(--radius-xs); overflow: hidden; }
+    [data-theme="dark"] .code-block { background: #020617; border: 1px solid var(--border); }
+    .code-toolbar {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 7px 12px; background: #1e293b; border-bottom: 1px solid #334155;
     }
-    
-    .collapsible-header:hover {
-      background: var(--border);
+    [data-theme="dark"] .code-toolbar { background: #0f172a; }
+    .code-lang { font-size: 11px; color: #64748b; font-family: var(--font-mono); }
+    .code-block pre {
+      margin: 0; padding: 14px 16px; font-family: var(--font-mono); font-size: 12px;
+      line-height: 1.6; color: #e2e8f0; overflow-x: auto;
+      max-height: 380px; overflow-y: auto; white-space: pre-wrap; word-break: break-all;
     }
-    
-    .collapsible-content {
-      max-height: 0;
-      overflow: hidden;
-      transition: max-height 0.3s ease;
+
+    /* API RESULT */
+    .api-result { border-radius: var(--radius-sm); overflow: hidden; border: 1px solid var(--border); margin-top: 16px; }
+    .api-result-header { display: flex; align-items: center; gap: 10px; padding: 13px 16px; font-weight: 500; font-size: 14px; }
+    .api-result.success .api-result-header { background: var(--success-bg); color: var(--success); border-bottom: 1px solid var(--success-border); }
+    .api-result.error .api-result-header { background: var(--danger-bg); color: var(--danger); border-bottom: 1px solid var(--danger-border); }
+    .api-result.idle .api-result-header { background: var(--bg-subtle); color: var(--text-muted); }
+
+    /* DRAWER */
+    .backdrop {
+      position: fixed; inset: 0; background: rgba(0,0,0,0.4); z-index: 200;
+      opacity: 0; pointer-events: none; transition: opacity 0.2s ease;
     }
-    
-    .collapsible-content.open {
-      max-height: 2000px;
+    .backdrop.open { opacity: 1; pointer-events: all; }
+    .drawer {
+      position: fixed; top: 0; right: 0; bottom: 0; width: 460px; max-width: 100vw;
+      background: var(--card); box-shadow: var(--shadow-lg); z-index: 201;
+      transform: translateX(100%); transition: transform 0.25s cubic-bezier(0.4,0,0.2,1);
+      display: flex; flex-direction: column;
     }
-    
-    .chevron {
-      transition: transform 0.3s ease;
-    }
-    
-    .chevron.open {
-      transform: rotate(180deg);
-    }
-    
-    .tooltip {
-      position: relative;
-      cursor: help;
-    }
-    
-    .tooltip::after {
-      content: attr(data-tooltip);
-      position: absolute;
-      bottom: 100%;
-      left: 50%;
-      transform: translateX(-50%);
-      background: var(--dark);
-      color: white;
-      padding: 6px 8px;
-      border-radius: 4px;
-      font-size: 12px;
-      white-space: nowrap;
-      opacity: 0;
-      pointer-events: none;
-      transition: opacity 0.3s;
-      z-index: 1000;
-    }
-    
-    .tooltip:hover::after {
-      opacity: 1;
-    }
-    
-    .stats-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-      gap: 16px;
-      margin: 20px 0;
-    }
-    
-    .stat-card {
-      background: var(--card);
-      padding: 20px;
-      border-radius: 8px;
-      border: 1px solid var(--border);
-      text-align: center;
-      transition: var(--transition);
-    }
-    
-    .stat-card:hover {
-      transform: translateY(-2px);
-      box-shadow: var(--shadow);
-    }
-    
-    .stat-value {
-      font-size: 2rem;
-      font-weight: 700;
-      color: var(--primary);
-      display: block;
-    }
-    
-    .stat-label {
-      font-size: 12px;
-      color: var(--text-muted);
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
-      margin-top: 4px;
-    }
-    
+    .drawer.open { transform: translateX(0); }
+    .drawer-header { padding: 18px 24px; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; }
+    .drawer-title { font-size: 15px; font-weight: 600; }
+    .drawer-body { flex: 1; overflow-y: auto; padding: 24px; }
+    .drawer-footer { padding: 14px 24px; border-top: 1px solid var(--border); display: flex; gap: 8px; justify-content: flex-end; }
+
+    /* TOAST */
+    .toast-container { position: fixed; top: 72px; right: 20px; z-index: 500; display: flex; flex-direction: column; gap: 8px; max-width: 360px; }
     .toast {
-      position: fixed;
-      top: 20px;
-      right: 20px;
-      background: var(--card);
-      border: 1px solid var(--border);
-      border-radius: 8px;
-      padding: 16px 20px;
-      box-shadow: var(--shadow-hover);
-      z-index: 1000;
-      max-width: 400px;
-      transform: translateX(100%);
-      transition: transform 0.3s ease;
+      display: flex; align-items: flex-start; gap: 10px; padding: 13px 15px;
+      background: var(--card); border: 1px solid var(--border);
+      border-radius: var(--radius-sm); box-shadow: var(--shadow-md);
+      animation: slideIn 0.2s ease; font-size: 13px;
     }
-    
-    .toast.show {
-      transform: translateX(0);
+    .toast.success { border-left: 3px solid var(--success); }
+    .toast.error { border-left: 3px solid var(--danger); }
+    .toast.warning { border-left: 3px solid var(--warning); }
+    .toast.info { border-left: 3px solid var(--primary); }
+    .toast-msg { flex: 1; color: var(--text); line-height: 1.4; }
+    .toast-close { background: none; border: none; cursor: pointer; color: var(--text-muted); padding: 0; font-size: 14px; line-height: 1; flex-shrink: 0; }
+    @keyframes slideIn { from { transform: translateX(16px); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+
+    /* SPINNER */
+    .spinner {
+      display: inline-block; width: 13px; height: 13px;
+      border: 2px solid rgba(255,255,255,0.35); border-top-color: currentColor;
+      border-radius: 50%; animation: spin 0.7s linear infinite;
     }
-    
-    .toast.success {
-      border-left: 4px solid var(--success);
-      background: rgba(39, 174, 96, 0.05);
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .progress-bar { height: 3px; background: var(--border); border-radius: 2px; overflow: hidden; margin-top: 8px; }
+    .progress-fill { height: 100%; background: var(--primary); width: 0; transition: width 2s ease; }
+
+    /* DIVIDER */
+    .divider { height: 1px; background: var(--border); margin: 20px 0; }
+    .divider-or {
+      display: flex; align-items: center; gap: 10px; margin: 16px 0;
     }
-    
-    .toast.error {
-      border-left: 4px solid var(--danger);
-      background: rgba(231, 76, 60, 0.05);
-    }
-    
-    .toast.warning {
-      border-left: 4px solid var(--warning);
-      background: rgba(243, 156, 18, 0.05);
-    }
-    
-    .toast.info {
-      border-left: 4px solid var(--info);
-      background: rgba(23, 162, 184, 0.05);
+    .divider-or::before, .divider-or::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+    .divider-or span { font-size: 12px; color: var(--text-muted); white-space: nowrap; }
+
+    /* UTIL */
+    .mt-2 { margin-top: 8px; }
+    .mt-3 { margin-top: 12px; }
+    .mt-4 { margin-top: 16px; }
+    .mb-3 { margin-bottom: 12px; }
+    .mb-4 { margin-bottom: 16px; }
+    .flex { display: flex; }
+    .items-center { align-items: center; }
+    .justify-between { justify-content: space-between; }
+    .gap-2 { gap: 8px; }
+    .text-sm { font-size: 13px; }
+    .text-xs { font-size: 12px; }
+    .text-muted { color: var(--text-muted); }
+    .font-600 { font-weight: 600; }
+    .hidden { display: none !important; }
+
+    @media (max-width: 768px) {
+      .container { padding: 16px; }
+      .form-grid, .form-grid-3 { grid-template-columns: 1fr; }
+      .steps { flex-wrap: wrap; gap: 12px; }
+      .step-connector { display: none; }
+      .drawer { width: 100%; }
+      .hour-table th:nth-child(4), .hour-table td:nth-child(4) { display: none; }
     }
   </style>
 </head>
 <body>
-  <div class="header">
-    <div class="header-content">
-      <h1>🚀 API POS SalesHourly v2.5 Testing Dashboard</h1>
-      <button class="theme-toggle" onclick="toggleTheme()">
-        <span id="themeIcon">🌙</span>
-        <span id="themeText">Dark Mode</span>
-      </button>
+
+<header class="header">
+  <div class="header-inner">
+    <div class="logo">
+      <div class="logo-icon">
+        <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+          <rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/>
+        </svg>
+      </div>
+      <div>
+        <div class="logo-title">POS SalesHourly</div>
+        <div class="logo-sub">Bảng điều khiển API v2.5</div>
+      </div>
+    </div>
+    <button class="btn btn-ghost btn-sm" onclick="toggleTheme()">
+      <svg id="themeIcon" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+        <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
+      </svg>
+      <span id="themeLabel">Tối</span>
+    </button>
+  </div>
+</header>
+
+<div class="toast-container" id="toastContainer"></div>
+
+<!-- DRAWER BACKDROP -->
+<div class="backdrop" id="backdrop" onclick="closeDrawer()"></div>
+
+<!-- DRAWER: Thêm/Sửa dữ liệu giờ -->
+<div class="drawer" id="entryDrawer">
+  <div class="drawer-header">
+    <span class="drawer-title" id="drawerTitle">Thêm dữ liệu giờ</span>
+    <button class="btn btn-ghost btn-icon" onclick="closeDrawer()">
+      <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+        <path d="M18 6 6 18M6 6l12 12"/>
+      </svg>
+    </button>
+  </div>
+  <div class="drawer-body">
+    <div class="field mb-4">
+      <label>Giờ (00–23) <span class="required">*</span></label>
+      <select id="entryHour"></select>
+    </div>
+    <div class="form-grid mb-4">
+      <div class="field">
+        <label>Số phiếu</label>
+        <input type="number" id="entryReceiptCount" value="0" min="0">
+      </div>
+      <div class="field">
+        <label>GTO gộp (Trước chiết khấu)</label>
+        <input type="number" id="entryGTO" value="0" step="0.01" min="0" oninput="calcDrawerVAT()">
+      </div>
+      <div class="field">
+        <label>Chiết khấu</label>
+        <input type="number" id="entryDiscount" value="0" step="0.01" min="0" oninput="calcDrawerVAT()">
+      </div>
+      <div class="field">
+        <label>VAT (tự tính)</label>
+        <input type="text" id="entryVAT" readonly style="background:var(--bg-subtle);color:var(--text-muted);">
+      </div>
+      <div class="field">
+        <label>Tiền mặt</label>
+        <input type="number" id="entryCash" value="0" step="0.01" min="0">
+      </div>
+      <div class="field">
+        <label>ATM</label>
+        <input type="number" id="entryATM" value="0" step="0.01" min="0">
+      </div>
+      <div class="field">
+        <label>Visa</label>
+        <input type="number" id="entryVisa" value="0" step="0.01" min="0">
+      </div>
+      <div class="field">
+        <label>Others Amount</label>
+        <input type="number" id="entryOthers" value="0" step="0.01" min="0">
+      </div>
+    </div>
+  </div>
+  <div class="drawer-footer">
+    <button class="btn btn-secondary" onclick="closeDrawer()">Hủy</button>
+    <button class="btn btn-primary" onclick="saveEntryFromDrawer()">
+      <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+        <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/>
+        <polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/>
+      </svg>
+      Lưu dữ liệu
+    </button>
+  </div>
+</div>
+
+<div class="container">
+
+  <!-- STEPS -->
+  <div class="steps">
+    <div class="step active" id="s1">
+      <div class="step-num" id="sn1">1</div>
+      <div>
+        <div class="step-label">Xác thực Token</div>
+        <div class="step-desc">OAuth2 access token</div>
+      </div>
+    </div>
+    <div class="step-connector"></div>
+    <div class="step" id="s2">
+      <div class="step-num" id="sn2">2</div>
+      <div>
+        <div class="step-label">Cấu hình báo cáo</div>
+        <div class="step-desc">Thông số mặc định</div>
+      </div>
+    </div>
+    <div class="step-connector"></div>
+    <div class="step" id="s3">
+      <div class="step-num" id="sn3">3</div>
+      <div>
+        <div class="step-label">Nhập liệu & Gửi</div>
+        <div class="step-desc">Upload Excel hoặc nhập tay</div>
+      </div>
     </div>
   </div>
 
-  <div class="container">
-    <!-- Toast Notification -->
-    <div id="toast" class="toast" style="display: none;"></div>
-
-    <div class="card slide-in">
-      <h2 data-icon="🔐">OAuth2 Token Authentication</h2>
-      <div class="grid-2">
-        <div class="form-group">
-          <label for="username">Tên người dùng <span class="required">*</span></label>
-          <input type="text" id="username" value="postestuservn" required>
-        </div>
-        <div class="form-group">
-          <label for="password">Mật khẩu <span class="required">*</span></label>
-          <input type="password" id="password" value="@APITest1234" required>
-        </div>
+  <!-- BƯỚC 1: TOKEN -->
+  <div class="section">
+    <div class="section-header">
+      <div class="section-title">
+        <div class="section-badge">1</div>
+        <span class="section-name">Xác thực OAuth2 Token</span>
       </div>
-      
-      <div class="btn-group">
-        <button id="btnToken" class="btn btn-primary">
-          <span class="loading" id="tokenLoading" style="display: none;"></span>
-          🔑 Lấy Token
-        </button>
-      </div>
-      
-      <div class="form-group">
-        <label for="token">Token truy cập</label>
-        <input type="text" id="token" readonly placeholder="Token sẽ xuất hiện tại đây">
-        <div class="progress-bar" id="tokenProgress" style="display: none;">
-          <div class="progress-fill"></div>
-        </div>
-      </div>
-      
-      <div class="collapsible-header" onclick="toggleCollapsible('tokenResponse')">
-        <span>🔍 Phản hồi thô / Lỗi</span>
-        <span class="chevron" id="tokenResponseChevron">▼</span>
-      </div>
-      <div class="collapsible-content" id="tokenResponseContent">
-        <pre id="tokenResponse">
-          <button class="copy-btn" onclick="copyToClipboard('tokenResponse')">📋 Copy</button>
-        </pre>
+      <div class="token-status" id="tokenStatusBadge">
+        <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+          <circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>
+        </svg>
+        Chưa có token
       </div>
     </div>
-
-    <div class="card slide-in">
-      <h2 data-icon="⚙️">Cấu hình thông tin mặc định</h2>
-      <div class="info-box warning">
-        <h3>💡 Payment Methods Logic</h3>
-        <p><strong>Payment Methods:</strong> Nhập số tiền thực tế cho từng phương thức thanh toán. 
-        Nếu tất cả = 0, toàn bộ doanh thu sau chiết khấu sẽ được gán vào Cash. 
-        Tổng các payment methods không được vượt quá (GTO - Discount). GST rate cố định 7%.</p>
+    <div class="section-body">
+      <div class="form-grid">
+        <div class="field">
+          <label for="username">Tên đăng nhập <span class="required">*</span></label>
+          <input type="text" id="username" value="postestuservn" autocomplete="off">
+        </div>
+        <div class="field">
+          <label for="password">Mật khẩu <span class="required">*</span></label>
+          <input type="password" id="password" value="@APITest1234">
+        </div>
       </div>
-      <div class="grid-2">
-        <div>
-          <div class="form-group">
-            <label for="machineId">Machine ID <span class="required">*</span></label>
-            <input type="text" id="machineId" value="50100904" required class="tooltip" data-tooltip="Unique identifier for POS machine">
+      <div class="mt-4">
+        <button class="btn btn-primary" id="btnToken" onclick="getToken()">
+          <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path d="M21 2l-2 2m-7.61 7.61a5.5 5.5 0 1 1-7.778 7.778 5.5 5.5 0 0 1 7.777-7.777zm0 0L15.5 7.5m0 0l3 3L22 7l-3-3m-3.5 3.5L19 4"/>
+          </svg>
+          <span id="btnTokenText">Lấy Token</span>
+          <span class="spinner hidden" id="tokenSpinner"></span>
+        </button>
+      </div>
+      <div id="tokenProgressWrap" class="progress-bar hidden mt-2"><div class="progress-fill" id="tokenProgressFill"></div></div>
+      <div class="token-row">
+        <input type="text" id="token" readonly placeholder="Token sẽ xuất hiện tại đây sau khi xác thực…">
+        <button class="token-copy" onclick="copyText('token')">
+          <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>
+          </svg>
+          Sao chép
+        </button>
+      </div>
+      <div class="mt-3">
+        <button class="collapse-btn" onclick="toggleCollapse('tokenRaw')">
+          <span class="flex items-center gap-2">
+            <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
+            </svg>
+            Phản hồi thô từ server
+          </span>
+          <svg class="chevron" id="chevron-tokenRaw" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <polyline points="6 9 12 15 18 9"/>
+          </svg>
+        </button>
+        <div class="collapse-body" id="tokenRaw">
+          <div class="collapse-inner">
+            <div class="code-block">
+              <div class="code-toolbar">
+                <span class="code-lang">JSON</span>
+                <button class="btn btn-ghost btn-sm" onclick="copyPreText('tokenRawPre')">Sao chép</button>
+              </div>
+              <pre id="tokenRawPre">— chưa có phản hồi —</pre>
+            </div>
           </div>
-          
-          <div class="form-group">
-            <label for="batchId">Batch ID (ZReport closing number) <span class="required">*</span></label>
-            <input type="text" id="batchId" value="1" required class="tooltip" data-tooltip="ZReport closing sequence number">
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- BƯỚC 2: CẤU HÌNH -->
+  <div class="section">
+    <div class="section-header">
+      <div class="section-title">
+        <div class="section-badge">2</div>
+        <span class="section-name">Cấu hình báo cáo</span>
+      </div>
+    </div>
+    <div class="section-body">
+      <div class="infobox warning mb-4">
+        <div class="infobox-title">Lưu ý — Phương thức thanh toán</div>
+        <p>Nếu tất cả phương thức = 0, toàn bộ doanh thu sau chiết khấu tự động phân bổ vào <strong>Tiền mặt</strong>. Tổng các phương thức = GTO (nett sau chiết khấu, trước VAT). Thuế <strong>VAT</strong> tự tính theo tỷ lệ đã cấu hình.</p>
+      </div>
+      <div class="form-grid">
+        <!-- CỘT TRÁI -->
+        <div style="display:flex;flex-direction:column;gap:14px;">
+          <div class="field">
+            <label for="machineId">Mã máy POS <span class="required">*</span></label>
+            <input type="text" id="machineId" value="50100904" required>
+            <span class="field-hint">Mã định danh duy nhất của máy POS</span>
           </div>
-          
-          <div class="form-group">
+          <div class="field">
+            <label for="batchId">Số lô (Mã đóng ZReport) <span class="required">*</span></label>
+            <input type="text" id="batchId" value="1" required>
+          </div>
+          <div class="field">
             <label for="reportDate">Ngày báo cáo <span class="required">*</span></label>
             <input type="date" id="reportDate" required>
           </div>
-          
-          <div class="form-group">
-            <label for="receiptCount">Receipt Count (mặc định)</label>
-            <input type="number" id="receiptCount" value="10" min="0" class="tooltip" data-tooltip="Default number of receipts per hour">
+          <div class="field">
+            <label for="vatPercent">Thuế VAT (%) <span class="required">*</span></label>
+            <input type="number" id="vatPercent" value="7" step="0.1" min="0" max="100" required>
+            <span class="field-hint">Nhập tỷ lệ VAT áp dụng (ví dụ: 7, 8, 10)</span>
           </div>
-          
-          <div class="form-group">
-            <label for="vatPercent">GST % (mặc định) <span class="required">*</span></label>
-            <input type="number" id="vatPercent" value="7" step="0.1" min="0" max="100" required class="tooltip" data-tooltip="Fixed GST rate at 7%">
+          <div class="field">
+            <label for="receiptCount">Số phiếu mặc định mỗi giờ</label>
+            <input type="number" id="receiptCount" value="10" min="0">
           </div>
-          
-          <div class="form-group">
-            <label for="serviceCharge">Service Charge (F&B only)</label>
-            <input type="number" id="serviceCharge" value="0" step="0.01" min="0">
-          </div>
-          
-          <div class="form-group">
-            <label for="noofpax">Number of Pax (F&B only)</label>
-            <input type="number" id="noofpax" value="0" min="0">
+          <div class="field">
+            <label for="vatRegistered">Đã đăng ký VAT <span class="required">*</span></label>
+            <select id="vatRegistered" required>
+              <option value="Y">Có (Y)</option>
+              <option value="N" selected>Không (N)</option>
+            </select>
           </div>
         </div>
-        
-        <div>
-          <label for="cash">Cash (after discount, before GST)</label>
-          <input type="number" id="cash" value="0" step="0.01" min="0" placeholder="0 = auto assign all">
-          
-          <label for="atm">ATM (after discount, before GST)</label>
-          <input type="number" id="atm" value="0" step="0.01" min="0">
-          
-          <label for="visa">Visa (after discount, before GST)</label>
-          <input type="number" id="visa" value="0" step="0.01" min="0">
-          
-          <label for="mastercard">Mastercard (after discount, before GST)</label>
-          <input type="number" id="mastercard" value="0" step="0.01" min="0">
-          
-          <label for="amex">Amex (after discount, before GST)</label>
-          <input type="number" id="amex" value="0" step="0.01" min="0">
-          
-          <label for="voucher">Voucher (after discount, before GST)</label>
-          <input type="number" id="voucher" value="0" step="0.01" min="0">
-          
-          <label for="vatRegistered">VAT Registered <span style="color: red;">*</span></label>
-          <select id="vatRegistered" required>
-            <option value="Y">Yes (Y)</option>
-            <option value="N" selected>No (N)</option>
-          </select>
+        <!-- CỘT PHẢI -->
+        <div style="display:flex;flex-direction:column;gap:12px;">
+          <div style="font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:0.5px;color:var(--text-muted);">
+            Phương thức thanh toán <span class="text-xs" style="text-transform:none;font-weight:400;">(sau CK, trước VAT)</span>
+          </div>
+          <div class="form-grid-3">
+            <div class="field">
+              <label>Tiền mặt</label>
+              <input type="number" id="cash" value="0" step="0.01" min="0" placeholder="0 = tự động" oninput="updatePaymentTotal()">
+            </div>
+            <div class="field">
+              <label>ATM</label>
+              <input type="number" id="atm" value="0" step="0.01" min="0" oninput="updatePaymentTotal()">
+            </div>
+            <div class="field">
+              <label>Visa</label>
+              <input type="number" id="visa" value="0" step="0.01" min="0" oninput="updatePaymentTotal()">
+            </div>
+            <div class="field">
+              <label>Mastercard</label>
+              <input type="number" id="mastercard" value="0" step="0.01" min="0" oninput="updatePaymentTotal()">
+            </div>
+            <div class="field">
+              <label>Amex</label>
+              <input type="number" id="amex" value="0" step="0.01" min="0" oninput="updatePaymentTotal()">
+            </div>
+            <div class="field">
+              <label>Voucher</label>
+              <input type="number" id="voucher" value="0" step="0.01" min="0" oninput="updatePaymentTotal()">
+            </div>
+          </div>
+          <div class="payment-total">
+            <span class="payment-total-label">Tổng thanh toán đã cấu hình</span>
+            <span class="payment-total-value" id="paymentTotalDisplay">0.00</span>
+          </div>
+          <div style="font-size:12px;color:var(--text-subtle);">Nếu tất cả = 0 → tự động phân bổ toàn bộ vào Tiền mặt</div>
+
+          <div class="divider-or"><span>Thông tin bổ sung (chỉ F&amp;B)</span></div>
+          <div class="form-grid">
+            <div class="field">
+              <label>Phụ thu dịch vụ (F&amp;B)</label>
+              <input type="number" id="serviceCharge" value="0" step="0.01" min="0">
+            </div>
+            <div class="field">
+              <label>Số khách (F&amp;B)</label>
+              <input type="number" id="noofpax" value="0" min="0">
+            </div>
+          </div>
         </div>
       </div>
-      
-      <div class="btn-group">
-        <button type="button" onclick="resetForm()" class="btn btn-secondary">🔄 Reset Form</button>
-        <button type="button" onclick="validateAndShowPreview()" class="btn btn-success">✓ Validate Form</button>
-        <button type="button" onclick="generateEmpty24Hours()" class="btn btn-warning">⏰ Generate 24 Hours (Empty)</button>
-      </div>
-      
-      <div style="margin-top: 12px; padding: 10px; background: #e8f5e8; border-radius: 4px; font-size: 13px;">
-        <strong>📋 Logic tính toán:</strong><br>
-        • <strong>GTO:</strong> Tổng doanh thu từ file Excel<br>
-        • <strong>GST:</strong> (GTO - Discount) × 7% (fixed rate)<br>
-        • <strong>Payment Methods:</strong> Nếu tất cả = 0, toàn bộ net amount sẽ vào Cash. Nếu có giá trị, sử dụng số tiền đã cấu hình<br>
-        • <strong>Others Amount:</strong> Phần còn lại = (GTO - Discount) - tổng payment methods<br>
-        • <strong>⚠️ API yêu cầu đủ 24 records (hour 00-23) cho mỗi ngày!</strong>
-      </div>
-      
-      <!-- Thêm example payload -->
-      <details style="margin-top: 12px;">
-        <summary style="cursor: pointer; font-weight: 500; color: var(--secondary);">📖 Xem example payload đúng format (theo API response)</summary>
-        <pre style="margin-top: 8px; font-size: 11px; background: #f8f9fa; border: 1px solid #e9ecef;">
+
+      <!-- Ví dụ payload -->
+      <div class="mt-4">
+        <button class="collapse-btn" onclick="toggleCollapse('examplePayload')">
+          <span class="flex items-center gap-2">
+            <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/>
+            </svg>
+            Xem ví dụ payload đúng định dạng
+          </span>
+          <svg class="chevron" id="chevron-examplePayload" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <polyline points="6 9 12 15 18 9"/>
+          </svg>
+        </button>
+        <div class="collapse-body" id="examplePayload">
+          <div class="collapse-inner">
+            <div class="code-block">
+              <div class="code-toolbar"><span class="code-lang">JSON — Ví dụ 1 bản ghi</span></div>
+              <pre>// API yêu cầu đủ 24 records (giờ 00-23) cho mỗi ngày!
 {
   "sales": [
     {
       "sale": {
-        "machineid": "50100904",
-        "batchid": "1",
-        "date": "20220125",              // yyyyMMdd format
-        "hour": "01",                   // HH format (24 hour)
-        "receiptcount": "5",            // Số giao dịch trong giờ
-        "gto": "191.54",               // Tổng doanh thu từ Excel
-        "gst": "13.41",                // (gto - discount) × 7%
-        "discount": "0.00",            // Chiết khấu từ Excel
-        "servicecharge": "5.00",       // F&B only
-        "noofpax": "0",               // F&B only
-        "cash": "172.39",             // After discount, before GST
-        "atm": "0.00",                // After discount, before GST
-        "visa": "0.00",               // After discount, before GST
-        "mastercard": "0.00",         // After discount, before GST
-        "amex": "0.00",               // After discount, before GST
-        "voucher": "0.00",            // After discount, before GST
-        "othersamount": "0.00",       // Phần còn lại
-        "vatregistered": "N"          // lowercase
+        "machineid":    "50100904",
+        "batchid":      "1",
+        "date":         "20220125",   // yyyyMMdd
+        "hour":         "01",         // HH (24 giờ)
+        "receiptcount": "5",
+        "gto":          "191.54",     // GTO nett (sau chiết khấu, trước VAT)
+        "VAT":          "13.41",      // (gto - discount) x VAT%
+        "discount":     "0.00",
+        "servicecharge":"0.00",       // Chỉ F&B
+        "noofpax":      "0",          // Chỉ F&B
+        "cash":         "191.54",     // Sau CK, trước VAT
+        "atm":          "0.00",
+        "visa":         "0.00",
+        "mastercard":   "0.00",
+        "amex":         "0.00",
+        "voucher":      "0.00",
+        "othersamount": "0.00",
+        "vatregistered":"N"
       }
     }
   ]
-}
-
-⚠️ Lỗi thường gặp:
-{
-  "status": "error",
-  "errors": [
-    {
-      "status_code": "Daily records",
-      "message": "ERROR: Every day should have 24 Records. Hour 00 to 23. Date :20220125"
-    }
-  ]
-}
-
-Giải thích tính toán:
-• gto: 191.54 (từ Excel)
-• discount: 0.00 (từ Excel)  
-• Net amount: 191.54 - 0.00 = 191.54
-• gst: 191.54 × 7% = 13.41 (fixed 7%)
-• cash: 191.54 (vì tất cả payment = 0)
-• othersamount: 191.54 - 191.54 = 0.00
-        </pre>
-      </details>
-    </div>
-
-    <div class="card slide-in">
-      <h2 data-icon="✏️">Manual Entry Management</h2>
-      <div class="info-box danger">
-        <h3>⚠️ 24 Hours Requirement</h3>
-        <p>Thêm/sửa entries thủ công để đảm bảo có đủ 24 records (hour 00-23). API yêu cầu strict 24 hours data.</p>
-      </div>
-      
-      <div class="btn-group">
-        <button type="button" onclick="addManualEntry()" class="btn btn-info">➕ Add Manual Entry</button>
-        <button type="button" onclick="validatePayload()" class="btn btn-danger">🔍 Validate Payload (Check 24 Hours)</button>
-        <button type="button" onclick="fillMissingHours()" class="btn btn-warning">⚡ Auto Fill Missing Hours</button>
-        <button type="button" onclick="sortPayloadByHour()" class="btn btn-secondary">🔢 Sort by Hour</button>
-      </div>
-      
-      <div id="manualEntryForm" style="display:none; background: #f8f9fa; padding: 16px; border-radius: 4px; margin-bottom: 16px;">
-        <h3 style="margin-top: 0;">Add/Edit Entry</h3>
-        <div class="grid-2">
-          <div>
-            <label for="entryHour">Hour (00-23) <span style="color: red;">*</span></label>
-            <select id="entryHour">
-              <option value="">Select Hour</option>
-            </select>
-            
-            <label for="entryReceiptCount">Receipt Count</label>
-            <input type="number" id="entryReceiptCount" value="0" min="0">
-            
-            <label for="entryGTO">GTO</label>
-            <input type="number" id="entryGTO" value="0" step="0.01" min="0">
-            
-            <label for="entryDiscount">Discount</label>
-            <input type="number" id="entryDiscount" value="0" step="0.01" min="0">
-          </div>
-          <div>
-            <label for="entryCash">Cash</label>
-            <input type="number" id="entryCash" value="0" step="0.01" min="0">
-            
-            <label for="entryATM">ATM</label>
-            <input type="number" id="entryATM" value="0" step="0.01" min="0">
-            
-            <label for="entryVisa">Visa</label>
-            <input type="number" id="entryVisa" value="0" step="0.01" min="0">
-            
-            <label for="entryOthers">Others Amount</label>
-            <input type="number" id="entryOthers" value="0" step="0.01" min="0">
+}</pre>
+            </div>
           </div>
         </div>
-        
-        <div style="margin-top: 12px;">
-          <button type="button" onclick="saveManualEntry()" style="background: #27ae60;">💾 Save Entry</button>
-          <button type="button" onclick="cancelManualEntry()" style="background: #95a5a6;">❌ Cancel</button>
-        </div>
       </div>
-      
-      <div id="validationResult" style="display:none; padding: 12px; border-radius: 4px; margin-bottom: 16px;">
-      </div>
-    </div>
 
-    <div class="card slide-in">
-      <h2 data-icon="📁">Upload và xử lý file</h2>
-      
-      <div class="file-drop-zone" id="fileDropZone" onclick="document.getElementById('fileInput').click()">
-        <div class="file-icon">📄</div>
-        <p><strong>Kéo thả file vào đây hoặc click để chọn</strong></p>
-        <p style="color: var(--text-muted); font-size: 12px;">Hỗ trợ: .csv, .xls, .xlsx (Max: 10MB)</p>
-        <input type="file" id="fileInput" accept=".csv, .xls, .xlsx" style="display: none;">
-      </div>
-      
-      <!-- Thêm khu vực hiển thị thông tin file -->
-      <div id="fileInfo" class="info-box" style="display:none;">
-        <h3>Thông tin file:</h3>
-        <p id="fileName"></p>
-        <p id="fileSize"></p>
-        <p id="recordCount"></p>
-      </div>
-      
-      <!-- Thêm khu vực preview dữ liệu -->
-      <div id="dataPreview" class="preview-section" style="display:none;">
-        <h3>Preview dữ liệu gốc (5 dòng đầu):</h3>
-        <pre id="rawDataPreview" style="max-height: 150px; overflow-y: auto;"></pre>
-        
-        <h3>Preview dữ liệu đã xử lý (5 giờ đầu):</h3>
-        <pre id="processedDataPreview" style="max-height: 150px; overflow-y: auto;"></pre>
-      </div>
-      
-      <div class="form-group">
-        <label for="salesData">Dữ liệu SalesHourly (JSON Payload)</label>
-        <textarea id="salesData">{"sales":[]}</textarea>
-        <div class="btn-group">
-          <button id="btnSales" class="btn btn-primary">
-            <span class="loading" id="salesLoading" style="display: none;"></span>
-            🚀 Gửi SalesHourly
-          </button>
-          <button onclick="copyToClipboard('salesData')" class="btn btn-secondary">📋 Copy Payload</button>
-          <button onclick="validateJSON()" class="btn btn-info">✓ Validate JSON</button>
-        </div>
-      </div>
-      
-      <div class="collapsible-header" onclick="toggleCollapsible('salesResponse')">
-        <span>🔍 Phản hồi API / Lỗi</span>
-        <span class="chevron" id="salesResponseChevron">▼</span>
-      </div>
-      <div class="collapsible-content" id="salesResponseContent">
-        <pre id="salesResponse">
-          <button class="copy-btn" onclick="copyToClipboard('salesResponse')">📋 Copy</button>
-        </pre>
+      <div class="mt-4 btn-group">
+        <button class="btn btn-secondary" onclick="resetForm()">
+          <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 .49-3.5"/>
+          </svg>
+          Đặt lại form
+        </button>
+        <button class="btn btn-outline" onclick="validateConfig()">
+          <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <polyline points="20 6 9 17 4 12"/>
+          </svg>
+          Kiểm tra cấu hình
+        </button>
+        <button class="btn btn-success" onclick="generateEmpty24Hours()">
+          <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>
+          </svg>
+          Tạo 24 giờ trống
+        </button>
       </div>
     </div>
   </div>
 
-  <script>
-    const baseUrl = 'https://staging.synthesis.bz/posvn/v1/api';
-
-    document.getElementById('btnToken').addEventListener('click', async () => {
-      const user = document.getElementById('username').value.trim();
-      const pass = document.getElementById('password').value.trim();
-      
-      if (!user || !pass) {
-        showToast('Vui lòng nhập đầy đủ username và password!', 'warning');
-        return;
-      }
-      
-      setButtonLoading('btnToken', true);
-      animateProgressBar('tokenProgress', 100, 2000);
-      
-      try {
-        const res = await fetch(`${baseUrl}/token`, {
-          method: 'POST', 
-          headers: {'Content-Type':'application/x-www-form-urlencoded'},
-          body: `grant_type=password&username=${encodeURIComponent(user)}&password=${encodeURIComponent(pass)}`, 
-          mode: 'cors'
-        }); 
-        
-        if(!res.ok) throw new Error(`${res.status} ${res.statusText}`);
-        
-        const data = await res.json();
-        document.getElementById('tokenResponse').textContent = JSON.stringify(data,null,2);
-        document.getElementById('token').value = data.access_token||'';
-        
-        if (data.access_token) {
-          showToast('Token lấy thành công! 🎉', 'success');
-        } else {
-          showToast('Không nhận được token từ API', 'warning');
-        }
-        
-      } catch(err) {
-        document.getElementById('tokenResponse').textContent = 'Lỗi: '+err.message;
-        showToast(`Lỗi khi lấy token: ${err.message}`, 'error');
-      } finally {
-        setButtonLoading('btnToken', false);
-      }
-    });
-
-    function parseCSV(text) {
-      const lines = text.trim().split(/\r?\n/);
-      const headers = lines.shift().split(/,|;|\t/).map(h=>h.trim());
-      return lines.map(line=>{
-        const cols = line.split(/,|;|\t/).map(c=>c.trim());
-        const obj = {}; headers.forEach((h,i)=>obj[h]=isNaN(cols[i])?cols[i]:Number(cols[i])); return obj;
-      });
-    }
-
-    function transformToHourly(raw) {
-      const date = document.getElementById('reportDate').value;
-      const machineid = document.getElementById('machineId').value.trim();
-      const batchid = document.getElementById('batchId').value.trim();
-      const receiptCountDefault = Number(document.getElementById('receiptCount').value);
-      const vatPercent = Number(document.getElementById('vatPercent').value);
-      const serviceChargeDefault = Number(document.getElementById('serviceCharge').value);
-      const noofpaxDefault = Number(document.getElementById('noofpax').value);
-      const cashDefault = Number(document.getElementById('cash').value);
-      const atmDefault = Number(document.getElementById('atm').value);
-      const visaDefault = Number(document.getElementById('visa').value);
-      const mastercardDefault = Number(document.getElementById('mastercard').value);
-      const amexDefault = Number(document.getElementById('amex').value);
-      const voucherDefault = Number(document.getElementById('voucher').value);
-      const vatRegistered = document.getElementById('vatRegistered').value;
-      
-      // Thử nhiều format date khác nhau
-      function formatDateForAPI(dateStr) {
-        if (!dateStr) return '';
-        
-        // Format theo document: yyyyMMdd (VD: "20220125")
-        const dateObj = new Date(dateStr);
-        if (isNaN(dateObj.getTime())) return dateStr;
-        
-        const year = dateObj.getFullYear();
-        const month = (dateObj.getMonth() + 1).toString().padStart(2, '0');
-        const day = dateObj.getDate().toString().padStart(2, '0');
-        
-        // Format yyyyMMdd theo document
-        const yyyymmdd = `${year}${month}${day}`;
-        console.log(`Date conversion: ${dateStr} -> ${yyyymmdd}`);
-        
-        return yyyymmdd;
-      }
-      
-      const formattedDate = formatDateForAPI(date);
-      
-      // Khởi tạo dữ liệu cho 24 giờ
-      const hourlyData = {};
-      for (let i = 0; i < 24; i++) {
-        hourlyData[i.toString().padStart(2, '0')] = {
-          receiptcount: 0,
-          gto: 0, // gross turnover (tổng doanh thu)
-          discount: 0,
-          sales: [], // lưu danh sách các sale để tính toán
-        };
-      }
-      
-      // Tìm cột thời gian với nhiều pattern khác nhau
-      const timeKey = Object.keys(raw[0]||{}).find(k => 
-        /thời\s*gian|time|ngày|date|datetime|timestamp|created|order_time/i.test(k)
-      );
-      
-      console.log('Raw data sample:', raw.slice(0, 3));
-      console.log('Time key found:', timeKey);
-      
-      raw.forEach((order, index) => {
-        // Xử lý nhiều cách tìm cột tổng tiền
-        const sale = Number(
-          order['Tổng tiền'] || 
-          order['Total'] || 
-          order['Amount'] || 
-          order['Subtotal'] || 
-          order['__EMPTY_8'] || 
-          order['Doanh thu'] ||
-          order['Revenue'] ||
-          0
-        );
-        
-        // Xử lý nhiều cách tìm cột chiết khấu
-        const discount = Number(
-          order['CK đơn hàng(VNĐ)'] || 
-          order['Discount'] || 
-          order['Chiết khấu'] || 
-          order['__EMPTY_9'] || 
-          order['Giảm giá'] ||
-          0
-        );
-        
-        // Xử lý thời gian thông minh hơn
-        let hour = '00';
-        if (timeKey && order[timeKey]) {
-          const timeStr = order[timeKey].toString();
-          
-          // Thử parse theo nhiều format khác nhau
-          let dateObj = null;
-          
-          // Format: DD/MM/YYYY HH:mm:ss
-          if (timeStr.match(/\d{1,2}\/\d{1,2}\/\d{4}\s+\d{1,2}:\d{2}/)) {
-            const parts = timeStr.split(' ');
-            const datePart = parts[0].split('/');
-            const timePart = parts[1] || '00:00';
-            dateObj = new Date(`${datePart[2]}-${datePart[1].padStart(2,'0')}-${datePart[0].padStart(2,'0')}T${timePart}`);
-          }
-          // Format: YYYY-MM-DD HH:mm:ss
-          else if (timeStr.match(/\d{4}-\d{1,2}-\d{1,2}/)) {
-            dateObj = new Date(timeStr);
-          }
-          // Format: chỉ có giờ HH:mm
-          else if (timeStr.match(/^\d{1,2}:\d{2}/)) {
-            const today = new Date();
-            dateObj = new Date(`${today.getFullYear()}-${(today.getMonth()+1).toString().padStart(2,'0')}-${today.getDate().toString().padStart(2,'0')}T${timeStr}`);
-          }
-          // Thử parse trực tiếp
-          else {
-            dateObj = new Date(timeStr);
-          }
-          
-          // Kiểm tra ngày hợp lệ
-          if (dateObj && !isNaN(dateObj.getTime())) {
-            const hourNum = dateObj.getHours();
-            if (hourNum >= 0 && hourNum <= 23) {
-              hour = hourNum.toString().padStart(2, '0');
-            }
-          } else {
-            console.warn(`Cannot parse time: ${timeStr} at row ${index + 1}`);
-          }
-        }
-        
-        // Cộng dồn dữ liệu vào giờ tương ứng
-        if (sale > 0 || discount > 0) {
-          hourlyData[hour].receiptcount += 1;
-          hourlyData[hour].gto += sale;
-          hourlyData[hour].discount += discount;
-          hourlyData[hour].sales.push({ sale, discount });
-        }
-        
-        if (index < 5) { // Log một vài dòng đầu để debug
-          console.log(`Row ${index + 1}: Time=${order[timeKey]}, Hour=${hour}, Sale=${sale}, Discount=${discount}`);
-        }
-      });
-      
-      // Tạo payload theo format API SalesHourly
-      const salesArray = [];
-      
-      // Đảm bảo tạo đủ 24 giờ (00-23) để tránh lỗi "Daily records"
-      for (let i = 0; i < 24; i++) {
-        const hour = i.toString().padStart(2, '0');
-        const data = hourlyData[hour];
-        
-        const netSale = data.gto - data.discount; // after discount, before GST
-        const gstAmount = (netSale * vatPercent / 100);
-        
-        // Payment methods phải là "after discount and before GST"
-        let actualCash = cashDefault;
-        let actualATM = atmDefault;
-        let actualVisa = visaDefault;
-        let actualMastercard = mastercardDefault;
-        let actualAmex = amexDefault;
-        let actualVoucher = voucherDefault;
-        
-        // Nếu tất cả payment methods đều = 0, phân bổ toàn bộ netSale vào cash
-        const totalPaymentDefaults = cashDefault + atmDefault + visaDefault + mastercardDefault + amexDefault + voucherDefault;
-        
-        if (totalPaymentDefaults === 0) {
-          // Phân bổ toàn bộ netSale vào cash nếu không có cấu hình payment methods
-          actualCash = netSale;
-          actualATM = 0;
-          actualVisa = 0;
-          actualMastercard = 0;
-          actualAmex = 0;
-          actualVoucher = 0;
-        } else {
-          // Sử dụng giá trị đã cấu hình (nhưng không vượt quá netSale)
-          const totalConfigured = totalPaymentDefaults;
-          if (totalConfigured > netSale) {
-            // Nếu tổng cấu hình > netSale, scale down theo tỷ lệ
-            const scale = netSale / totalConfigured;
-            actualCash = cashDefault * scale;
-            actualATM = atmDefault * scale;
-            actualVisa = visaDefault * scale;
-            actualMastercard = mastercardDefault * scale;
-            actualAmex = amexDefault * scale;
-            actualVoucher = voucherDefault * scale;
-          }
-          // Nếu totalConfigured <= netSale, giữ nguyên giá trị cấu hình
-        }
-        
-        // Tính othersamount (phần còn lại)
-        const totalKnownPayments = actualCash + actualATM + actualVisa + actualMastercard + actualAmex + actualVoucher;
-        const othersamount = Math.max(0, netSale - totalKnownPayments);
-        
-        salesArray.push({
-          sale: {
-            machineid: machineid,
-            batchid: batchid,
-            date: formattedDate, // Sử dụng date đã được format
-            hour: hour,
-            receiptcount: data.receiptcount.toString(),
-            gto: data.gto.toFixed(2),
-            gst: gstAmount.toFixed(2),                // Field name: gst
-            discount: data.discount.toFixed(2),
-            servicecharge: serviceChargeDefault.toFixed(2),
-            noofpax: noofpaxDefault.toString(),
-            cash: actualCash.toFixed(2),              // after discount, before GST
-            atm: actualATM.toFixed(2),               // Field name: atm (lowercase)
-            visa: actualVisa.toFixed(2),             // after discount, before GST
-            mastercard: actualMastercard.toFixed(2), // after discount, before GST
-            amex: actualAmex.toFixed(2),             // after discount, before GST
-            voucher: actualVoucher.toFixed(2),       // after discount, before GST
-            othersamount: othersamount.toFixed(2),   // after discount, before GST
-            vatregistered: vatRegistered              // Field name: vatregistered (lowercase)
-          }
-        });
-      }
-      
-      console.log(`Generated ${salesArray.length} entries for 24 hours`);
-      console.log('First 3 entries:', salesArray.slice(0, 3));
-      
-      return {
-        sales: salesArray
-      };
-    }
-
-    document.getElementById('fileInput').addEventListener('change', e=>{
-      const file = e.target.files[0]; 
-      if(!file) {
-        document.getElementById('fileInfo').style.display = 'none';
-        document.getElementById('dataPreview').style.display = 'none';
-        return;
-      }
-      
-      // Hiển thị thông tin file
-      document.getElementById('fileName').textContent = `Tên file: ${file.name}`;
-      document.getElementById('fileSize').textContent = `Kích thước: ${(file.size / 1024).toFixed(2)} KB`;
-      document.getElementById('fileInfo').style.display = 'block';
-      
-      const reader = new FileReader(); 
-      reader.onload = evt => {
-        try {
-          let arr = file.name.endsWith('.csv') ? parseCSV(evt.target.result)
-            : XLSX.utils.sheet_to_json(XLSX.read(evt.target.result,{type:'binary'}).Sheets[XLSX.read(evt.target.result,{type:'binary'}).SheetNames[0]],{raw:false});
-          
-          // Cập nhật số lượng record
-          document.getElementById('recordCount').textContent = `Số dòng dữ liệu: ${arr.length}`;
-          
-          // Hiển thị preview dữ liệu gốc
-          document.getElementById('rawDataPreview').textContent = JSON.stringify(arr.slice(0, 5), null, 2);
-          
-          // Transform dữ liệu
-          const hourly = transformToHourly(arr);
-          
-          // Hiển thị preview dữ liệu đã xử lý (chỉ những giờ có dữ liệu)
-          const salesData = hourly.sales.slice(0, 5);
-          document.getElementById('processedDataPreview').textContent = JSON.stringify(salesData.length > 0 ? salesData : [{"message": "Không có dữ liệu sau khi xử lý"}], null, 2);
-          
-          // Hiển thị khu vực preview
-          document.getElementById('dataPreview').style.display = 'block';
-          
-          // Cập nhật textarea với dữ liệu đã xử lý
-          document.getElementById('salesData').value = JSON.stringify(hourly, null, 2);
-          
-        } catch (error) {
-          console.error('Error processing file:', error);
-          document.getElementById('salesResponse').textContent = `Lỗi xử lý file: ${error.message}`;
-        }
-      };
-      
-      if (file.name.endsWith('.csv')) {
-        reader.readAsText(file);
-      } else {
-        reader.readAsBinaryString(file);
-      }
-    });
-
-    document.getElementById('btnSales').addEventListener('click', async ()=>{
-      const token = document.getElementById('token').value.trim();
-      
-      if (!token) {
-        showToast('Vui lòng lấy token trước khi gửi dữ liệu!', 'warning');
-        return;
-      }
-      
-      const payload = document.getElementById('salesData').value;
-      
-      // Validate JSON first
-      try {
-        JSON.parse(payload);
-      } catch (error) {
-        showToast(`JSON payload không hợp lệ: ${error.message}`, 'error');
-        return;
-      }
-      
-      setButtonLoading('btnSales', true);
-      
-      try {
-        console.log('Sending payload:', payload);
-        
-        const res = await fetch(`${baseUrl}/SalesHourly`,{
-          method:'POST',
-          headers:{
-            'Content-Type':'application/json',
-            'Authorization':'Bearer '+token
-          },
-          body: payload,
-          mode:'cors'
-        }); 
-        
-        const responseData = await res.json();
-        
-        if(!res.ok) {
-          // API returned error
-          if (responseData.errors && responseData.errors.length > 0) {
-            const errorMessage = responseData.errors[0].message;
-            const statusCode = responseData.errors[0].status_code;
-            
-            if (statusCode === 'Daily records') {
-              showToast('Lỗi Daily Records! Thiếu entries cho một số giờ.', 'error');
-              document.getElementById('salesResponse').innerHTML = 
-                `❌ <strong>Lỗi Daily Records!</strong>\n\n` +
-                `${errorMessage}\n\n` +
-                `🔧 <strong>Cách khắc phục:</strong>\n` +
-                `1. Nhấn nút "🔍 Validate Payload" để kiểm tra\n` +
-                `2. Nhấn nút "⚡ Auto Fill Missing Hours" để tự động thêm giờ thiếu\n` +
-                `3. Hoặc dùng "➕ Add Manual Entry" để thêm từng giờ thủ công\n\n` +
-                `📋 <strong>Full response:</strong>\n` +
-                JSON.stringify(responseData, null, 2);
-            } else {
-              showToast(`API Error: ${statusCode}`, 'error');
-              document.getElementById('salesResponse').textContent = 
-                `❌ API Error: ${statusCode}\n${errorMessage}\n\nFull response:\n` +
-                JSON.stringify(responseData, null, 2);
-            }
-          } else {
-            throw new Error(`${res.status} ${res.statusText}`);
-          }
-        } else {
-          // Success
-          showToast('SalesHourly API call thành công! 🎉', 'success');
-          document.getElementById('salesResponse').textContent = 
-            `✅ Thành công!\n\n` +
-            JSON.stringify(responseData, null, 2);
-        }
-        
-      } catch(err) {
-        showToast(`Network/Connection Error: ${err.message}`, 'error');
-        document.getElementById('salesResponse').textContent = 
-          `❌ Network/Connection Error: ${err.message}\n\n` +
-          `Có thể do:\n` +
-          `- Mất kết nối internet\n` +
-          `- Token hết hạn\n` +
-          `- Server không phản hồi\n` +
-          `- CORS policy`;
-        console.error('API call failed:', err);
-      } finally {
-        setButtonLoading('btnSales', false);
-      }
-    });
-
-    // Thêm các hàm helper
-    function resetForm() {
-      document.getElementById('machineId').value = '50100904';
-      document.getElementById('batchId').value = '1';
-      document.getElementById('reportDate').value = '';
-      document.getElementById('receiptCount').value = '10';
-      document.getElementById('vatPercent').value = '7';
-      document.getElementById('serviceCharge').value = '0';
-      document.getElementById('noofpax').value = '0';
-      document.getElementById('cash').value = '0';
-      document.getElementById('atm').value = '0';
-      document.getElementById('visa').value = '0';
-      document.getElementById('mastercard').value = '0';
-      document.getElementById('amex').value = '0';
-      document.getElementById('voucher').value = '0';
-      document.getElementById('vatRegistered').value = 'N';
-      
-      // Clear file input và previews
-      document.getElementById('fileInput').value = '';
-      document.getElementById('fileInfo').style.display = 'none';
-      document.getElementById('dataPreview').style.display = 'none';
-      document.getElementById('salesData').value = '{"sales":[]}';
-      document.getElementById('salesResponse').textContent = '';
-      
-      console.log('Form đã được reset');
-    }
-
-    function validateAndShowPreview() {
-      const requiredFields = [
-        {id: 'machineId', name: 'Machine ID'},
-        {id: 'batchId', name: 'Batch ID'},
-        {id: 'reportDate', name: 'Ngày báo cáo'},
-        {id: 'vatPercent', name: 'VAT %'}
-      ];
-      
-      let isValid = true;
-      let errors = [];
-      
-      requiredFields.forEach(field => {
-        const element = document.getElementById(field.id);
-        const value = element.value.trim();
-        
-        if (!value) {
-          isValid = false;
-          errors.push(`${field.name} là bắt buộc`);
-          element.style.borderColor = '#e74c3c';
-        } else {
-          element.style.borderColor = '#bdc3c7';
-        }
-      });
-      
-      // Validate VAT percentage
-      const vatPercent = Number(document.getElementById('vatPercent').value);
-      if (vatPercent < 0 || vatPercent > 100) {
-        isValid = false;
-        errors.push('GST % phải từ 0 đến 100');
-        document.getElementById('vatPercent').style.borderColor = '#e74c3c';
-      }
-      
-      if (isValid) {
-        alert('✅ Form hợp lệ! Bạn có thể upload file để xử lý dữ liệu.');
-        console.log('Form validation passed');
-      } else {
-        alert('❌ Có lỗi trong form:\n' + errors.join('\n'));
-        console.log('Form validation errors:', errors);
-      }
-      
-      return isValid;
-    }
-    
-    function generateEmpty24Hours() {
-      const machineId = document.getElementById('machineId').value.trim();
-      const batchId = document.getElementById('batchId').value.trim();
-      const reportDate = document.getElementById('reportDate').value;
-      const serviceCharge = document.getElementById('serviceCharge').value;
-      const noofpax = document.getElementById('noofpax').value;
-      const vatRegistered = document.getElementById('vatRegistered').value;
-      
-      if (!machineId || !batchId || !reportDate) {
-        alert('Vui lòng điền đầy đủ Machine ID, Batch ID và Ngày báo cáo trước!');
-        return;
-      }
-      
-      // Format date to yyyyMMdd
-      function formatDateForAPI(dateStr) {
-        const dateObj = new Date(dateStr);
-        if (isNaN(dateObj.getTime())) return dateStr;
-        
-        const year = dateObj.getFullYear();
-        const month = (dateObj.getMonth() + 1).toString().padStart(2, '0');
-        const day = dateObj.getDate().toString().padStart(2, '0');
-        
-        return `${year}${month}${day}`;
-      }
-      
-      const formattedDate = formatDateForAPI(reportDate);
-      const salesArray = [];
-      
-      // Generate 24 empty entries
-      for (let i = 0; i < 24; i++) {
-        const hour = i.toString().padStart(2, '0');
-        
-        salesArray.push({
-          sale: {
-            machineid: machineId,
-            batchid: batchId,
-            date: formattedDate,
-            hour: hour,
-            receiptcount: "0",
-            gto: "0.00",
-            gst: "0.00",
-            discount: "0.00",
-            servicecharge: serviceCharge,
-            noofpax: noofpax,
-            cash: "0.00",
-            atm: "0.00",
-            visa: "0.00",
-            mastercard: "0.00",
-            amex: "0.00",
-            voucher: "0.00",
-            othersamount: "0.00",
-            vatregistered: vatRegistered
-          }
-        });
-      }
-      
-      const payload = { sales: salesArray };
-      document.getElementById('salesData').value = JSON.stringify(payload, null, 2);
-      
-      alert(`✅ Đã tạo 24 entries trống cho ngày ${formattedDate}. Bạn có thể chỉnh sửa từng entry thủ công.`);
-      console.log('Generated 24 empty hours data');
-    }
-
-    // Auto-set ngày hiện tại khi trang load
-    window.addEventListener('load', () => {
-      if (!document.getElementById('reportDate').value) {
-        document.getElementById('reportDate').value = new Date().toISOString().slice(0,10);
-      }
-    });
-    
-    // Theme Toggle
-    function toggleTheme() {
-      const body = document.body;
-      const themeIcon = document.getElementById('themeIcon');
-      const themeText = document.getElementById('themeText');
-      
-      if (body.getAttribute('data-theme') === 'dark') {
-        body.removeAttribute('data-theme');
-        themeIcon.textContent = '🌙';
-        themeText.textContent = 'Dark Mode';
-        localStorage.setItem('theme', 'light');
-      } else {
-        body.setAttribute('data-theme', 'dark');
-        themeIcon.textContent = '☀️';
-        themeText.textContent = 'Light Mode';
-        localStorage.setItem('theme', 'dark');
-      }
-    }
-    
-    // Load saved theme
-    const savedTheme = localStorage.getItem('theme');
-    if (savedTheme === 'dark') {
-      document.body.setAttribute('data-theme', 'dark');
-      document.getElementById('themeIcon').textContent = '☀️';
-      document.getElementById('themeText').textContent = 'Light Mode';
-    }
-    
-    // Toast Notifications
-    function showToast(message, type = 'info', duration = 5000) {
-      const toast = document.getElementById('toast');
-      toast.className = `toast ${type}`;
-      toast.innerHTML = `
-        <div style="display: flex; align-items: center; gap: 8px;">
-          <span style="font-size: 18px;">
-            ${type === 'success' ? '✅' : type === 'error' ? '❌' : type === 'warning' ? '⚠️' : 'ℹ️'}
-          </span>
-          <span>${message}</span>
-          <button onclick="hideToast()" style="background: none; border: none; font-size: 16px; cursor: pointer; margin-left: auto;">✕</button>
+  <!-- BƯỚC 3: NHẬP LIỆU & GỬI -->
+  <div class="section">
+    <div class="section-header">
+      <div class="section-title">
+        <div class="section-badge">3</div>
+        <span class="section-name">Nhập liệu &amp; Gửi dữ liệu</span>
+      </div>
+    </div>
+    <div class="section-body">
+      <!-- TABS -->
+      <div class="tabs">
+        <div class="tab active" id="tab-upload" onclick="switchTab('upload')">
+          <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/>
+          </svg>
+          Upload file Excel
         </div>
-      `;
-      toast.style.display = 'block';
-      
-      setTimeout(() => {
-        toast.classList.add('show');
-      }, 100);
-      
-      setTimeout(() => {
-        hideToast();
-      }, duration);
-    }
-    
-    function hideToast() {
-      const toast = document.getElementById('toast');
-      toast.classList.remove('show');
-      setTimeout(() => {
-        toast.style.display = 'none';
-      }, 300);
-    }
-    
-    // Collapsible Sections
-    function toggleCollapsible(id) {
-      const content = document.getElementById(id + 'Content');
-      const chevron = document.getElementById(id + 'Chevron');
-      
-      if (content.classList.contains('open')) {
-        content.classList.remove('open');
-        chevron.textContent = '▼';
-        chevron.classList.remove('open');
-      } else {
-        content.classList.add('open');
-        chevron.textContent = '▲';
-        chevron.classList.add('open');
-      }
-    }
-    
-    // Copy to Clipboard
-    async function copyToClipboard(elementId) {
-      const element = document.getElementById(elementId);
-      let text = '';
-      
-      if (element.tagName === 'TEXTAREA' || element.tagName === 'INPUT') {
-        text = element.value;
-      } else {
-        text = element.textContent;
-      }
-      
-      try {
-        await navigator.clipboard.writeText(text);
-        showToast('Đã copy vào clipboard!', 'success', 2000);
-      } catch (err) {
-        console.error('Failed to copy: ', err);
-        showToast('Không thể copy. Hãy copy thủ công.', 'error');
-      }
-    }
-    
-    // JSON Validation
-    function validateJSON() {
-      const salesData = document.getElementById('salesData').value;
-      try {
-        JSON.parse(salesData);
-        showToast('JSON hợp lệ! ✓', 'success');
-      } catch (error) {
-        showToast(`JSON không hợp lệ: ${error.message}`, 'error');
-      }
-    }
-    
-    // Drag & Drop for file upload
-    const fileDropZone = document.getElementById('fileDropZone');
-    const fileInput = document.getElementById('fileInput');
-    
-    fileDropZone.addEventListener('dragover', (e) => {
-        e.stopPropagation();
-      e.preventDefault();
-      fileDropZone.classList.add('dragover');
-    });
-    
-    fileDropZone.addEventListener('dragleave', (e) => {
-        e.stopPropagation();
+        <div class="tab" id="tab-manual" onclick="switchTab('manual')">
+          <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
+            <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
+          </svg>
+          Nhập tay
+        </div>
+      </div>
 
-      e.preventDefault();
-      fileDropZone.classList.remove('dragover');
-    });
-    
-    fileDropZone.addEventListener('drop', (e) => {
-        e.stopPropagation();
+      <!-- TAB UPLOAD -->
+      <div class="tab-panel active" id="panel-upload">
+        <div class="drop-zone" id="fileDropZone" onclick="document.getElementById('fileInput').click()">
+          <div class="drop-icon">
+            <svg width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
+              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+              <polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/>
+            </svg>
+          </div>
+          <p><strong>Kéo thả file hoặc bấm để chọn</strong></p>
+          <p>Hỗ trợ: .csv, .xls, .xlsx — Tối đa 10MB</p>
+          <input type="file" id="fileInput" accept=".csv,.xls,.xlsx" style="display:none">
+        </div>
+        <div id="fileMetaBox" class="hidden">
+          <div class="file-meta">
+            <svg class="file-meta-icon" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/>
+            </svg>
+            <div>
+              <div class="file-meta-name" id="fileMetaName"></div>
+              <div class="file-meta-detail" id="fileMetaDetail"></div>
+            </div>
+          </div>
+        </div>
+        <div id="colMappingBox" class="col-map hidden">
+          <div class="col-map-title">
+            <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/>
+              <line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/>
+            </svg>
+            Chọn cột chứa thời gian giao dịch
+          </div>
+          <div style="display:grid;grid-template-columns:1fr auto;gap:8px;align-items:end;">
+            <div class="field">
+              <label>Cột thời gian trong file Excel</label>
+              <select id="timeColumnSelect"></select>
+            </div>
+            <button class="btn btn-outline" onclick="applyColumnMapping()">Áp dụng</button>
+          </div>
+          <p style="font-size:12px;color:var(--text-muted);margin-top:8px;">Không có cột thời gian? Chọn "Phân bổ tất cả vào giờ 00" rồi chỉnh thủ công sau.</p>
+        </div>
+      </div>
 
-      e.preventDefault();
-      fileDropZone.classList.remove('dragover');
-      
-      const files = e.dataTransfer.files;
-      if (files.length > 0) {
-        const file = files[0];
-        if (file.name.match(/\.(csv|xls|xlsx)$/i)) {
-          if (file.size <= 10 * 1024 * 1024) { // 10MB limit
-            fileInput.files = files;
-            fileInput.dispatchEvent(new Event('change'));
-            showToast(`File "${file.name}" đã được chọn!`, 'success');
-          } else {
-            showToast('File quá lớn! Giới hạn 10MB.', 'error');
-          }
+      <!-- TAB NHẬP TAY -->
+      <div class="tab-panel" id="panel-manual">
+        <div class="infobox danger mb-4">
+          <div class="infobox-title">Yêu cầu bắt buộc: đủ 24 giờ (00–23)</div>
+          <p>API sẽ trả lỗi nếu thiếu bất kỳ giờ nào. Dùng "Tự động điền giờ thiếu" để bổ sung nhanh.</p>
+        </div>
+        <div class="btn-group mb-4">
+          <button class="btn btn-primary" onclick="openAddEntryDrawer()">
+            <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
+            </svg>
+            Thêm dữ liệu giờ
+          </button>
+          <button class="btn btn-secondary" onclick="validatePayload()">
+            <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+            </svg>
+            Kiểm tra (24 giờ)
+          </button>
+          <button class="btn btn-secondary" onclick="fillMissingHours()">
+            <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/>
+            </svg>
+            Tự động điền giờ thiếu
+          </button>
+          <button class="btn btn-ghost btn-sm" onclick="sortPayloadByHour()">
+            <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/>
+            </svg>
+            Sắp xếp theo giờ
+          </button>
+        </div>
+        <div id="validationResultBox" class="hidden mb-4"></div>
+      </div>
+
+      <!-- BẢNG 24 GIỜ (dùng chung cả 2 tab) -->
+      <div class="flex items-center justify-between mb-3 mt-4">
+        <span class="text-sm font-600">Bảng dữ liệu 24 giờ</span>
+        <span class="text-xs text-muted" id="hourTableSummary">0 / 24 giờ có dữ liệu</span>
+      </div>
+      <div class="hour-table-wrap">
+        <table class="hour-table">
+          <thead>
+            <tr>
+              <th>Giờ</th>
+              <th>Số phiếu</th>
+              <th>GTO</th>
+              <th>Chiết khấu</th>
+              <th>Tiền mặt</th>
+              <th>Trạng thái</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody id="hourTableBody"></tbody>
+        </table>
+      </div>
+
+      <!-- JSON PAYLOAD (collapsible) -->
+      <div class="mt-4">
+        <button class="collapse-btn" onclick="toggleCollapse('jsonPayload')">
+          <span class="flex items-center gap-2">
+            <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/>
+            </svg>
+            Xem / chỉnh sửa payload JSON thô
+          </span>
+          <svg class="chevron" id="chevron-jsonPayload" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <polyline points="6 9 12 15 18 9"/>
+          </svg>
+        </button>
+        <div class="collapse-body" id="jsonPayload">
+          <div class="collapse-inner">
+            <div class="btn-group mb-3">
+              <button class="btn btn-secondary btn-sm" onclick="copyText('salesData')">
+                <svg width="11" height="11" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                  <rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>
+                </svg>
+                Sao chép payload
+              </button>
+              <button class="btn btn-secondary btn-sm" onclick="validateJSON()">
+                <svg width="11" height="11" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                  <polyline points="20 6 9 17 4 12"/>
+                </svg>
+                Kiểm tra JSON
+              </button>
+            </div>
+            <div class="field">
+              <textarea id="salesData" oninput="renderHourTable()">{"sales":[]}</textarea>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- GỬI -->
+      <div class="divider"></div>
+      <div class="flex items-center justify-between" style="flex-wrap:wrap;gap:12px;">
+        <div>
+          <div style="font-size:15px;font-weight:600;">Gửi dữ liệu SalesHourly</div>
+          <div class="text-xs text-muted mt-2">Cần có token hợp lệ và đủ 24 giờ dữ liệu trước khi gửi</div>
+        </div>
+        <button class="btn btn-primary btn-lg" id="btnSales" onclick="submitSales()">
+          <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/>
+          </svg>
+          <span id="btnSalesText">Gửi dữ liệu</span>
+          <span class="spinner hidden" id="salesSpinner"></span>
+        </button>
+      </div>
+
+      <!-- KẾT QUẢ API -->
+      <div id="apiResultBox" class="api-result idle hidden">
+        <div class="api-result-header" id="apiResultHeader">
+          <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <circle cx="12" cy="12" r="10"/>
+          </svg>
+          <span id="apiResultTitle">Kết quả API</span>
+        </div>
+        <div class="code-block" style="border-radius:0;">
+          <div class="code-toolbar">
+            <span class="code-lang">Phản hồi từ server</span>
+            <button class="btn btn-ghost btn-sm" onclick="copyPreText('apiResultPre')">Sao chép</button>
+          </div>
+          <pre id="apiResultPre">— chưa gửi request —</pre>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div><!-- /container -->
+
+<script>
+  const BASE_URL = 'https://staging.synthesis.bz/posvn/v1/api';
+  let _rawData = [];
+  let _detectedCols = [];
+
+  // ── UTILS ──────────────────────────────────────────────────────
+  function formatDateForAPI(dateStr) {
+    if (!dateStr) return '';
+    const d = new Date(dateStr);
+    if (isNaN(d.getTime())) return dateStr;
+    return `${d.getFullYear()}${String(d.getMonth()+1).padStart(2,'0')}${String(d.getDate()).padStart(2,'0')}`;
+  }
+
+  function fmtNum(n) { return parseFloat(n || 0).toFixed(2); }
+
+  function getSalesData() {
+    try { return JSON.parse(document.getElementById('salesData').value); }
+    catch { return { sales: [] }; }
+  }
+
+  function setSalesData(obj) {
+    document.getElementById('salesData').value = JSON.stringify(obj, null, 2);
+    renderHourTable();
+  }
+
+  // ── TOAST ──────────────────────────────────────────────────────
+  function showToast(msg, type = 'info', dur = 4000) {
+    const icons = {
+      success: `<svg width="15" height="15" fill="none" stroke="#16a34a" stroke-width="2.5" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="9 12 11 14 15 10"/></svg>`,
+      error:   `<svg width="15" height="15" fill="none" stroke="#dc2626" stroke-width="2.5" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>`,
+      warning: `<svg width="15" height="15" fill="none" stroke="#d97706" stroke-width="2.5" viewBox="0 0 24 24"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>`,
+      info:    `<svg width="15" height="15" fill="none" stroke="#0d9488" stroke-width="2.5" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>`,
+    };
+    const t = document.createElement('div');
+    t.className = `toast ${type}`;
+    t.innerHTML = `<div style="flex-shrink:0">${icons[type]||icons.info}</div><div class="toast-msg">${msg}</div><button class="toast-close" onclick="this.closest('.toast').remove()">✕</button>`;
+    document.getElementById('toastContainer').prepend(t);
+    setTimeout(() => t.remove(), dur);
+  }
+
+  // ── THEME ──────────────────────────────────────────────────────
+  function toggleTheme() {
+    const dark = document.body.getAttribute('data-theme') === 'dark';
+    if (dark) {
+      document.body.removeAttribute('data-theme');
+      document.getElementById('themeIcon').innerHTML = '<path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>';
+      document.getElementById('themeLabel').textContent = 'Tối';
+      localStorage.setItem('theme', 'light');
+    } else {
+      document.body.setAttribute('data-theme', 'dark');
+      document.getElementById('themeIcon').innerHTML = '<circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>';
+      document.getElementById('themeLabel').textContent = 'Sáng';
+      localStorage.setItem('theme', 'dark');
+    }
+  }
+
+  // ── COLLAPSIBLE ────────────────────────────────────────────────
+  function toggleCollapse(id) {
+    const body = document.getElementById(id);
+    const ch = document.getElementById('chevron-' + id);
+    const open = body.classList.toggle('open');
+    if (ch) ch.classList.toggle('open', open);
+  }
+
+  // ── COPY ───────────────────────────────────────────────────────
+  async function copyText(id) {
+    const el = document.getElementById(id);
+    try {
+      await navigator.clipboard.writeText(el.value || el.textContent);
+      showToast('Đã sao chép!', 'success', 2000);
+    } catch { showToast('Không thể sao chép. Hãy sao chép thủ công.', 'error'); }
+  }
+
+  async function copyPreText(id) {
+    try {
+      await navigator.clipboard.writeText(document.getElementById(id).textContent);
+      showToast('Đã sao chép!', 'success', 2000);
+    } catch { showToast('Không thể sao chép.', 'error'); }
+  }
+
+  // ── STEP INDICATOR ─────────────────────────────────────────────
+  const CHECK_SVG = `<svg width="13" height="13" fill="none" stroke="white" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>`;
+  function stepDone(n) {
+    document.getElementById('s'+n).classList.add('done');
+    document.getElementById('s'+n).classList.remove('active');
+    document.getElementById('sn'+n).innerHTML = CHECK_SVG;
+  }
+  function stepActive(n) { document.getElementById('s'+n).classList.add('active'); }
+
+  // ── TABS ───────────────────────────────────────────────────────
+  function switchTab(name) {
+    ['upload','manual'].forEach(t => {
+      document.getElementById('tab-'+t).classList.toggle('active', t === name);
+      document.getElementById('panel-'+t).classList.toggle('active', t === name);
+    });
+  }
+
+  // ── PAYMENT TOTAL ──────────────────────────────────────────────
+  function updatePaymentTotal() {
+    const total = ['cash','atm','visa','mastercard','amex','voucher']
+      .reduce((s, id) => s + (Number(document.getElementById(id).value) || 0), 0);
+    document.getElementById('paymentTotalDisplay').textContent = fmtNum(total);
+  }
+
+  // ── TOKEN ──────────────────────────────────────────────────────
+  async function getToken() {
+    const user = document.getElementById('username').value.trim();
+    const pass = document.getElementById('password').value.trim();
+    if (!user || !pass) { showToast('Vui lòng nhập tên đăng nhập và mật khẩu!', 'warning'); return; }
+
+    const btn = document.getElementById('btnToken');
+    btn.disabled = true;
+    document.getElementById('tokenSpinner').classList.remove('hidden');
+    document.getElementById('btnTokenText').textContent = 'Đang lấy…';
+    const prog = document.getElementById('tokenProgressWrap');
+    const fill = document.getElementById('tokenProgressFill');
+    prog.classList.remove('hidden');
+    setTimeout(() => fill.style.width = '85%', 50);
+
+    try {
+      const res = await fetch(`${BASE_URL}/token`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        body: `grant_type=password&username=${encodeURIComponent(user)}&password=${encodeURIComponent(pass)}`,
+        mode: 'cors'
+      });
+      if (!res.ok) throw new Error(`${res.status} ${res.statusText}`);
+      const data = await res.json();
+      document.getElementById('tokenRawPre').textContent = JSON.stringify(data, null, 2);
+      const tokenEl = document.getElementById('token');
+      tokenEl.value = data.access_token || '';
+      if (data.access_token) {
+        tokenEl.classList.add('has-token');
+        const badge = document.getElementById('tokenStatusBadge');
+        badge.className = 'token-status ok';
+        badge.innerHTML = `<svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg> Token hợp lệ`;
+        stepDone(1); stepActive(2);
+        showToast('Lấy token thành công!', 'success');
+      } else {
+        showToast('Không nhận được token từ API.', 'warning');
+      }
+    } catch (err) {
+      document.getElementById('tokenRawPre').textContent = 'Lỗi: ' + err.message;
+      showToast(`Lỗi khi lấy token: ${err.message}`, 'error');
+    } finally {
+      btn.disabled = false;
+      document.getElementById('tokenSpinner').classList.add('hidden');
+      document.getElementById('btnTokenText').textContent = 'Lấy Token';
+      fill.style.width = '100%';
+      setTimeout(() => { prog.classList.add('hidden'); fill.style.width = '0'; }, 700);
+    }
+  }
+
+  // ── CONFIG VALIDATION ──────────────────────────────────────────
+  function validateConfig() {
+    const fields = [
+      { id: 'machineId', label: 'Mã máy POS' },
+      { id: 'batchId', label: 'Số lô' },
+      { id: 'reportDate', label: 'Ngày báo cáo' },
+      { id: 'vatPercent', label: 'Thuế VAT (%)' },
+    ];
+    let ok = true;
+    fields.forEach(f => {
+      const el = document.getElementById(f.id);
+      const empty = !el.value.trim();
+      el.classList.toggle('error', empty);
+      if (empty) ok = false;
+    });
+    ok ? showToast('Cấu hình hợp lệ! Có thể tiếp tục.', 'success')
+       : showToast('Vui lòng điền đầy đủ các trường bắt buộc.', 'error');
+    return ok;
+  }
+
+  // ── RESET FORM ─────────────────────────────────────────────────
+  function resetForm() {
+    document.getElementById('machineId').value = '50100904';
+    document.getElementById('batchId').value = '1';
+    document.getElementById('reportDate').value = new Date().toISOString().slice(0, 10);
+    document.getElementById('receiptCount').value = '10';
+    document.getElementById('vatPercent').value = '7';
+    document.getElementById('serviceCharge').value = '0';
+    document.getElementById('noofpax').value = '0';
+    ['cash','atm','visa','mastercard','amex','voucher'].forEach(id => document.getElementById(id).value = '0');
+    document.getElementById('vatRegistered').value = 'N';
+    document.getElementById('fileInput').value = '';
+    document.getElementById('fileMetaBox').classList.add('hidden');
+    document.getElementById('colMappingBox').classList.add('hidden');
+    setSalesData({ sales: [] });
+    updatePaymentTotal();
+    showToast('Form đã được đặt lại.', 'info', 2000);
+  }
+
+  // ── GENERATE EMPTY 24H ─────────────────────────────────────────
+  function generateEmpty24Hours() {
+    const machineId = document.getElementById('machineId').value.trim();
+    const batchId = document.getElementById('batchId').value.trim();
+    const reportDate = document.getElementById('reportDate').value;
+    if (!machineId || !batchId || !reportDate) {
+      showToast('Vui lòng điền đủ Mã máy POS, Số lô và Ngày báo cáo!', 'warning'); return;
+    }
+    const date = formatDateForAPI(reportDate);
+    const vatReg = document.getElementById('vatRegistered').value;
+    const sc = document.getElementById('serviceCharge').value;
+    const pax = document.getElementById('noofpax').value;
+    const sales = Array.from({ length: 24 }, (_, i) => ({
+      sale: {
+        machineid: machineId, batchid: batchId, date,
+        hour: String(i).padStart(2, '0'),
+        receiptcount: '0', gto: '0.00', VAT: '0.00', discount: '0.00',
+        servicecharge: sc, noofpax: pax,
+        cash: '0.00', atm: '0.00', visa: '0.00', mastercard: '0.00',
+        amex: '0.00', voucher: '0.00', othersamount: '0.00', vatregistered: vatReg
+      }
+    }));
+    setSalesData({ sales });
+    stepDone(2); stepActive(3);
+    showToast(`Đã tạo 24 giờ trống cho ngày ${date}.`, 'success');
+  }
+
+  // ── FILE UPLOAD ────────────────────────────────────────────────
+  function parseCSV(text) {
+    const lines = text.trim().split(/\r?\n/);
+    const headers = lines.shift().split(/,|;|\t/).map(h => h.trim());
+    const rows = lines.map(line => {
+      const cols = line.split(/,|;|\t/).map(c => c.trim());
+      const obj = {};
+      headers.forEach((h, i) => obj[h] = isNaN(cols[i]) ? cols[i] : Number(cols[i]));
+      return obj;
+    });
+    return { headers, rows };
+  }
+
+  document.getElementById('fileInput').addEventListener('change', e => {
+    const file = e.target.files[0];
+    if (file) handleFileLoad(file);
+  });
+
+  function handleFileLoad(file) {
+    if (file.size > 10 * 1024 * 1024) { showToast('File quá lớn! Tối đa 10MB.', 'error'); return; }
+    document.getElementById('fileMetaName').textContent = file.name;
+    document.getElementById('fileMetaBox').classList.remove('hidden');
+
+    const reader = new FileReader();
+    reader.onload = evt => {
+      try {
+        let rows, headers;
+        if (file.name.endsWith('.csv')) {
+          const parsed = parseCSV(evt.target.result);
+          rows = parsed.rows; headers = parsed.headers;
         } else {
-          showToast('File không được hỗ trợ! Chỉ chấp nhận .csv, .xls, .xlsx', 'error');
+          const wb = XLSX.read(evt.target.result, { type: 'binary' });
+          const ws = wb.Sheets[wb.SheetNames[0]];
+          rows = XLSX.utils.sheet_to_json(ws, { raw: false });
+          headers = rows.length > 0 ? Object.keys(rows[0]) : [];
+        }
+        _rawData = rows; _detectedCols = headers;
+        document.getElementById('fileMetaDetail').textContent = `${rows.length} dòng dữ liệu — ${headers.length} cột`;
+
+        const timeKey = headers.find(k => /thời\s*gian|time|ngày|date|datetime|timestamp|created|order_time|giờ/i.test(k));
+        if (!timeKey) {
+          const sel = document.getElementById('timeColumnSelect');
+          sel.innerHTML = `<option value="">— Phân bổ tất cả vào giờ 00 —</option>` +
+            headers.map(h => `<option value="${h}">${h}</option>`).join('');
+          document.getElementById('colMappingBox').classList.remove('hidden');
+          showToast('Không tìm thấy cột thời gian. Vui lòng chọn cột phù hợp.', 'warning');
+        } else {
+          document.getElementById('colMappingBox').classList.add('hidden');
+          processAndRender(rows, timeKey);
+        }
+      } catch (err) { showToast(`Lỗi xử lý file: ${err.message}`, 'error'); }
+    };
+    file.name.endsWith('.csv') ? reader.readAsText(file) : reader.readAsBinaryString(file);
+  }
+
+  function applyColumnMapping() {
+    const timeKey = document.getElementById('timeColumnSelect').value || null;
+    processAndRender(_rawData, timeKey);
+    document.getElementById('colMappingBox').classList.add('hidden');
+  }
+
+  function processAndRender(raw, timeKey) {
+    const hourly = transformToHourly(raw, timeKey);
+    setSalesData(hourly);
+    stepDone(2); stepActive(3);
+    showToast('Dữ liệu đã được xử lý thành công!', 'success');
+  }
+
+  // ── TRANSFORM TO HOURLY ────────────────────────────────────────
+  function transformToHourly(raw, timeKey) {
+    const date = formatDateForAPI(document.getElementById('reportDate').value);
+    const machineid = document.getElementById('machineId').value.trim();
+    const batchid = document.getElementById('batchId').value.trim();
+    const vatPercent = Number(document.getElementById('vatPercent').value);
+    const scDefault = Number(document.getElementById('serviceCharge').value);
+    const paxDefault = Number(document.getElementById('noofpax').value);
+    const cashDef = Number(document.getElementById('cash').value);
+    const atmDef = Number(document.getElementById('atm').value);
+    const visaDef = Number(document.getElementById('visa').value);
+    const mcDef = Number(document.getElementById('mastercard').value);
+    const amexDef = Number(document.getElementById('amex').value);
+    const voucherDef = Number(document.getElementById('voucher').value);
+    const vatReg = document.getElementById('vatRegistered').value;
+
+    const hd = {};
+    for (let i = 0; i < 24; i++) hd[String(i).padStart(2,'0')] = { receiptcount: 0, gto: 0, discount: 0 };
+
+    raw.forEach(order => {
+      const sale = Number(order['Tổng tiền'] || order['Total'] || order['Amount'] || order['Subtotal'] || order['Doanh thu'] || 0);
+      const disc = Number(order['CK đơn hàng(VNĐ)'] || order['Discount'] || order['Chiết khấu'] || order['Giảm giá'] || 0);
+      let hour = '00';
+      if (timeKey && order[timeKey]) {
+        const ts = order[timeKey].toString();
+        let dt = null;
+        if (ts.match(/\d{1,2}\/\d{1,2}\/\d{4}\s+\d{1,2}:\d{2}/)) {
+          const [dp, tp = '00:00'] = ts.split(' ');
+          const [d, m, y] = dp.split('/');
+          dt = new Date(`${y}-${m.padStart(2,'0')}-${d.padStart(2,'0')}T${tp}`);
+        } else if (ts.match(/\d{4}-\d{2}-\d{2}/)) {
+          dt = new Date(ts);
+        } else if (ts.match(/^\d{1,2}:\d{2}/)) {
+          const now = new Date();
+          dt = new Date(`${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}-${String(now.getDate()).padStart(2,'0')}T${ts}`);
+        } else {
+          dt = new Date(ts);
+        }
+        if (dt && !isNaN(dt.getTime())) {
+          const h = dt.getHours();
+          if (h >= 0 && h <= 23) hour = String(h).padStart(2, '0');
         }
       }
-    });
-    
-    // Enhanced button loading states
-    function setButtonLoading(buttonId, isLoading) {
-      const button = document.getElementById(buttonId);
-      const loadingSpinner = button.querySelector('.loading');
-      
-      if (isLoading) {
-        button.disabled = true;
-        if (loadingSpinner) loadingSpinner.style.display = 'inline-block';
-      } else {
-        button.disabled = false;
-        if (loadingSpinner) loadingSpinner.style.display = 'none';
+      if (sale > 0 || disc > 0) {
+        hd[hour].receiptcount += 1;
+        hd[hour].gto += sale;
+        hd[hour].discount += disc;
       }
+    });
+
+    const totalDef = cashDef + atmDef + visaDef + mcDef + amexDef + voucherDef;
+    const sales = Array.from({ length: 24 }, (_, i) => {
+      const hour = String(i).padStart(2, '0');
+      const d = hd[hour];
+      const net = d.gto - d.discount;
+      const gst = net * vatPercent / 100;
+      let cash = cashDef, atm = atmDef, visa = visaDef, mc = mcDef, amex = amexDef, voucher = voucherDef;
+      if (totalDef === 0) { cash = net; atm = visa = mc = amex = voucher = 0; }
+      else if (totalDef > net) {
+        const scale = net / totalDef;
+        cash *= scale; atm *= scale; visa *= scale; mc *= scale; amex *= scale; voucher *= scale;
+      }
+      const others = Math.max(0, net - (cash + atm + visa + mc + amex + voucher));
+      return {
+        sale: {
+          machineid, batchid, date, hour,
+          receiptcount: String(d.receiptcount),
+          gto: fmtNum(net), VAT: fmtNum(gst), discount: fmtNum(d.discount),
+          servicecharge: fmtNum(scDefault), noofpax: String(paxDefault),
+          cash: fmtNum(cash), atm: fmtNum(atm), visa: fmtNum(visa),
+          mastercard: fmtNum(mc), amex: fmtNum(amex), voucher: fmtNum(voucher),
+          othersamount: fmtNum(others), vatregistered: vatReg
+        }
+      };
+    });
+    return { sales };
+  }
+
+  // ── 24H TABLE ──────────────────────────────────────────────────
+  function renderHourTable() {
+    const data = getSalesData();
+    const date = formatDateForAPI(document.getElementById('reportDate').value);
+    const map = {};
+    (data.sales || []).forEach(s => { map[`${s.sale.date}-${s.sale.hour}`] = s.sale; });
+
+    let count = 0, rows = '';
+    for (let i = 0; i < 24; i++) {
+      const h = String(i).padStart(2, '0');
+      const s = map[`${date}-${h}`];
+      const hasData = s && parseFloat(s.gto) > 0;
+      if (hasData) count++;
+      rows += `<tr>
+        <td class="mono" style="font-weight:${hasData?'600':'400'}">${h}:00</td>
+        <td class="mono">${s ? s.receiptcount : '—'}</td>
+        <td class="mono">${s ? parseFloat(s.gto).toLocaleString('vi-VN',{minimumFractionDigits:2}) : '—'}</td>
+        <td class="mono">${s ? parseFloat(s.discount).toLocaleString('vi-VN',{minimumFractionDigits:2}) : '—'}</td>
+        <td class="mono">${s ? parseFloat(s.cash).toLocaleString('vi-VN',{minimumFractionDigits:2}) : '—'}</td>
+        <td><span class="dot ${hasData?'dot-data':'dot-empty'}"></span> <span style="font-size:12px;color:var(--text-muted)">${hasData?'Có dữ liệu':(s?'Trống':'Chưa có')}</span></td>
+        <td><button class="btn btn-ghost btn-sm" onclick="openEditEntryDrawer('${h}')">
+          <svg width="11" height="11" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
+            <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
+          </svg>
+        </button></td>
+      </tr>`;
     }
-    
-    // Progress bar animation
-    function animateProgressBar(progressBarId, targetPercent, duration = 1000) {
-      const progressBar = document.getElementById(progressBarId);
-      const progressFill = progressBar.querySelector('.progress-fill');
-      
-      progressBar.style.display = 'block';
-      progressFill.style.width = '0%';
-      
-      setTimeout(() => {
-        progressFill.style.width = targetPercent + '%';
-      }, 100);
-      
-      setTimeout(() => {
-        progressBar.style.display = 'none';
-      }, duration + 500);
+    document.getElementById('hourTableBody').innerHTML = rows;
+    document.getElementById('hourTableSummary').textContent = `${count} / 24 giờ có dữ liệu`;
+  }
+
+  // ── DRAWER ─────────────────────────────────────────────────────
+  function openDrawer() {
+    document.getElementById('backdrop').classList.add('open');
+    document.getElementById('entryDrawer').classList.add('open');
+    document.body.style.overflow = 'hidden';
+  }
+  function closeDrawer() {
+    document.getElementById('backdrop').classList.remove('open');
+    document.getElementById('entryDrawer').classList.remove('open');
+    document.body.style.overflow = '';
+  }
+  function populateHourSelect(sel) {
+    document.getElementById('entryHour').innerHTML = Array.from({length:24}, (_,i) => {
+      const h = String(i).padStart(2,'0');
+      return `<option value="${h}" ${h===sel?'selected':''}>${h}:00</option>`;
+    }).join('');
+  }
+  function openAddEntryDrawer() {
+    document.getElementById('drawerTitle').textContent = 'Thêm dữ liệu giờ';
+    populateHourSelect('00');
+    ['entryReceiptCount','entryGTO','entryDiscount','entryCash','entryATM','entryVisa','entryOthers'].forEach(id => document.getElementById(id).value = '0');
+    document.getElementById('entryVAT').value = '0.00';
+    openDrawer();
+  }
+  function openEditEntryDrawer(hour) {
+    document.getElementById('drawerTitle').textContent = `Chỉnh sửa giờ ${hour}:00`;
+    populateHourSelect(hour);
+    const data = getSalesData();
+    const date = formatDateForAPI(document.getElementById('reportDate').value);
+    const entry = (data.sales || []).find(s => s.sale.date === date && s.sale.hour === hour);
+    if (entry) {
+      document.getElementById('entryReceiptCount').value = entry.sale.receiptcount || 0;
+      // Reconstruct gross GTO = nett GTO + discount (for user-friendly display)
+      const storedNettGTO = parseFloat(entry.sale.gto || 0);
+      const storedDiscount = parseFloat(entry.sale.discount || 0);
+      document.getElementById('entryGTO').value = fmtNum(storedNettGTO + storedDiscount);
+      document.getElementById('entryDiscount').value = fmtNum(storedDiscount);
+      document.getElementById('entryCash').value = entry.sale.cash || 0;
+      document.getElementById('entryATM').value = entry.sale.atm || 0;
+      document.getElementById('entryVisa').value = entry.sale.visa || 0;
+      document.getElementById('entryOthers').value = entry.sale.othersamount || 0;
+      calcDrawerVAT();
     }
-    
-    // Replace alert with toast notifications
-    window.alert = function(message) {
-      if (message.includes('✅')) {
-        showToast(message.replace('✅', ''), 'success');
-      } else if (message.includes('❌')) {
-        showToast(message.replace('❌', ''), 'error');
-      } else if (message.includes('⚠️')) {
-        showToast(message.replace('⚠️', ''), 'warning');
-      } else {
-        showToast(message, 'info');
+    openDrawer();
+  }
+  function calcDrawerVAT() {
+    const gto = Number(document.getElementById('entryGTO').value) || 0;
+    const disc = Number(document.getElementById('entryDiscount').value) || 0;
+    const vat = Number(document.getElementById('vatPercent').value) || 7;
+    document.getElementById('entryVAT').value = fmtNum((gto - disc) * vat / 100);
+  }
+  function saveEntryFromDrawer() {
+    const hour = document.getElementById('entryHour').value;
+    if (!hour) { showToast('Vui lòng chọn giờ!', 'warning'); return; }
+    const gto = Number(document.getElementById('entryGTO').value) || 0;
+    const disc = Number(document.getElementById('entryDiscount').value) || 0;
+    const vat = Number(document.getElementById('vatPercent').value) || 7;
+    const date = formatDateForAPI(document.getElementById('reportDate').value);
+    const nettGTO = gto - disc;
+    const newEntry = {
+      sale: {
+        machineid: document.getElementById('machineId').value.trim(),
+        batchid: document.getElementById('batchId').value.trim(),
+        date, hour,
+        receiptcount: document.getElementById('entryReceiptCount').value,
+        gto: fmtNum(nettGTO), VAT: fmtNum(nettGTO * vat / 100), discount: fmtNum(disc),
+        servicecharge: document.getElementById('serviceCharge').value,
+        noofpax: document.getElementById('noofpax').value,
+        cash: fmtNum(Number(document.getElementById('entryCash').value)),
+        atm: fmtNum(Number(document.getElementById('entryATM').value)),
+        visa: fmtNum(Number(document.getElementById('entryVisa').value)),
+        mastercard: document.getElementById('mastercard').value,
+        amex: document.getElementById('amex').value,
+        voucher: document.getElementById('voucher').value,
+        othersamount: fmtNum(Number(document.getElementById('entryOthers').value)),
+        vatregistered: document.getElementById('vatRegistered').value
       }
     };
-    
-    // Enhanced form validation with real-time feedback
-    function addRealTimeValidation() {
-      const inputs = document.querySelectorAll('input[required], select[required]');
-      inputs.forEach(input => {
-        input.addEventListener('blur', () => {
-          if (input.validity.valid) {
-            input.style.borderColor = 'var(--success)';
-          } else {
-            input.style.borderColor = 'var(--danger)';
+    const data = getSalesData();
+    const idx = (data.sales||[]).findIndex(s => s.sale.date === date && s.sale.hour === hour);
+    if (idx !== -1) data.sales[idx] = newEntry;
+    else data.sales.push(newEntry);
+    setSalesData(data);
+    closeDrawer();
+    showToast(`Đã lưu dữ liệu giờ ${hour}:00!`, 'success', 2500);
+  }
+
+  // ── PAYLOAD VALIDATION ─────────────────────────────────────────
+  function validatePayload() {
+    const data = getSalesData();
+    const date = formatDateForAPI(document.getElementById('reportDate').value);
+    const missing = [];
+    for (let i = 0; i < 24; i++) {
+      const h = String(i).padStart(2,'0');
+      if (!(data.sales||[]).some(s => s.sale.date === date && s.sale.hour === h)) missing.push(h);
+    }
+    const box = document.getElementById('validationResultBox');
+    box.classList.remove('hidden');
+    box.innerHTML = missing.length === 0
+      ? `<div class="infobox success"><div class="infobox-title">Hợp lệ — đủ 24 giờ cho ngày ${date}</div><p>Payload sẵn sàng để gửi lên API.</p></div>`
+      : `<div class="infobox danger"><div class="infobox-title">Thiếu ${missing.length} giờ: ${missing.join(', ')}</div><p>API sẽ trả lỗi: <code>"Every day should have 24 Records. Hour 00 to 23."</code></p><p style="margin-top:6px">Nhấn <strong>Tự động điền giờ thiếu</strong> để bổ sung.</p></div>`;
+  }
+
+  function fillMissingHours() {
+    const data = getSalesData();
+    const date = formatDateForAPI(document.getElementById('reportDate').value);
+    const vatReg = document.getElementById('vatRegistered').value;
+    const sc = document.getElementById('serviceCharge').value;
+    const pax = document.getElementById('noofpax').value;
+    let filled = 0;
+    for (let i = 0; i < 24; i++) {
+      const h = String(i).padStart(2,'0');
+      if (!(data.sales||[]).some(s => s.sale.date === date && s.sale.hour === h)) {
+        data.sales.push({
+          sale: {
+            machineid: document.getElementById('machineId').value.trim(),
+            batchid: document.getElementById('batchId').value.trim(),
+            date, hour: h, receiptcount: '0', gto: '0.00', VAT: '0.00', discount: '0.00',
+            servicecharge: sc, noofpax: pax, cash: '0.00', atm: '0.00', visa: '0.00',
+            mastercard: document.getElementById('mastercard').value,
+            amex: document.getElementById('amex').value,
+            voucher: document.getElementById('voucher').value,
+            othersamount: '0.00', vatregistered: vatReg
           }
         });
-        
-        input.addEventListener('input', () => {
-          if (input.style.borderColor === 'var(--danger)' && input.validity.valid) {
-            input.style.borderColor = 'var(--success)';
-          }
-        });
+        filled++;
+      }
+    }
+    data.sales.sort((a, b) => a.sale.hour.localeCompare(b.sale.hour));
+    setSalesData(data);
+    filled > 0
+      ? showToast(`Đã thêm ${filled} giờ trống vào payload.`, 'success')
+      : showToast('Payload đã đủ 24 giờ!', 'info');
+  }
+
+  function sortPayloadByHour() {
+    const data = getSalesData();
+    if (!data.sales || !data.sales.length) { showToast('Chưa có dữ liệu để sắp xếp.', 'warning'); return; }
+    data.sales.sort((a, b) => a.sale.hour.localeCompare(b.sale.hour));
+    setSalesData(data);
+    showToast(`Đã sắp xếp ${data.sales.length} bản ghi theo thứ tự giờ.`, 'success', 2000);
+  }
+
+  function validateJSON() {
+    try { JSON.parse(document.getElementById('salesData').value); showToast('JSON hợp lệ!', 'success', 2000); }
+    catch (err) { showToast(`JSON không hợp lệ: ${err.message}`, 'error'); }
+  }
+
+  // ── SUBMIT ─────────────────────────────────────────────────────
+  async function submitSales() {
+    const token = document.getElementById('token').value.trim();
+    if (!token) { showToast('Vui lòng lấy token trước khi gửi!', 'warning'); return; }
+    const payload = document.getElementById('salesData').value;
+    try { JSON.parse(payload); } catch (err) { showToast(`JSON không hợp lệ: ${err.message}`, 'error'); return; }
+
+    const btn = document.getElementById('btnSales');
+    btn.disabled = true;
+    document.getElementById('salesSpinner').classList.remove('hidden');
+    document.getElementById('btnSalesText').textContent = 'Đang gửi…';
+
+    const resultBox = document.getElementById('apiResultBox');
+    resultBox.className = 'api-result idle';
+
+    try {
+      const res = await fetch(`${BASE_URL}/SalesHourly`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
+        body: payload, mode: 'cors'
       });
-    }
-    
-    // Initialize real-time validation when page loads
-    window.addEventListener('load', () => {
-      addRealTimeValidation();
-    });
+      const responseData = await res.json();
+      document.getElementById('apiResultPre').textContent = JSON.stringify(responseData, null, 2);
+      resultBox.classList.remove('hidden');
 
-    // Manual Entry Management
-    function addManualEntry() {
-      const form = document.getElementById('manualEntryForm');
-      form.style.display = 'block';
-      document.getElementById('entryHour').innerHTML = ''; // Clear previous options
-      for (let i = 0; i < 24; i++) {
-        const option = document.createElement('option');
-        option.value = i.toString().padStart(2, '0');
-        option.textContent = `Hour ${i.toString().padStart(2, '0')}`;
-        document.getElementById('entryHour').appendChild(option);
-      }
-      document.getElementById('entryReceiptCount').value = '0';
-      document.getElementById('entryGTO').value = '0';
-      document.getElementById('entryDiscount').value = '0';
-      document.getElementById('entryCash').value = '0';
-      document.getElementById('entryATM').value = '0';
-      document.getElementById('entryVisa').value = '0';
-      document.getElementById('entryOthers').value = '0';
-      document.getElementById('validationResult').style.display = 'none';
-      document.getElementById('validationResult').textContent = '';
-    }
-
-    function cancelManualEntry() {
-      document.getElementById('manualEntryForm').style.display = 'none';
-    }
-
-    function saveManualEntry() {
-      const hour = document.getElementById('entryHour').value;
-      const receiptCount = document.getElementById('entryReceiptCount').value;
-      const gto = document.getElementById('entryGTO').value;
-      const discount = document.getElementById('entryDiscount').value;
-      const cash = document.getElementById('entryCash').value;
-      const atm = document.getElementById('entryATM').value;
-      const visa = document.getElementById('entryVisa').value;
-      const others = document.getElementById('entryOthers').value;
-      const vatRegistered = document.getElementById('vatRegistered').value;
-
-      if (!hour) {
-        alert('Vui lòng chọn giờ!');
-        return;
-      }
-      
-      // Format date to yyyyMMdd
-      function formatDateForAPI(dateStr) {
-        if (!dateStr) return '';
-        const dateObj = new Date(dateStr);
-        if (isNaN(dateObj.getTime())) return dateStr;
-        
-        const year = dateObj.getFullYear();
-        const month = (dateObj.getMonth() + 1).toString().padStart(2, '0');
-        const day = dateObj.getDate().toString().padStart(2, '0');
-        
-        return `${year}${month}${day}`;
-      }
-      
-      const formattedDate = formatDateForAPI(document.getElementById('reportDate').value);
-
-      const newEntry = {
-        sale: {
-          machineid: document.getElementById('machineId').value.trim(),
-          batchid: document.getElementById('batchId').value.trim(),
-          date: formattedDate,
-          hour: hour,
-          receiptcount: receiptCount,
-          gto: gto,
-          gst: ((Number(gto) - Number(discount)) * 0.07).toFixed(2), // Calculate GST at 7%
-          discount: discount,
-          servicecharge: document.getElementById('serviceCharge').value,
-          noofpax: document.getElementById('noofpax').value,
-          cash: cash,
-          atm: atm,
-          visa: visa,
-          mastercard: document.getElementById('mastercard').value,
-          amex: document.getElementById('amex').value,
-          voucher: document.getElementById('voucher').value,
-          othersamount: others,
-          vatregistered: vatRegistered
-        }
-      };
-
-      const salesData = JSON.parse(document.getElementById('salesData').value);
-      const existingEntryIndex = salesData.sales.findIndex(s => s.sale.date === newEntry.sale.date && s.sale.hour === newEntry.sale.hour);
-
-      if (existingEntryIndex !== -1) {
-        salesData.sales[existingEntryIndex] = newEntry;
+      if (!res.ok) {
+        resultBox.className = 'api-result error';
+        document.getElementById('apiResultHeader').innerHTML = `<svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg><span>Lỗi từ API (${res.status})</span>`;
+        const errs = responseData.errors || [];
+        if (errs.some(e => e.status_code === 'Daily records'))
+          showToast('Lỗi Daily Records! Thiếu dữ liệu cho một số giờ. Dùng "Tự động điền giờ thiếu".', 'error', 6000);
+        else
+          showToast(`Lỗi API: ${res.status} ${res.statusText}`, 'error');
       } else {
-        salesData.sales.push(newEntry);
+        resultBox.className = 'api-result success';
+        document.getElementById('apiResultHeader').innerHTML = `<svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg><span>Gửi thành công!</span>`;
+        stepDone(3);
+        showToast('Gửi dữ liệu SalesHourly thành công!', 'success');
       }
-
-      document.getElementById('salesData').value = JSON.stringify(salesData, null, 2);
-      document.getElementById('manualEntryForm').style.display = 'none';
-      alert('Entry đã được lưu.');
+    } catch (err) {
+      resultBox.className = 'api-result error';
+      resultBox.classList.remove('hidden');
+      document.getElementById('apiResultHeader').innerHTML = `<svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg><span>Lỗi kết nối</span>`;
+      document.getElementById('apiResultPre').textContent = `Lỗi: ${err.message}\n\nNguyên nhân có thể:\n- Mất kết nối internet\n- Token hết hạn\n- Server không phản hồi\n- CORS policy`;
+      showToast(`Lỗi kết nối: ${err.message}`, 'error');
+    } finally {
+      btn.disabled = false;
+      document.getElementById('salesSpinner').classList.add('hidden');
+      document.getElementById('btnSalesText').textContent = 'Gửi dữ liệu';
     }
+  }
 
-    function validatePayload() {
-      const salesData = JSON.parse(document.getElementById('salesData').value);
-      const rawDate = document.getElementById('reportDate').value;
-      
-      // Format date to yyyyMMdd để match với payload
-      function formatDateForAPI(dateStr) {
-        if (!dateStr) return '';
-        const dateObj = new Date(dateStr);
-        if (isNaN(dateObj.getTime())) return dateStr;
-        
-        const year = dateObj.getFullYear();
-        const month = (dateObj.getMonth() + 1).toString().padStart(2, '0');
-        const day = dateObj.getDate().toString().padStart(2, '0');
-        
-        return `${year}${month}${day}`;
-      }
-      
-      const date = formatDateForAPI(rawDate);
-      const requiredHours = [];
+  // ── DRAG & DROP ────────────────────────────────────────────────
+  const dz = document.getElementById('fileDropZone');
+  dz.addEventListener('dragover', e => { e.preventDefault(); e.stopPropagation(); dz.classList.add('dragover'); });
+  dz.addEventListener('dragleave', e => { e.preventDefault(); e.stopPropagation(); dz.classList.remove('dragover'); });
+  dz.addEventListener('drop', e => {
+    e.preventDefault(); e.stopPropagation(); dz.classList.remove('dragover');
+    const file = e.dataTransfer.files[0];
+    if (!file) return;
+    if (!file.name.match(/\.(csv|xls|xlsx)$/i)) { showToast('Chỉ chấp nhận .csv, .xls, .xlsx', 'error'); return; }
+    document.getElementById('fileInput').files = e.dataTransfer.files;
+    handleFileLoad(file);
+    showToast(`Đã tải file "${file.name}"`, 'success', 2000);
+  });
 
-      for (let i = 0; i < 24; i++) {
-        const hour = i.toString().padStart(2, '0');
-        if (!salesData.sales.some(s => s.sale.date === date && s.sale.hour === hour)) {
-          requiredHours.push(hour);
-        }
-      }
-
-      if (requiredHours.length === 0) {
-        document.getElementById('validationResult').textContent = `✅ Payload đã đủ 24 giờ cho ngày ${date}.`;
-        document.getElementById('validationResult').style.backgroundColor = '#d4edda';
-        document.getElementById('validationResult').style.color = '#155724';
-      } else {
-        document.getElementById('validationResult').innerHTML = `❌ Payload thiếu ${requiredHours.length} giờ: ${requiredHours.join(', ')}<br><strong>Lỗi API sẽ là:</strong><br><code>{"status": "error", "errors": [{"status_code": "Daily records", "message": "ERROR: Every day should have 24 Records. Hour 00 to 23. Date :${date}"}]}</code>`;
-        document.getElementById('validationResult').style.backgroundColor = '#f8d7da';
-        document.getElementById('validationResult').style.color = '#721c24';
-      }
-      document.getElementById('validationResult').style.display = 'block';
+  // ── INIT ───────────────────────────────────────────────────────
+  window.addEventListener('load', () => {
+    const dateEl = document.getElementById('reportDate');
+    if (!dateEl.value) dateEl.value = new Date().toISOString().slice(0, 10);
+    if (localStorage.getItem('theme') === 'dark') {
+      document.body.setAttribute('data-theme', 'dark');
+      document.getElementById('themeIcon').innerHTML = '<circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>';
+      document.getElementById('themeLabel').textContent = 'Sáng';
     }
-
-    function fillMissingHours() {
-      const salesData = JSON.parse(document.getElementById('salesData').value);
-      const rawDate = document.getElementById('reportDate').value;
-      
-      // Format date to yyyyMMdd
-      function formatDateForAPI(dateStr) {
-        if (!dateStr) return '';
-        const dateObj = new Date(dateStr);
-        if (isNaN(dateObj.getTime())) return dateStr;
-        
-        const year = dateObj.getFullYear();
-        const month = (dateObj.getMonth() + 1).toString().padStart(2, '0');
-        const day = dateObj.getDate().toString().padStart(2, '0');
-        
-        return `${year}${month}${day}`;
-      }
-      
-      const date = formatDateForAPI(rawDate);
-      const missingHours = [];
-
-      for (let i = 0; i < 24; i++) {
-        const hour = i.toString().padStart(2, '0');
-        if (!salesData.sales.some(s => s.sale.date === date && s.sale.hour === hour)) {
-          missingHours.push(hour);
-        }
-      }
-
-      if (missingHours.length === 0) {
-        alert('Không có giờ nào thiếu trong payload.');
-        return;
-      }
-
-      if (confirm(`Bạn có chắc chắn muốn thêm ${missingHours.length} giờ vào payload không?\n\nCác giờ thiếu: ${missingHours.join(', ')}`)) {
-        missingHours.forEach(hour => {
-          const newEntry = {
-            sale: {
-              machineid: document.getElementById('machineId').value.trim(),
-              batchid: document.getElementById('batchId').value.trim(),
-              date: date,
-              hour: hour,
-              receiptcount: '0',
-              gto: '0.00',
-              gst: '0.00',
-              discount: '0.00',
-              servicecharge: document.getElementById('serviceCharge').value,
-              noofpax: document.getElementById('noofpax').value,
-              cash: '0.00',
-              atm: '0.00',
-              visa: '0.00',
-              mastercard: document.getElementById('mastercard').value,
-              amex: document.getElementById('amex').value,
-              voucher: document.getElementById('voucher').value,
-              othersamount: '0.00',
-              vatregistered: document.getElementById('vatRegistered').value
-            }
-          };
-          salesData.sales.push(newEntry);
-        });
-        
-        // Sort by hour để đảm bảo thứ tự
-        salesData.sales.sort((a, b) => a.sale.hour.localeCompare(b.sale.hour));
-        
-        document.getElementById('salesData').value = JSON.stringify(salesData, null, 2);
-        alert(`✅ Đã thêm ${missingHours.length} giờ vào payload. Total entries: ${salesData.sales.length}`);
-      }
-    }
-
-    function sortPayloadByHour() {
-      try {
-        const salesData = JSON.parse(document.getElementById('salesData').value);
-        if (!salesData.sales || salesData.sales.length === 0) {
-          alert('Không có dữ liệu để sắp xếp.');
-          return;
-        }
-        
-        salesData.sales.sort((a, b) => a.sale.hour.localeCompare(b.sale.hour));
-        document.getElementById('salesData').value = JSON.stringify(salesData, null, 2);
-        alert(`✅ Đã sắp xếp ${salesData.sales.length} entries theo thứ tự giờ (00-23).`);
-      } catch (error) {
-        alert('❌ Lỗi khi parse JSON payload!');
-        console.error('Sort error:', error);
-      }
-    }
-  </script>
+    renderHourTable();
+    updatePaymentTotal();
+  });
+</script>
 </body>
 </html>
