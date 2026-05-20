@@ -168,10 +168,18 @@
           <input type="text" id="entryGTO" inputmode="decimal" value="0 ₫"
             onfocus="vndFocus(this)" onblur="vndBlur(this)" oninput="calcDrawerVAT()">
         </div>
-        <div class="field field-vnd">
-          <label>Chiết khấu / giảm giá</label>
-          <input type="text" id="entryDiscount" inputmode="decimal" value="0 ₫"
-            onfocus="vndFocus(this)" onblur="vndBlur(this)" oninput="calcDrawerVAT()">
+        <div class="field">
+          <label>Chiết khấu / giảm giá
+            <span class="disc-mode-toggle">
+              <button type="button" class="disc-mode-btn active" id="entryDiscModeFix" onclick="setDiscMode('entry','fix')">₫</button>
+              <button type="button" class="disc-mode-btn" id="entryDiscModePct" onclick="setDiscMode('entry','pct')">%</button>
+            </span>
+          </label>
+          <div class="disc-input-wrap" id="entryDiscWrap">
+            <input type="text" id="entryDiscount" inputmode="decimal" value="0 ₫"
+              onfocus="entDiscFocus(this)" onblur="entDiscBlur(this)" oninput="calcDrawerVAT()">
+          </div>
+          <input type="hidden" id="entryDiscountMode" value="fix">
         </div>
         <div class="field field-vnd">
           <label>Thuế VAT (tự tính)</label>
@@ -371,10 +379,18 @@
               <input type="text" id="qeGTO" inputmode="decimal" value="0 ₫"
                 onfocus="vndFocus(this)" onblur="vndBlur(this)" oninput="calcQEVAT()">
             </div>
-            <div class="field field-vnd">
-              <label>Chiết khấu</label>
-              <input type="text" id="qeDiscount" inputmode="decimal" value="0 ₫"
-                onfocus="vndFocus(this)" onblur="vndBlur(this)" oninput="calcQEVAT()">
+            <div class="field">
+              <label>Chiết khấu
+                <span class="disc-mode-toggle">
+                  <button type="button" class="disc-mode-btn active" id="qeDiscModeFix" onclick="setDiscMode('qe','fix')">₫</button>
+                  <button type="button" class="disc-mode-btn" id="qeDiscModePct" onclick="setDiscMode('qe','pct')">%</button>
+                </span>
+              </label>
+              <div class="disc-input-wrap" id="qeDiscWrap">
+                <input type="text" id="qeDiscount" inputmode="decimal" value="0 ₫"
+                  onfocus="qeDiscFocus(this)" onblur="qeDiscBlur(this)" oninput="calcQEVAT()">
+              </div>
+              <input type="hidden" id="qeDiscountMode" value="fix">
             </div>
             <div class="field field-vnd">
               <label>Thuế VAT (tự tính)</label>
@@ -805,6 +821,43 @@
   }
   function fmtVND(n) { return formatVND(n); }
 
+  // ── DISCOUNT MODE TOGGLE ────────────────────────────────────────
+  function setDiscMode(prefix, mode) {
+    document.getElementById(prefix + 'DiscountMode').value = mode;
+    document.getElementById(prefix + 'DiscModeFix').classList.toggle('active', mode === 'fix');
+    document.getElementById(prefix + 'DiscModePct').classList.toggle('active', mode === 'pct');
+    const wrap = document.getElementById(prefix + 'DiscWrap');
+    const inp  = document.getElementById(prefix + 'Discount');
+    if (mode === 'pct') {
+      wrap.classList.add('pct-mode');
+      inp.value = '';
+      inp.placeholder = '0';
+      inp.inputMode = 'decimal';
+    } else {
+      wrap.classList.remove('pct-mode');
+      inp.placeholder = '';
+      setVNDValue(prefix + 'Discount', 0);
+    }
+    if (prefix === 'qe') calcQEVAT(); else calcDrawerVAT();
+  }
+
+  // Returns the resolved discount amount (₫) regardless of input mode
+  function getDiscountAmt(prefix) {
+    const mode = document.getElementById(prefix + 'DiscountMode').value;
+    if (mode === 'pct') {
+      const gto = getVNDValue(prefix + 'GTO');
+      const pct = parseFloat(document.getElementById(prefix + 'Discount').value) || 0;
+      return gto * pct / 100;
+    }
+    return getVNDValue(prefix + 'Discount');
+  }
+
+  // Mode-aware focus/blur wrappers for the discount inputs
+  function qeDiscFocus(el)  { if (document.getElementById('qeDiscountMode').value === 'fix') vndFocus(el); }
+  function qeDiscBlur(el)   { if (document.getElementById('qeDiscountMode').value === 'fix') vndBlur(el); }
+  function entDiscFocus(el) { if (document.getElementById('entryDiscountMode').value === 'fix') vndFocus(el); }
+  function entDiscBlur(el)  { if (document.getElementById('entryDiscountMode').value === 'fix') vndBlur(el); }
+
   function getSalesData() {
     try { return JSON.parse(document.getElementById('salesData').value); }
     catch { return { sales: [] }; }
@@ -911,7 +964,7 @@
 
   function calcQEVAT() {
     const gto = getVNDValue('qeGTO');
-    const disc = getVNDValue('qeDiscount');
+    const disc = getDiscountAmt('qe');
     const vat = Number(document.getElementById('vatPercent').value) || 7;
     setVNDValue('qeVAT', (gto - disc) * vat / 100);
   }
@@ -925,7 +978,7 @@
       showToast('Vui lòng điền đủ Mã máy, Số lô và Ngày báo cáo trước!', 'warning'); return;
     }
     const gto  = getVNDValue('qeGTO');
-    const disc = getVNDValue('qeDiscount');
+    const disc = getDiscountAmt('qe');
     const vatPct = Number(document.getElementById('vatPercent').value) || 7;
     const nett = Math.max(0, gto - disc);
     const vatAmt = nett * vatPct / 100;
@@ -1149,12 +1202,13 @@
     document.getElementById('machineId').value = '50100904';
     document.getElementById('batchId').value = '1';
     document.getElementById('reportDate').value = new Date().toISOString().slice(0, 10);
-    document.getElementById('vatPercent').value = '7';
-    document.getElementById('vatRegistered').value = 'N';
+    document.getElementById('vatPercent').value = '10';
+    document.getElementById('vatRegistered').value = 'Y';
     // Reset QE form
     document.getElementById('qeReceiptCount').value = '0';
     document.getElementById('qePax').value = '0';
     ['qeGTO','qeDiscount','qeVAT','qeCash','qeATM','qeVisa','qeMC','qeAmex','qeVoucher','qeOthers','qeSC'].forEach(id => setVNDValue(id, 0));
+    setDiscMode('qe', 'fix');
     initQEHourSelect();
     updatePaymentTotal();
     document.getElementById('fileInput').value = '';
@@ -1500,6 +1554,7 @@
     document.getElementById('entryPax').value = '0';
     ['entryGTO','entryDiscount','entryCash','entryATM','entryVisa','entryOthers','entrySC'].forEach(id => setVNDValue(id, 0));
     document.getElementById('entryVAT').value = '0 ₫';
+    setDiscMode('entry', 'fix');
     openDrawer();
   }
   function openEditEntryDrawer(hour) {
@@ -1510,6 +1565,7 @@
     document.getElementById('entryPax').value = '0';
     ['entryGTO','entryDiscount','entryCash','entryATM','entryVisa','entryOthers','entrySC'].forEach(id => setVNDValue(id, 0));
     document.getElementById('entryVAT').value = '0 ₫';
+    setDiscMode('entry', 'fix');
     const data = getSalesData();
     const date = formatDateForAPI(document.getElementById('reportDate').value);
     const entry = (data.sales || []).find(s => s.sale.date === date && s.sale.hour === hour);
@@ -1531,7 +1587,7 @@
   }
   function calcDrawerVAT() {
     const gto = getVNDValue('entryGTO');
-    const disc = getVNDValue('entryDiscount');
+    const disc = getDiscountAmt('entry');
     const vat = Number(document.getElementById('vatPercent').value) || 7;
     setVNDValue('entryVAT', (gto - disc) * vat / 100);
   }
@@ -1539,7 +1595,7 @@
     const hour = document.getElementById('entryHour').value;
     if (!hour) { showToast('Vui lòng chọn giờ!', 'warning'); return; }
     const gto = getVNDValue('entryGTO');
-    const disc = getVNDValue('entryDiscount');
+    const disc = getDiscountAmt('entry');
     const vat = Number(document.getElementById('vatPercent').value) || 7;
     const date = formatDateForAPI(document.getElementById('reportDate').value);
     const nettGTO = gto - disc;
