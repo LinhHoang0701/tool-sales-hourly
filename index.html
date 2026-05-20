@@ -6,390 +6,49 @@
   <title>POS SalesHourly v2.5 — Bảng điều khiển</title>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
   <script src="https://cdn.jsdelivr.net/npm/xlsx/dist/xlsx.full.min.js"></script>
-  <style>
-    :root {
-      --primary: #0d9488;
-      --primary-dark: #0f766e;
-      --primary-light: #f0fdfa;
-      --primary-border: #5eead4;
-      --bg: #f8fafc;
-      --bg-subtle: #f1f5f9;
-      --card: #ffffff;
-      --text: #0f172a;
-      --text-muted: #64748b;
-      --text-subtle: #94a3b8;
-      --border: #e2e8f0;
-      --success: #16a34a;
-      --success-bg: #f0fdf4;
-      --success-border: #bbf7d0;
-      --danger: #dc2626;
-      --danger-bg: #fef2f2;
-      --danger-border: #fecaca;
-      --warning: #d97706;
-      --warning-bg: #fffbeb;
-      --warning-border: #fde68a;
-      --shadow: 0 1px 3px rgba(0,0,0,0.08), 0 1px 2px rgba(0,0,0,0.04);
-      --shadow-md: 0 4px 6px -1px rgba(0,0,0,0.1), 0 2px 4px -1px rgba(0,0,0,0.06);
-      --shadow-lg: 0 10px 15px -3px rgba(0,0,0,0.1), 0 4px 6px -2px rgba(0,0,0,0.05);
-      --radius: 12px;
-      --radius-sm: 8px;
-      --radius-xs: 6px;
-      --transition: 0.15s ease;
-      --font: 'Inter', system-ui, -apple-system, sans-serif;
-      --font-mono: 'JetBrains Mono', 'Fira Code', monospace;
-    }
-    [data-theme="dark"] {
-      --bg: #0f172a;
-      --bg-subtle: #1e293b;
-      --card: #1e293b;
-      --text: #f1f5f9;
-      --text-muted: #94a3b8;
-      --text-subtle: #64748b;
-      --border: #334155;
-      --primary-light: #042f2e;
-      --primary-border: #0f766e;
-      --success-bg: #052e16;
-      --success-border: #166534;
-      --danger-bg: #450a0a;
-      --danger-border: #991b1b;
-      --warning-bg: #451a03;
-      --warning-border: #92400e;
-    }
-    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-    body {
-      font-family: var(--font);
-      background: var(--bg);
-      color: var(--text);
-      line-height: 1.5;
-      font-size: 14px;
-      min-height: 100vh;
-      transition: background var(--transition), color var(--transition);
-    }
-
-    /* HEADER */
-    .header {
-      background: var(--card);
-      border-bottom: 1px solid var(--border);
-      position: sticky; top: 0; z-index: 100;
-    }
-    .header-inner {
-      max-width: 1200px; margin: 0 auto; padding: 0 24px;
-      height: 64px; display: flex; align-items: center; justify-content: space-between; gap: 16px;
-    }
-    .logo { display: flex; align-items: center; gap: 12px; }
-    .logo-icon {
-      width: 36px; height: 36px; background: var(--primary); border-radius: 8px;
-      display: flex; align-items: center; justify-content: center; color: white; flex-shrink: 0;
-    }
-    .logo-title { font-size: 15px; font-weight: 600; line-height: 1.2; }
-    .logo-sub { font-size: 11px; color: var(--text-muted); }
-
-    /* BUTTONS */
-    .btn {
-      display: inline-flex; align-items: center; gap: 6px;
-      padding: 8px 16px; border-radius: var(--radius-xs);
-      font-size: 13px; font-weight: 500; font-family: var(--font);
-      border: 1px solid transparent; cursor: pointer;
-      transition: all var(--transition); white-space: nowrap; line-height: 1;
-    }
-    .btn:disabled { opacity: 0.5; cursor: not-allowed; }
-    .btn-primary { background: var(--primary); color: white; border-color: var(--primary); }
-    .btn-primary:hover:not(:disabled) { background: var(--primary-dark); border-color: var(--primary-dark); }
-    .btn-secondary { background: var(--bg-subtle); color: var(--text); border-color: var(--border); }
-    .btn-secondary:hover:not(:disabled) { background: var(--border); }
-    .btn-ghost { background: transparent; color: var(--text-muted); border-color: transparent; }
-    .btn-ghost:hover:not(:disabled) { background: var(--bg-subtle); color: var(--text); }
-    .btn-success { background: var(--success); color: white; }
-    .btn-success:hover:not(:disabled) { opacity: 0.9; }
-    .btn-outline { background: transparent; color: var(--primary); border-color: var(--primary); }
-    .btn-outline:hover:not(:disabled) { background: var(--primary-light); }
-    .btn-sm { padding: 6px 12px; font-size: 12px; }
-    .btn-lg { padding: 12px 24px; font-size: 15px; font-weight: 600; }
-    .btn-icon { padding: 8px; }
-    .btn-group { display: flex; flex-wrap: wrap; gap: 8px; }
-
-    /* LAYOUT */
-    .container { max-width: 1200px; margin: 0 auto; padding: 24px; }
-
-    /* STEP BAR */
-    .steps {
-      display: flex; align-items: center;
-      background: var(--card); border: 1px solid var(--border);
-      border-radius: var(--radius); padding: 16px 24px;
-      box-shadow: var(--shadow); margin-bottom: 24px;
-      gap: 8px;
-    }
-    .step { display: flex; align-items: center; gap: 10px; flex: 1; min-width: 0; }
-    .step-connector { flex: 1; height: 1px; background: var(--border); min-width: 16px; }
-    .step-num {
-      width: 30px; height: 30px; border-radius: 50%;
-      border: 2px solid var(--border); display: flex; align-items: center; justify-content: center;
-      font-size: 12px; font-weight: 600; color: var(--text-muted); flex-shrink: 0;
-      transition: all var(--transition);
-    }
-    .step.active .step-num { background: var(--primary); color: white; border-color: var(--primary); }
-    .step.done .step-num { background: var(--success); color: white; border-color: var(--success); }
-    .step-label { font-size: 13px; font-weight: 500; color: var(--text-muted); white-space: nowrap; }
-    .step-desc { font-size: 11px; color: var(--text-subtle); white-space: nowrap; }
-    .step.active .step-label { color: var(--primary); font-weight: 600; }
-    .step.done .step-label { color: var(--success); }
-
-    /* SECTION */
-    .section {
-      background: var(--card); border: 1px solid var(--border);
-      border-radius: var(--radius); box-shadow: var(--shadow); margin-bottom: 24px; overflow: hidden;
-    }
-    .section-header {
-      padding: 18px 24px; border-bottom: 1px solid var(--border);
-      display: flex; align-items: center; justify-content: space-between;
-    }
-    .section-title { display: flex; align-items: center; gap: 10px; }
-    .section-badge {
-      width: 26px; height: 26px; border-radius: 6px;
-      background: var(--primary-light); color: var(--primary);
-      display: flex; align-items: center; justify-content: center;
-      font-size: 12px; font-weight: 700; flex-shrink: 0;
-    }
-    .section-name { font-size: 15px; font-weight: 600; }
-    .section-body { padding: 24px; }
-
-    /* FORMS */
-    .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
-    .form-grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; }
-    .field { display: flex; flex-direction: column; gap: 5px; }
-    .field label { font-size: 11px; font-weight: 600; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; }
-    .required { color: var(--danger); }
-    .field input, .field select, .field textarea {
-      width: 100%; padding: 9px 12px; border: 1px solid var(--border);
-      border-radius: var(--radius-xs); font-family: var(--font); font-size: 14px;
-      background: var(--card); color: var(--text);
-      transition: border-color var(--transition), box-shadow var(--transition); outline: none;
-    }
-    .field input:focus, .field select:focus, .field textarea:focus {
-      border-color: var(--primary);
-      box-shadow: 0 0 0 3px rgba(13,148,136,0.12);
-    }
-    .field input.error { border-color: var(--danger); }
-    .field textarea { resize: vertical; font-family: var(--font-mono); font-size: 12px; line-height: 1.6; min-height: 220px; }
-    .field-hint { font-size: 11px; color: var(--text-subtle); }
-
-    /* TOKEN DISPLAY */
-    .token-row { display: flex; margin-top: 12px; }
-    .token-row input {
-      flex: 1; padding: 9px 12px; border: 1px solid var(--border);
-      border-radius: var(--radius-xs) 0 0 var(--radius-xs); border-right: none;
-      font-family: var(--font-mono); font-size: 12px;
-      background: var(--bg-subtle); color: var(--text-muted); outline: none;
-    }
-    .token-row input.has-token { color: var(--success); border-color: var(--success-border); background: var(--success-bg); }
-    .token-copy {
-      padding: 9px 14px; background: var(--bg-subtle); border: 1px solid var(--border);
-      border-radius: 0 var(--radius-xs) var(--radius-xs) 0; cursor: pointer;
-      color: var(--text-muted); transition: all var(--transition);
-      display: flex; align-items: center; gap: 5px; font-size: 12px; font-family: var(--font); white-space: nowrap;
-    }
-    .token-copy:hover { background: var(--border); color: var(--text); }
-    .token-status { display: flex; align-items: center; gap: 6px; font-size: 12px; margin-top: 6px; color: var(--text-subtle); }
-    .token-status.ok { color: var(--success); }
-
-    /* INFOBOX */
-    .infobox {
-      padding: 13px 16px; border-radius: var(--radius-xs);
-      border: 1px solid var(--primary-border); background: var(--primary-light);
-    }
-    .infobox-title { font-weight: 600; color: var(--primary); font-size: 13px; margin-bottom: 4px; }
-    .infobox p { color: var(--text-muted); font-size: 13px; margin: 2px 0; }
-    .infobox.warning { border-color: var(--warning-border); background: var(--warning-bg); }
-    .infobox.warning .infobox-title { color: var(--warning); }
-    .infobox.danger { border-color: var(--danger-border); background: var(--danger-bg); }
-    .infobox.danger .infobox-title { color: var(--danger); }
-    .infobox.success { border-color: var(--success-border); background: var(--success-bg); }
-    .infobox.success .infobox-title { color: var(--success); }
-
-    /* PAYMENT */
-    .payment-total {
-      display: flex; justify-content: space-between; align-items: center;
-      padding: 9px 12px; background: var(--bg-subtle);
-      border-radius: var(--radius-xs); border: 1px solid var(--border);
-      margin-top: 10px; font-size: 13px;
-    }
-    .payment-total-label { color: var(--text-muted); }
-    .payment-total-value { font-weight: 600; font-family: var(--font-mono); }
-
-    /* FILE DROP */
-    .drop-zone {
-      border: 2px dashed var(--border); border-radius: var(--radius-sm);
-      padding: 36px 24px; text-align: center; cursor: pointer;
-      background: var(--bg-subtle); transition: all var(--transition);
-    }
-    .drop-zone:hover, .drop-zone.dragover { border-color: var(--primary); background: var(--primary-light); }
-    .drop-icon {
-      width: 46px; height: 46px; background: var(--card); border: 1px solid var(--border);
-      border-radius: 10px; display: flex; align-items: center; justify-content: center;
-      margin: 0 auto 14px; color: var(--text-muted);
-    }
-    .drop-zone p { color: var(--text-muted); font-size: 13px; margin: 3px 0; }
-    .drop-zone strong { color: var(--text); }
-    .file-meta {
-      display: flex; align-items: center; gap: 10px; padding: 11px 14px;
-      background: var(--success-bg); border: 1px solid var(--success-border);
-      border-radius: var(--radius-xs); margin-top: 10px;
-    }
-    .file-meta-icon { color: var(--success); flex-shrink: 0; }
-    .file-meta-name { font-weight: 500; font-size: 13px; }
-    .file-meta-detail { font-size: 12px; color: var(--text-muted); }
-
-    /* COLUMN MAPPING */
-    .col-map {
-      padding: 14px 16px; background: var(--warning-bg);
-      border: 1px solid var(--warning-border); border-radius: var(--radius-xs); margin-top: 10px;
-    }
-    .col-map-title { font-weight: 600; color: var(--warning); font-size: 13px; margin-bottom: 10px; display: flex; align-items: center; gap: 6px; }
-
-    /* TABS */
-    .tabs { display: flex; border-bottom: 1px solid var(--border); }
-    .tab {
-      padding: 11px 20px; font-size: 13px; font-weight: 500; color: var(--text-muted);
-      cursor: pointer; border-bottom: 2px solid transparent; margin-bottom: -1px;
-      transition: all var(--transition); display: flex; align-items: center; gap: 6px;
-    }
-    .tab:hover { color: var(--text); }
-    .tab.active { color: var(--primary); border-bottom-color: var(--primary); }
-    .tab-panel { display: none; padding-top: 20px; }
-    .tab-panel.active { display: block; }
-
-    /* 24H TABLE */
-    .hour-table-wrap { border: 1px solid var(--border); border-radius: var(--radius-sm); overflow: hidden; }
-    .hour-table { width: 100%; border-collapse: collapse; font-size: 13px; }
-    .hour-table thead tr { background: var(--bg-subtle); border-bottom: 1px solid var(--border); }
-    .hour-table th {
-      padding: 9px 12px; text-align: left;
-      font-size: 11px; font-weight: 600; color: var(--text-muted);
-      text-transform: uppercase; letter-spacing: 0.4px; white-space: nowrap;
-    }
-    .hour-table td { padding: 7px 12px; border-bottom: 1px solid var(--border); vertical-align: middle; }
-    .hour-table tbody tr:last-child td { border-bottom: none; }
-    .hour-table tbody tr:hover td { background: var(--bg-subtle); }
-    .mono { font-family: var(--font-mono); font-size: 12px; }
-    .dot { width: 7px; height: 7px; border-radius: 50%; display: inline-block; }
-    .dot-empty { background: var(--border); }
-    .dot-data { background: var(--success); }
-
-    /* COLLAPSIBLE */
-    .collapse-btn {
-      display: flex; align-items: center; justify-content: space-between; width: 100%;
-      padding: 11px 14px; background: var(--bg-subtle); border: 1px solid var(--border);
-      border-radius: var(--radius-xs); cursor: pointer; font-size: 13px; font-weight: 500;
-      color: var(--text); transition: background var(--transition); font-family: var(--font);
-    }
-    .collapse-btn:hover { background: var(--border); }
-    .chevron { transition: transform 0.2s ease; color: var(--text-muted); }
-    .chevron.open { transform: rotate(180deg); }
-    .collapse-body { max-height: 0; overflow: hidden; transition: max-height 0.3s ease; }
-    .collapse-body.open { max-height: 3000px; }
-    .collapse-inner { padding: 12px 0 0; }
-
-    /* CODE BLOCK */
-    .code-block { background: #0f172a; border-radius: var(--radius-xs); overflow: hidden; }
-    [data-theme="dark"] .code-block { background: #020617; border: 1px solid var(--border); }
-    .code-toolbar {
-      display: flex; align-items: center; justify-content: space-between;
-      padding: 7px 12px; background: #1e293b; border-bottom: 1px solid #334155;
-    }
-    [data-theme="dark"] .code-toolbar { background: #0f172a; }
-    .code-lang { font-size: 11px; color: #64748b; font-family: var(--font-mono); }
-    .code-block pre {
-      margin: 0; padding: 14px 16px; font-family: var(--font-mono); font-size: 12px;
-      line-height: 1.6; color: #e2e8f0; overflow-x: auto;
-      max-height: 380px; overflow-y: auto; white-space: pre-wrap; word-break: break-all;
-    }
-
-    /* API RESULT */
-    .api-result { border-radius: var(--radius-sm); overflow: hidden; border: 1px solid var(--border); margin-top: 16px; }
-    .api-result-header { display: flex; align-items: center; gap: 10px; padding: 13px 16px; font-weight: 500; font-size: 14px; }
-    .api-result.success .api-result-header { background: var(--success-bg); color: var(--success); border-bottom: 1px solid var(--success-border); }
-    .api-result.error .api-result-header { background: var(--danger-bg); color: var(--danger); border-bottom: 1px solid var(--danger-border); }
-    .api-result.idle .api-result-header { background: var(--bg-subtle); color: var(--text-muted); }
-
-    /* DRAWER */
-    .backdrop {
-      position: fixed; inset: 0; background: rgba(0,0,0,0.4); z-index: 200;
-      opacity: 0; pointer-events: none; transition: opacity 0.2s ease;
-    }
-    .backdrop.open { opacity: 1; pointer-events: all; }
-    .drawer {
-      position: fixed; top: 0; right: 0; bottom: 0; width: 460px; max-width: 100vw;
-      background: var(--card); box-shadow: var(--shadow-lg); z-index: 201;
-      transform: translateX(100%); transition: transform 0.25s cubic-bezier(0.4,0,0.2,1);
-      display: flex; flex-direction: column;
-    }
-    .drawer.open { transform: translateX(0); }
-    .drawer-header { padding: 18px 24px; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; }
-    .drawer-title { font-size: 15px; font-weight: 600; }
-    .drawer-body { flex: 1; overflow-y: auto; padding: 24px; }
-    .drawer-footer { padding: 14px 24px; border-top: 1px solid var(--border); display: flex; gap: 8px; justify-content: flex-end; }
-
-    /* TOAST */
-    .toast-container { position: fixed; top: 72px; right: 20px; z-index: 500; display: flex; flex-direction: column; gap: 8px; max-width: 360px; }
-    .toast {
-      display: flex; align-items: flex-start; gap: 10px; padding: 13px 15px;
-      background: var(--card); border: 1px solid var(--border);
-      border-radius: var(--radius-sm); box-shadow: var(--shadow-md);
-      animation: slideIn 0.2s ease; font-size: 13px;
-    }
-    .toast.success { border-left: 3px solid var(--success); }
-    .toast.error { border-left: 3px solid var(--danger); }
-    .toast.warning { border-left: 3px solid var(--warning); }
-    .toast.info { border-left: 3px solid var(--primary); }
-    .toast-msg { flex: 1; color: var(--text); line-height: 1.4; }
-    .toast-close { background: none; border: none; cursor: pointer; color: var(--text-muted); padding: 0; font-size: 14px; line-height: 1; flex-shrink: 0; }
-    @keyframes slideIn { from { transform: translateX(16px); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
-
-    /* SPINNER */
-    .spinner {
-      display: inline-block; width: 13px; height: 13px;
-      border: 2px solid rgba(255,255,255,0.35); border-top-color: currentColor;
-      border-radius: 50%; animation: spin 0.7s linear infinite;
-    }
-    @keyframes spin { to { transform: rotate(360deg); } }
-    .progress-bar { height: 3px; background: var(--border); border-radius: 2px; overflow: hidden; margin-top: 8px; }
-    .progress-fill { height: 100%; background: var(--primary); width: 0; transition: width 2s ease; }
-
-    /* DIVIDER */
-    .divider { height: 1px; background: var(--border); margin: 20px 0; }
-    .divider-or {
-      display: flex; align-items: center; gap: 10px; margin: 16px 0;
-    }
-    .divider-or::before, .divider-or::after { content: ''; flex: 1; height: 1px; background: var(--border); }
-    .divider-or span { font-size: 12px; color: var(--text-muted); white-space: nowrap; }
-
-    /* UTIL */
-    .mt-2 { margin-top: 8px; }
-    .mt-3 { margin-top: 12px; }
-    .mt-4 { margin-top: 16px; }
-    .mb-3 { margin-bottom: 12px; }
-    .mb-4 { margin-bottom: 16px; }
-    .flex { display: flex; }
-    .items-center { align-items: center; }
-    .justify-between { justify-content: space-between; }
-    .gap-2 { gap: 8px; }
-    .text-sm { font-size: 13px; }
-    .text-xs { font-size: 12px; }
-    .text-muted { color: var(--text-muted); }
-    .font-600 { font-weight: 600; }
-    .hidden { display: none !important; }
-
-    @media (max-width: 768px) {
-      .container { padding: 16px; }
-      .form-grid, .form-grid-3 { grid-template-columns: 1fr; }
-      .steps { flex-wrap: wrap; gap: 12px; }
-      .step-connector { display: none; }
-      .drawer { width: 100%; }
-      .hour-table th:nth-child(4), .hour-table td:nth-child(4) { display: none; }
-    }
-  </style>
+  <link rel="stylesheet" href="style.css">
 </head>
 <body>
+
+<!-- ── RENEW TOKEN MODAL ─────────────────────────────────────── -->
+<div id="renewModal" class="modal-overlay" style="display:none">
+  <div class="modal-card">
+    <div class="modal-header">
+      <div class="modal-logo" style="background:#fffbeb;">
+        <svg width="22" height="22" fill="none" stroke="#d97706" stroke-width="2" viewBox="0 0 24 24">
+          <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/>
+          <line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/>
+        </svg>
+      </div>
+      <div>
+        <div class="modal-title">Phiên đăng nhập sắp hết hạn</div>
+        <div class="modal-subtitle" id="renewModalTime">Token sẽ hết hạn trong ít phút nữa</div>
+      </div>
+    </div>
+    <div class="modal-body" style="padding-bottom:8px;">
+      <p style="font-size:13px;color:var(--text-muted);line-height:1.6;">Nhấn nút bên dưới để tự động lấy token mới. Tất cả dữ liệu đang nhập sẽ được giữ nguyên.</p>
+      <div id="renewError" class="modal-error hidden"></div>
+      <div id="renewProgress" class="progress-bar hidden mt-3"><div class="progress-fill" id="renewProgressFill"></div></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-primary btn-lg" id="btnRenew" onclick="renewToken()" style="width:100%">
+        <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+          <polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 .49-3.5"/>
+        </svg>
+        <span id="btnRenewText">Lấy token mới</span>
+        <span class="spinner hidden" id="renewSpinner"></span>
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- ── GLOBAL LOADING OVERLAY ─────────────────────────────────── -->
+<div id="globalLoader" class="global-loader hidden" aria-live="polite">
+  <div class="global-loader-card">
+    <div class="global-loader-spinner"></div>
+    <div class="global-loader-msg" id="globalLoaderMsg">Đang xử lý…</div>
+  </div>
+</div>
 
 <header class="header">
   <div class="header-inner">
@@ -401,7 +60,7 @@
       </div>
       <div>
         <div class="logo-title">POS SalesHourly</div>
-        <div class="logo-sub">Bảng điều khiển API v2.5</div>
+        <div class="logo-sub">Gửi dữ liệu bán hàng theo giờ</div>
       </div>
     </div>
     <button class="btn btn-ghost btn-sm" onclick="toggleTheme()">
@@ -429,42 +88,66 @@
     </button>
   </div>
   <div class="drawer-body">
-    <div class="field mb-4">
-      <label>Giờ (00–23) <span class="required">*</span></label>
-      <select id="entryHour"></select>
+    <!-- Chọn giờ -->
+    <div class="drawer-section">
+      <div class="drawer-section-title">Khung giờ</div>
+      <div class="field">
+        <label>Giờ trong ngày <span class="required">*</span></label>
+        <select id="entryHour"></select>
+      </div>
     </div>
-    <div class="form-grid mb-4">
-      <div class="field">
-        <label>Số phiếu</label>
-        <input type="number" id="entryReceiptCount" value="0" min="0">
+
+    <!-- Doanh thu -->
+    <div class="drawer-section">
+      <div class="drawer-section-title">Doanh thu</div>
+      <div class="form-grid">
+        <div class="field">
+          <label>Số phiếu</label>
+          <input type="number" id="entryReceiptCount" value="0" min="0">
+        </div>
+        <div class="field field-vnd">
+          <label>Doanh thu (trước CK) <span class="required">*</span></label>
+          <input type="text" id="entryGTO" inputmode="decimal" value="0 ₫"
+            onfocus="vndFocus(this)" onblur="vndBlur(this)" oninput="calcDrawerVAT()">
+        </div>
+        <div class="field field-vnd">
+          <label>Chiết khấu / giảm giá</label>
+          <input type="text" id="entryDiscount" inputmode="decimal" value="0 ₫"
+            onfocus="vndFocus(this)" onblur="vndBlur(this)" oninput="calcDrawerVAT()">
+        </div>
+        <div class="field field-vnd">
+          <label>Thuế VAT (tự tính)</label>
+          <input type="text" id="entryVAT" readonly value="0 ₫"
+            style="background:var(--bg-subtle);color:var(--text-muted);cursor:default;text-align:right;font-family:var(--font-mono);padding-right:26px">
+        </div>
       </div>
-      <div class="field">
-        <label>GTO gộp (Trước chiết khấu)</label>
-        <input type="number" id="entryGTO" value="0" step="0.01" min="0" oninput="calcDrawerVAT()">
-      </div>
-      <div class="field">
-        <label>Chiết khấu</label>
-        <input type="number" id="entryDiscount" value="0" step="0.01" min="0" oninput="calcDrawerVAT()">
-      </div>
-      <div class="field">
-        <label>VAT (tự tính)</label>
-        <input type="text" id="entryVAT" readonly style="background:var(--bg-subtle);color:var(--text-muted);">
-      </div>
-      <div class="field">
-        <label>Tiền mặt</label>
-        <input type="number" id="entryCash" value="0" step="0.01" min="0">
-      </div>
-      <div class="field">
-        <label>ATM</label>
-        <input type="number" id="entryATM" value="0" step="0.01" min="0">
-      </div>
-      <div class="field">
-        <label>Visa</label>
-        <input type="number" id="entryVisa" value="0" step="0.01" min="0">
-      </div>
-      <div class="field">
-        <label>Others Amount</label>
-        <input type="number" id="entryOthers" value="0" step="0.01" min="0">
+    </div>
+
+    <!-- Thanh toán -->
+    <div class="drawer-section">
+      <div class="drawer-section-title">Phương thức thanh toán</div>
+      <p style="font-size:12px;color:var(--text-muted);margin-bottom:10px;line-height:1.5">Để <strong>0</strong> nếu không cần phân tách — hệ thống sẽ tự gán toàn bộ vào Tiền mặt.</p>
+      <div class="form-grid">
+        <div class="field field-vnd">
+          <label>Tiền mặt</label>
+          <input type="text" id="entryCash" inputmode="decimal" value="0 ₫"
+            onfocus="vndFocus(this)" onblur="vndBlur(this)">
+        </div>
+        <div class="field field-vnd">
+          <label>ATM</label>
+          <input type="text" id="entryATM" inputmode="decimal" value="0 ₫"
+            onfocus="vndFocus(this)" onblur="vndBlur(this)">
+        </div>
+        <div class="field field-vnd">
+          <label>Visa</label>
+          <input type="text" id="entryVisa" inputmode="decimal" value="0 ₫"
+            onfocus="vndFocus(this)" onblur="vndBlur(this)">
+        </div>
+        <div class="field field-vnd">
+          <label>Thanh toán khác</label>
+          <input type="text" id="entryOthers" inputmode="decimal" value="0 ₫"
+            onfocus="vndFocus(this)" onblur="vndBlur(this)">
+        </div>
       </div>
     </div>
   </div>
@@ -482,141 +165,96 @@
 
 <div class="container">
 
+  <!-- WELCOME BANNER -->
+  <div class="welcome-banner">
+    <svg width="20" height="20" fill="none" stroke="var(--primary)" stroke-width="2" viewBox="0 0 24 24" style="flex-shrink:0"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+    <div>
+      <div style="font-weight:600;color:var(--text);font-size:13px;margin-bottom:4px;">Hướng dẫn sử dụng nhanh</div>
+      <div class="welcome-steps">
+        <span class="ws-chip">1&nbsp;·&nbsp;Điền ngày &amp; mã máy</span>
+        <span class="ws-arr">→</span>
+        <span class="ws-chip">2&nbsp;·&nbsp;Upload file Excel</span>
+        <span class="ws-arr">→</span>
+        <span class="ws-chip">✓&nbsp;Nhấn Gửi báo cáo</span>
+      </div>
+    </div>
+  </div>
+
   <!-- STEPS -->
   <div class="steps">
     <div class="step active" id="s1">
       <div class="step-num" id="sn1">1</div>
       <div>
-        <div class="step-label">Xác thực Token</div>
-        <div class="step-desc">OAuth2 access token</div>
+        <div class="step-label">Đăng nhập</div>
+        <div class="step-desc">Nhập tài khoản API</div>
       </div>
     </div>
     <div class="step-connector"></div>
     <div class="step" id="s2">
       <div class="step-num" id="sn2">2</div>
       <div>
-        <div class="step-label">Cấu hình báo cáo</div>
-        <div class="step-desc">Thông số mặc định</div>
+        <div class="step-label">Thông tin báo cáo</div>
+        <div class="step-desc">Ngày, mã máy, số lô</div>
       </div>
     </div>
     <div class="step-connector"></div>
     <div class="step" id="s3">
-      <div class="step-num" id="sn3">3</div>
+      <div class="step-num" id="sn3">2</div>
       <div>
-        <div class="step-label">Nhập liệu & Gửi</div>
-        <div class="step-desc">Upload Excel hoặc nhập tay</div>
+        <div class="step-label">Tải dữ liệu & Gửi</div>
+        <div class="step-desc">Upload Excel, nhấn Gửi</div>
       </div>
     </div>
   </div>
+  <!-- hidden anchor for scroll/JS compat -->
+  <div id="s1" style="display:none"><span id="sn1"></span></div>
 
-  <!-- BƯỚC 1: TOKEN -->
-  <div class="section">
-    <div class="section-header">
-      <div class="section-title">
-        <div class="section-badge">1</div>
-        <span class="section-name">Xác thực OAuth2 Token</span>
-      </div>
-      <div class="token-status" id="tokenStatusBadge">
-        <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-          <circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>
-        </svg>
-        Chưa có token
-      </div>
-    </div>
-    <div class="section-body">
-      <div class="form-grid">
-        <div class="field">
-          <label for="username">Tên đăng nhập <span class="required">*</span></label>
-          <input type="text" id="username" value="postestuservn" autocomplete="off">
-        </div>
-        <div class="field">
-          <label for="password">Mật khẩu <span class="required">*</span></label>
-          <input type="password" id="password" value="@APITest1234">
-        </div>
-      </div>
-      <div class="mt-4">
-        <button class="btn btn-primary" id="btnToken" onclick="getToken()">
-          <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-            <path d="M21 2l-2 2m-7.61 7.61a5.5 5.5 0 1 1-7.778 7.778 5.5 5.5 0 0 1 7.777-7.777zm0 0L15.5 7.5m0 0l3 3L22 7l-3-3m-3.5 3.5L19 4"/>
-          </svg>
-          <span id="btnTokenText">Lấy Token</span>
-          <span class="spinner hidden" id="tokenSpinner"></span>
-        </button>
-      </div>
-      <div id="tokenProgressWrap" class="progress-bar hidden mt-2"><div class="progress-fill" id="tokenProgressFill"></div></div>
-      <div class="token-row">
-        <input type="text" id="token" readonly placeholder="Token sẽ xuất hiện tại đây sau khi xác thực…">
-        <button class="token-copy" onclick="copyText('token')">
-          <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-            <rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>
-          </svg>
-          Sao chép
-        </button>
-      </div>
-      <div class="mt-3">
-        <button class="collapse-btn" onclick="toggleCollapse('tokenRaw')">
-          <span class="flex items-center gap-2">
-            <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-              <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
-            </svg>
-            Phản hồi thô từ server
-          </span>
-          <svg class="chevron" id="chevron-tokenRaw" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-            <polyline points="6 9 12 15 18 9"/>
-          </svg>
-        </button>
-        <div class="collapse-body" id="tokenRaw">
-          <div class="collapse-inner">
-            <div class="code-block">
-              <div class="code-toolbar">
-                <span class="code-lang">JSON</span>
-                <button class="btn btn-ghost btn-sm" onclick="copyPreText('tokenRawPre')">Sao chép</button>
-              </div>
-              <pre id="tokenRawPre">— chưa có phản hồi —</pre>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
+  <!-- BƯỚC 1: TOKEN — ẩn khỏi UI, JS vẫn xử lý ngầm -->
+  <div id="section-1" style="display:none" aria-hidden="true">
+    <div id="tokenStatusBadge" class="token-status"></div>
+    <input type="text" id="token" readonly>
+    <span id="tokenCountdown" class="hidden"><span id="tokenCountdownText"></span></span>
+    <pre id="tokenRawPre"></pre>
   </div>
 
   <!-- BƯỚC 2: CẤU HÌNH -->
-  <div class="section">
+  <div class="section" id="section-2">
     <div class="section-header">
       <div class="section-title">
-        <div class="section-badge">2</div>
-        <span class="section-name">Cấu hình báo cáo</span>
+        <div class="section-badge">1</div>
+        <div>
+          <span class="section-name">Thông tin báo cáo</span>
+          <div class="section-subtitle">Điền ngày, mã máy và số lô trước khi tải file</div>
+        </div>
       </div>
     </div>
     <div class="section-body">
-      <div class="infobox warning mb-4">
-        <div class="infobox-title">Lưu ý — Phương thức thanh toán</div>
-        <p>Nếu tất cả phương thức = 0, toàn bộ doanh thu sau chiết khấu tự động phân bổ vào <strong>Tiền mặt</strong>. Tổng các phương thức = GTO (nett sau chiết khấu, trước VAT). Thuế <strong>VAT</strong> tự tính theo tỷ lệ đã cấu hình.</p>
-      </div>
-      <div class="form-grid">
-        <!-- CỘT TRÁI -->
-        <div style="display:flex;flex-direction:column;gap:14px;">
+      <div class="form-grid" style="gap:20px;align-items:start">
+        <!-- CỘT TRÁI: Thông tin cơ bản -->
+        <div class="config-card">
+          <div class="config-card-title">
+            <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg>
+            Thông tin cơ bản
+          </div>
           <div class="field">
             <label for="machineId">Mã máy POS <span class="required">*</span></label>
             <input type="text" id="machineId" value="50100904" required>
-            <span class="field-hint">Mã định danh duy nhất của máy POS</span>
+            <span class="field-hint">Do quản trị viên cấp — không tự sửa</span>
           </div>
           <div class="field">
-            <label for="batchId">Số lô (Mã đóng ZReport) <span class="required">*</span></label>
+            <label for="batchId">Số lô (ZReport) <span class="required">*</span></label>
             <input type="text" id="batchId" value="1" required>
+            <span class="field-hint">Thứ tự lần đóng Z-Report trong ngày, ví dụ: 1</span>
           </div>
           <div class="field">
             <label for="reportDate">Ngày báo cáo <span class="required">*</span></label>
             <input type="date" id="reportDate" required>
+            <span class="field-hint">Ngày cần gửi (thường là hôm qua)</span>
           </div>
           <div class="field">
             <label for="vatPercent">Thuế VAT (%) <span class="required">*</span></label>
             <input type="number" id="vatPercent" value="7" step="0.1" min="0" max="100" required>
-            <span class="field-hint">Nhập tỷ lệ VAT áp dụng (ví dụ: 7, 8, 10)</span>
-          </div>
-          <div class="field">
-            <label for="receiptCount">Số phiếu mặc định mỗi giờ</label>
-            <input type="number" id="receiptCount" value="10" min="0">
+            <span class="field-hint">Thường là 7% — hỏi quản trị nếu không chắc</span>
           </div>
           <div class="field">
             <label for="vatRegistered">Đã đăng ký VAT <span class="required">*</span></label>
@@ -624,50 +262,60 @@
               <option value="Y">Có (Y)</option>
               <option value="N" selected>Không (N)</option>
             </select>
+            <span class="field-hint">Theo giấy phép đăng ký kinh doanh</span>
           </div>
         </div>
-        <!-- CỘT PHẢI -->
-        <div style="display:flex;flex-direction:column;gap:12px;">
-          <div style="font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:0.5px;color:var(--text-muted);">
-            Phương thức thanh toán <span class="text-xs" style="text-transform:none;font-weight:400;">(sau CK, trước VAT)</span>
+
+        <!-- CỘT PHẢI: Phương thức thanh toán -->
+        <div class="config-card">
+          <div class="config-card-title">
+            <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="1" y="4" width="22" height="16" rx="2" ry="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>
+            Phương thức thanh toán <span class="tag-opt" style="margin-left:6px">không bắt buộc</span>
           </div>
-          <div class="form-grid-3">
-            <div class="field">
+          <div class="guide-note">Để <strong>tất cả = 0</strong> nếu không cần phân tách. Hệ thống tự gán toàn bộ vào Tiền mặt.</div>
+          <div class="payment-grid-2">
+            <div class="payment-item">
               <label>Tiền mặt</label>
-              <input type="number" id="cash" value="0" step="0.01" min="0" placeholder="0 = tự động" oninput="updatePaymentTotal()">
+              <input type="text" id="cash" inputmode="decimal" value="0 ₫"
+                onfocus="vndFocus(this)" onblur="vndBlur(this)" oninput="updatePaymentTotal()">
             </div>
-            <div class="field">
+            <div class="payment-item">
               <label>ATM</label>
-              <input type="number" id="atm" value="0" step="0.01" min="0" oninput="updatePaymentTotal()">
+              <input type="text" id="atm" inputmode="decimal" value="0 ₫"
+                onfocus="vndFocus(this)" onblur="vndBlur(this)" oninput="updatePaymentTotal()">
             </div>
-            <div class="field">
+            <div class="payment-item">
               <label>Visa</label>
-              <input type="number" id="visa" value="0" step="0.01" min="0" oninput="updatePaymentTotal()">
+              <input type="text" id="visa" inputmode="decimal" value="0 ₫"
+                onfocus="vndFocus(this)" onblur="vndBlur(this)" oninput="updatePaymentTotal()">
             </div>
-            <div class="field">
+            <div class="payment-item">
               <label>Mastercard</label>
-              <input type="number" id="mastercard" value="0" step="0.01" min="0" oninput="updatePaymentTotal()">
+              <input type="text" id="mastercard" inputmode="decimal" value="0 ₫"
+                onfocus="vndFocus(this)" onblur="vndBlur(this)" oninput="updatePaymentTotal()">
             </div>
-            <div class="field">
+            <div class="payment-item">
               <label>Amex</label>
-              <input type="number" id="amex" value="0" step="0.01" min="0" oninput="updatePaymentTotal()">
+              <input type="text" id="amex" inputmode="decimal" value="0 ₫"
+                onfocus="vndFocus(this)" onblur="vndBlur(this)" oninput="updatePaymentTotal()">
             </div>
-            <div class="field">
+            <div class="payment-item">
               <label>Voucher</label>
-              <input type="number" id="voucher" value="0" step="0.01" min="0" oninput="updatePaymentTotal()">
+              <input type="text" id="voucher" inputmode="decimal" value="0 ₫"
+                onfocus="vndFocus(this)" onblur="vndBlur(this)" oninput="updatePaymentTotal()">
             </div>
           </div>
           <div class="payment-total">
             <span class="payment-total-label">Tổng thanh toán đã cấu hình</span>
-            <span class="payment-total-value" id="paymentTotalDisplay">0.00</span>
+            <span class="payment-total-value" id="paymentTotalDisplay">0 ₫</span>
           </div>
-          <div style="font-size:12px;color:var(--text-subtle);">Nếu tất cả = 0 → tự động phân bổ toàn bộ vào Tiền mặt</div>
 
           <div class="divider-or"><span>Thông tin bổ sung (chỉ F&amp;B)</span></div>
           <div class="form-grid">
-            <div class="field">
+            <div class="field field-vnd">
               <label>Phụ thu dịch vụ (F&amp;B)</label>
-              <input type="number" id="serviceCharge" value="0" step="0.01" min="0">
+              <input type="text" id="serviceCharge" inputmode="decimal" value="0 ₫"
+                onfocus="vndFocus(this)" onblur="vndBlur(this)">
             </div>
             <div class="field">
               <label>Số khách (F&amp;B)</label>
@@ -684,7 +332,7 @@
             <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
               <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/>
             </svg>
-            Xem ví dụ payload đúng định dạng
+            Xem cấu trúc dữ liệu <span class="tag-opt">dành cho IT</span>
           </span>
           <svg class="chevron" id="chevron-examplePayload" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
             <polyline points="6 9 12 15 18 9"/>
@@ -731,30 +379,27 @@
           <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
             <polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 .49-3.5"/>
           </svg>
-          Đặt lại form
-        </button>
-        <button class="btn btn-outline" onclick="validateConfig()">
-          <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-            <polyline points="20 6 9 17 4 12"/>
-          </svg>
-          Kiểm tra cấu hình
+          Đặt lại
         </button>
         <button class="btn btn-success" onclick="generateEmpty24Hours()">
           <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-            <circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>
+            <polyline points="20 6 9 17 4 12"/>
           </svg>
-          Tạo 24 giờ trống
+          Xác nhận &amp; Tiếp tục
         </button>
       </div>
     </div>
   </div>
 
   <!-- BƯỚC 3: NHẬP LIỆU & GỬI -->
-  <div class="section">
+  <div class="section" id="section-3">
     <div class="section-header">
       <div class="section-title">
-        <div class="section-badge">3</div>
-        <span class="section-name">Nhập liệu &amp; Gửi dữ liệu</span>
+        <div class="section-badge">2</div>
+        <div>
+          <span class="section-name">Tải dữ liệu &amp; Gửi báo cáo</span>
+          <div class="section-subtitle">Upload file từ hệ thống POS để tự động tổng hợp và gửi</div>
+        </div>
       </div>
     </div>
     <div class="section-body">
@@ -764,14 +409,14 @@
           <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
             <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/>
           </svg>
-          Upload file Excel
+          Tải file Excel <span class="tag-rec">Nên dùng</span>
         </div>
         <div class="tab" id="tab-manual" onclick="switchTab('manual')">
           <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
             <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
             <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
           </svg>
-          Nhập tay
+          Nhập tay <span class="tag-opt">nâng cao</span>
         </div>
       </div>
 
@@ -784,8 +429,9 @@
               <polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/>
             </svg>
           </div>
-          <p><strong>Kéo thả file hoặc bấm để chọn</strong></p>
-          <p>Hỗ trợ: .csv, .xls, .xlsx — Tối đa 10MB</p>
+          <p><strong>Bấm để chọn file hoặc kéo thả vào đây</strong></p>
+          <p style="margin-top:6px">Xuất file từ phần mềm POS của bạn, rồi tải lên đây</p>
+          <p style="font-size:11px;color:var(--text-subtle);margin-top:4px">.csv &nbsp;·&nbsp; .xls &nbsp;·&nbsp; .xlsx &nbsp;—&nbsp; tối đa 10 MB</p>
           <input type="file" id="fileInput" accept=".csv,.xls,.xlsx" style="display:none">
         </div>
         <div id="fileMetaBox" class="hidden">
@@ -805,24 +451,24 @@
               <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/>
               <line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/>
             </svg>
-            Chọn cột chứa thời gian giao dịch
+            Bước thêm: Chọn cột chứa thời gian giao dịch
           </div>
           <div style="display:grid;grid-template-columns:1fr auto;gap:8px;align-items:end;">
             <div class="field">
-              <label>Cột thời gian trong file Excel</label>
+              <label>Cột thời gian trong file</label>
               <select id="timeColumnSelect"></select>
             </div>
-            <button class="btn btn-outline" onclick="applyColumnMapping()">Áp dụng</button>
+            <button class="btn btn-outline" onclick="applyColumnMapping()">Xác nhận</button>
           </div>
-          <p style="font-size:12px;color:var(--text-muted);margin-top:8px;">Không có cột thời gian? Chọn "Phân bổ tất cả vào giờ 00" rồi chỉnh thủ công sau.</p>
+          <p style="font-size:12px;color:var(--text-muted);margin-top:8px;">ℹ️ Không tìm thấy cột giờ? Chọn <em>"Phân bổ tất cả vào giờ 00"</em> — có thể chỉnh lại sau.</p>
         </div>
       </div>
 
       <!-- TAB NHẬP TAY -->
       <div class="tab-panel" id="panel-manual">
         <div class="infobox danger mb-4">
-          <div class="infobox-title">Yêu cầu bắt buộc: đủ 24 giờ (00–23)</div>
-          <p>API sẽ trả lỗi nếu thiếu bất kỳ giờ nào. Dùng "Tự động điền giờ thiếu" để bổ sung nhanh.</p>
+          <div class="infobox-title">⚠️ Chú ý: phải có đủ 24 dòng (giờ 00–23)</div>
+          <p>API sẽ báo lỗi nếu thiếu bất kỳ giờ nào. Nhấn <strong>Tự động bổ sung giờ trống</strong> để lấp nhanh các giờ chưa có số liệu.</p>
         </div>
         <div class="btn-group mb-4">
           <button class="btn btn-primary" onclick="openAddEntryDrawer()">
@@ -831,17 +477,17 @@
             </svg>
             Thêm dữ liệu giờ
           </button>
-          <button class="btn btn-secondary" onclick="validatePayload()">
-            <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-              <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
-            </svg>
-            Kiểm tra (24 giờ)
-          </button>
           <button class="btn btn-secondary" onclick="fillMissingHours()">
             <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
               <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/>
             </svg>
-            Tự động điền giờ thiếu
+            Tự động bổ sung giờ trống
+          </button>
+          <button class="btn btn-secondary" onclick="validatePayload()">
+            <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+            </svg>
+            Kiểm tra đủ 24 giờ
           </button>
           <button class="btn btn-ghost btn-sm" onclick="sortPayloadByHour()">
             <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
@@ -854,24 +500,33 @@
       </div>
 
       <!-- BẢNG 24 GIỜ (dùng chung cả 2 tab) -->
-      <div class="flex items-center justify-between mb-3 mt-4">
-        <span class="text-sm font-600">Bảng dữ liệu 24 giờ</span>
-        <span class="text-xs text-muted" id="hourTableSummary">0 / 24 giờ có dữ liệu</span>
+      <div class="hour-header-row">
+        <div class="hour-header-title">
+          Dữ liệu theo giờ
+          <span class="text-xs text-muted" id="hourTableSummary" style="margin-left:8px;font-weight:400">0 / 24 giờ có dữ liệu</span>
+        </div>
+        <div class="hour-progress-wrap">
+          <div class="hour-progress-bar">
+            <div class="hour-progress-fill" id="hourProgressFill" style="width:0%"></div>
+          </div>
+          <span class="hour-count-badge empty" id="hourCountBadge">0 / 24</span>
+        </div>
       </div>
       <div class="hour-table-wrap">
         <table class="hour-table">
           <thead>
             <tr>
               <th>Giờ</th>
-              <th>Số phiếu</th>
-              <th>GTO</th>
-              <th>Chiết khấu</th>
-              <th>Tiền mặt</th>
+              <th class="center">Phiếu</th>
+              <th class="right">Doanh thu</th>
+              <th class="right">Chiết khấu</th>
+              <th class="right">Tiền mặt</th>
               <th>Trạng thái</th>
               <th></th>
             </tr>
           </thead>
           <tbody id="hourTableBody"></tbody>
+          <tfoot id="hourTableFoot"></tfoot>
         </table>
       </div>
 
@@ -882,7 +537,7 @@
             <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
               <polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/>
             </svg>
-            Xem / chỉnh sửa payload JSON thô
+            Dữ liệu kỹ thuật <span class="tag-opt">dành cho IT</span>
           </span>
           <svg class="chevron" id="chevron-jsonPayload" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
             <polyline points="6 9 12 15 18 9"/>
@@ -915,14 +570,14 @@
       <div class="divider"></div>
       <div class="flex items-center justify-between" style="flex-wrap:wrap;gap:12px;">
         <div>
-          <div style="font-size:15px;font-weight:600;">Gửi dữ liệu SalesHourly</div>
-          <div class="text-xs text-muted mt-2">Cần có token hợp lệ và đủ 24 giờ dữ liệu trước khi gửi</div>
+          <div style="font-size:15px;font-weight:600;">Gửi báo cáo lên hệ thống</div>
+          <div class="text-xs text-muted mt-2">ℹ️ Đảm bảo đã đăng nhập (Bước 1) và tải file (Bước 2) trước khi gửi</div>
         </div>
-        <button class="btn btn-primary btn-lg" id="btnSales" onclick="submitSales()">
+        <button class="btn btn-primary btn-lg" id="btnSales" onclick="submitSales()" style="min-width:160px">
           <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
             <line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/>
           </svg>
-          <span id="btnSalesText">Gửi dữ liệu</span>
+          <span id="btnSalesText">Gửi báo cáo</span>
           <span class="spinner hidden" id="salesSpinner"></span>
         </button>
       </div>
@@ -933,14 +588,14 @@
           <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
             <circle cx="12" cy="12" r="10"/>
           </svg>
-          <span id="apiResultTitle">Kết quả API</span>
+          <span id="apiResultTitle">Kết quả gửi</span>
         </div>
         <div class="code-block" style="border-radius:0;">
           <div class="code-toolbar">
-            <span class="code-lang">Phản hồi từ server</span>
+            <span class="code-lang">Phản hồi từ máy chủ</span>
             <button class="btn btn-ghost btn-sm" onclick="copyPreText('apiResultPre')">Sao chép</button>
           </div>
-          <pre id="apiResultPre">— chưa gửi request —</pre>
+          <pre id="apiResultPre">— chưa gửi báo cáo —</pre>
         </div>
       </div>
     </div>
@@ -962,6 +617,52 @@
   }
 
   function fmtNum(n) { return parseFloat(n || 0).toFixed(2); }
+
+  // ── VND FORMATTING ─────────────────────────────────────────────
+  function formatVND(val) {
+    const n = parseFloat(val) || 0;
+    if (n === 0) return '0 ₫';
+    return n.toLocaleString('vi-VN', { minimumFractionDigits: 0, maximumFractionDigits: 2 }) + ' ₫';
+  }
+
+  function getVNDValue(id) {
+    const el = document.getElementById(id);
+    const v = el.value.trim();
+    if (v.includes('₫')) {
+      return parseFloat(v.replace(/[₫\s]/g,'').replace(/\./g,'').replace(',','.')) || 0;
+    }
+    return parseFloat(v) || 0;
+  }
+
+  function setVNDValue(id, val) {
+    document.getElementById(id).value = formatVND(parseFloat(val) || 0);
+  }
+
+  function vndFocus(el) {
+    const v = el.value.trim();
+    let n;
+    if (v.includes('₫')) {
+      n = parseFloat(v.replace(/[₫\s]/g,'').replace(/\./g,'').replace(',','.')) || 0;
+    } else {
+      n = parseFloat(v) || 0;
+    }
+    el.value = n === 0 ? '' : String(n);
+    el.select();
+  }
+
+  function vndBlur(el) {
+    const n = parseFloat(el.value) || 0;
+    el.value = formatVND(n);
+  }
+  // parseVND: handles both formatted ("1.234.567 ₫") and raw numbers
+  function parseVND(str) {
+    const s = String(str).trim();
+    if (s.includes('₫')) {
+      return parseFloat(s.replace(/[₫\s]/g,'').replace(/\./g,'').replace(',','.')) || 0;
+    }
+    return parseFloat(s) || 0;
+  }
+  function fmtVND(n) { return formatVND(n); }
 
   function getSalesData() {
     try { return JSON.parse(document.getElementById('salesData').value); }
@@ -1031,11 +732,17 @@
   // ── STEP INDICATOR ─────────────────────────────────────────────
   const CHECK_SVG = `<svg width="13" height="13" fill="none" stroke="white" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>`;
   function stepDone(n) {
-    document.getElementById('s'+n).classList.add('done');
-    document.getElementById('s'+n).classList.remove('active');
-    document.getElementById('sn'+n).innerHTML = CHECK_SVG;
+    const el = document.getElementById('s'+n);
+    const num = document.getElementById('sn'+n);
+    if (!el) return;
+    el.classList.add('done');
+    el.classList.remove('active');
+    if (num) num.innerHTML = CHECK_SVG;
   }
-  function stepActive(n) { document.getElementById('s'+n).classList.add('active'); }
+  function stepActive(n) {
+    const el = document.getElementById('s'+n);
+    if (el) el.classList.add('active');
+  }
 
   // ── TABS ───────────────────────────────────────────────────────
   function switchTab(name) {
@@ -1048,58 +755,154 @@
   // ── PAYMENT TOTAL ──────────────────────────────────────────────
   function updatePaymentTotal() {
     const total = ['cash','atm','visa','mastercard','amex','voucher']
-      .reduce((s, id) => s + (Number(document.getElementById(id).value) || 0), 0);
-    document.getElementById('paymentTotalDisplay').textContent = fmtNum(total);
+      .reduce((s, id) => s + getVNDValue(id), 0);
+    document.getElementById('paymentTotalDisplay').textContent = formatVND(total);
   }
 
-  // ── TOKEN ──────────────────────────────────────────────────────
-  async function getToken() {
-    const user = document.getElementById('username').value.trim();
-    const pass = document.getElementById('password').value.trim();
-    if (!user || !pass) { showToast('Vui lòng nhập tên đăng nhập và mật khẩu!', 'warning'); return; }
+  // ── LOADING OVERLAY ────────────────────────────────────────────
+  function showLoader(msg = 'Đang xử lý…') {
+    document.getElementById('globalLoaderMsg').textContent = msg;
+    document.getElementById('globalLoader').classList.remove('hidden');
+  }
+  function hideLoader() {
+    document.getElementById('globalLoader').classList.add('hidden');
+  }
 
-    const btn = document.getElementById('btnToken');
-    btn.disabled = true;
-    document.getElementById('tokenSpinner').classList.remove('hidden');
-    document.getElementById('btnTokenText').textContent = 'Đang lấy…';
-    const prog = document.getElementById('tokenProgressWrap');
-    const fill = document.getElementById('tokenProgressFill');
-    prog.classList.remove('hidden');
-    setTimeout(() => fill.style.width = '85%', 50);
+  // ── HARDCODED CREDENTIALS ──────────────────────────────────────
+  const CRED_USER = 'postestuservn';
+  const CRED_PASS = '@APITest1234';
 
-    try {
-      const res = await fetch(`${BASE_URL}/token`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-        body: `grant_type=password&username=${encodeURIComponent(user)}&password=${encodeURIComponent(pass)}`,
-        mode: 'cors'
-      });
-      if (!res.ok) throw new Error(`${res.status} ${res.statusText}`);
-      const data = await res.json();
-      document.getElementById('tokenRawPre').textContent = JSON.stringify(data, null, 2);
-      const tokenEl = document.getElementById('token');
-      tokenEl.value = data.access_token || '';
-      if (data.access_token) {
-        tokenEl.classList.add('has-token');
-        const badge = document.getElementById('tokenStatusBadge');
-        badge.className = 'token-status ok';
-        badge.innerHTML = `<svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg> Token hợp lệ`;
-        stepDone(1); stepActive(2);
-        showToast('Lấy token thành công!', 'success');
-      } else {
-        showToast('Không nhận được token từ API.', 'warning');
+  // ── TOKEN STORAGE KEYS ─────────────────────────────────────────
+  const LS_TOKEN   = 'pos_access_token';
+  const LS_EXPIRES = 'pos_token_expires';  // ISO string
+  let _renewModalTimer = null;
+  let _countdownTimer  = null;
+
+  function saveSession(data) {
+    localStorage.setItem(LS_TOKEN,   data.access_token);
+    localStorage.setItem(LS_EXPIRES, new Date(data.expires).toISOString());
+  }
+
+  function loadSession() {
+    return {
+      token:   localStorage.getItem(LS_TOKEN),
+      expires: localStorage.getItem(LS_EXPIRES)
+    };
+  }
+
+  function applyToken(tokenValue, expiresISO) {
+    const tokenEl = document.getElementById('token');
+    tokenEl.value = tokenValue;
+    tokenEl.classList.add('has-token');
+    const badge = document.getElementById('tokenStatusBadge');
+    badge.className = 'token-status ok';
+    badge.innerHTML = `<svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg> Đã đăng nhập`;
+    stepDone(1); stepActive(2);
+    startCountdown(new Date(expiresISO));
+    scheduleRenewPrompt(expiresISO);
+  }
+
+  // ── COUNTDOWN DISPLAY ──────────────────────────────────────────
+  function startCountdown(expiresDate) {
+    if (_countdownTimer) clearInterval(_countdownTimer);
+    const chip = document.getElementById('tokenCountdown');
+    const txt  = document.getElementById('tokenCountdownText');
+    chip.classList.remove('hidden');
+    function tick() {
+      const secsLeft = Math.floor((expiresDate - Date.now()) / 1000);
+      if (secsLeft <= 0) {
+        txt.textContent = 'Hết hạn'; chip.className = 'token-countdown danger';
+        clearInterval(_countdownTimer); return;
       }
+      const m = Math.floor(secsLeft / 60), s = secsLeft % 60;
+      txt.textContent = `Hết hạn sau ${m}:${String(s).padStart(2,'0')}`;
+      chip.className = 'token-countdown' + (secsLeft < 300 ? ' danger' : secsLeft < 600 ? ' warn' : '');
+    }
+    tick();
+    _countdownTimer = setInterval(tick, 1000);
+  }
+
+  // ── RENEW PROMPT SCHEDULER (shows modal 5 min before expiry) ───
+  function scheduleRenewPrompt(expiresISO) {
+    if (_renewModalTimer) clearTimeout(_renewModalTimer);
+    const secsLeft = (new Date(expiresISO) - Date.now()) / 1000;
+    const delay = Math.max((secsLeft - 300) * 1000, 0); // 5 min before
+    _renewModalTimer = setTimeout(() => openRenewModal(), delay);
+  }
+
+  // ── CORE fetchToken ─────────────────────────────────────────────
+  async function fetchToken() {
+    const res = await fetch(`${BASE_URL}/token`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+      body: `grant_type=password&username=${encodeURIComponent(CRED_USER)}&password=${encodeURIComponent(CRED_PASS)}`,
+      mode: 'cors'
+    });
+    if (!res.ok) throw new Error(`${res.status} ${res.statusText}`);
+    const data = await res.json();
+    if (!data.access_token) throw new Error('Không nhận được token từ API.');
+    document.getElementById('tokenRawPre').textContent = JSON.stringify(data, null, 2);
+    saveSession(data);
+    applyToken(data.access_token, data.expires);
+    return data;
+  }
+
+  // ── RENEW MODAL CONTROL ────────────────────────────────────────
+  function openRenewModal() {
+    const secsLeft = Math.max(0, Math.floor((new Date(loadSession().expires) - Date.now()) / 1000));
+    const m = Math.floor(secsLeft / 60), s = secsLeft % 60;
+    document.getElementById('renewModalTime').textContent =
+      secsLeft > 0 ? `Token hết hạn sau ${m}:${String(s).padStart(2,'0')}` : 'Token đã hết hạn';
+    document.getElementById('renewError').classList.add('hidden');
+    document.getElementById('renewModal').style.display = 'flex';
+  }
+
+  function closeRenewModal() {
+    document.getElementById('renewModal').style.display = 'none';
+  }
+
+  async function renewToken() {
+    const btn  = document.getElementById('btnRenew');
+    const spin = document.getElementById('renewSpinner');
+    const txt  = document.getElementById('btnRenewText');
+    const prog = document.getElementById('renewProgress');
+    const fill = document.getElementById('renewProgressFill');
+    btn.disabled = true; spin.classList.remove('hidden');
+    txt.textContent = 'Đang lấy token…';
+    prog.classList.remove('hidden');
+    setTimeout(() => fill.style.width = '80%', 50);
+    document.getElementById('renewError').classList.add('hidden');
+    try {
+      await fetchToken();
+      fill.style.width = '100%';
+      showToast('Token đã được làm mới thành công.', 'success', 3000);
+      setTimeout(() => closeRenewModal(), 400);
     } catch (err) {
-      document.getElementById('tokenRawPre').textContent = 'Lỗi: ' + err.message;
-      showToast(`Lỗi khi lấy token: ${err.message}`, 'error');
+      fill.style.width = '0'; prog.classList.add('hidden');
+      const errEl = document.getElementById('renewError');
+      errEl.textContent = `Lỗi: ${err.message}`;
+      errEl.classList.remove('hidden');
     } finally {
-      btn.disabled = false;
-      document.getElementById('tokenSpinner').classList.add('hidden');
-      document.getElementById('btnTokenText').textContent = 'Lấy Token';
+      btn.disabled = false; spin.classList.add('hidden');
+      txt.textContent = 'Lấy token mới';
       fill.style.width = '100%';
       setTimeout(() => { prog.classList.add('hidden'); fill.style.width = '0'; }, 700);
     }
   }
+
+  // ── getToken: silent re-fetch (used by "Đăng nhập lại" button) ─
+  async function getToken() {
+    showLoader('Đang làm mới token…');
+    try {
+      await fetchToken();
+      showToast('Token đã được làm mới.', 'success', 3000);
+    } catch (err) {
+      showToast(`Lỗi lấy token: ${err.message}`, 'error');
+    } finally {
+      hideLoader();
+    }
+  }
+
 
   // ── CONFIG VALIDATION ──────────────────────────────────────────
   function validateConfig() {
@@ -1126,11 +929,9 @@
     document.getElementById('machineId').value = '50100904';
     document.getElementById('batchId').value = '1';
     document.getElementById('reportDate').value = new Date().toISOString().slice(0, 10);
-    document.getElementById('receiptCount').value = '10';
     document.getElementById('vatPercent').value = '7';
-    document.getElementById('serviceCharge').value = '0';
+    ['serviceCharge','cash','atm','visa','mastercard','amex','voucher'].forEach(id => setVNDValue(id, 0));
     document.getElementById('noofpax').value = '0';
-    ['cash','atm','visa','mastercard','amex','voucher'].forEach(id => document.getElementById(id).value = '0');
     document.getElementById('vatRegistered').value = 'N';
     document.getElementById('fileInput').value = '';
     document.getElementById('fileMetaBox').classList.add('hidden');
@@ -1150,7 +951,7 @@
     }
     const date = formatDateForAPI(reportDate);
     const vatReg = document.getElementById('vatRegistered').value;
-    const sc = document.getElementById('serviceCharge').value;
+    const sc = fmtNum(parseVND(document.getElementById('serviceCharge').value));
     const pax = document.getElementById('noofpax').value;
     const sales = Array.from({ length: 24 }, (_, i) => ({
       sale: {
@@ -1241,14 +1042,14 @@
     const machineid = document.getElementById('machineId').value.trim();
     const batchid = document.getElementById('batchId').value.trim();
     const vatPercent = Number(document.getElementById('vatPercent').value);
-    const scDefault = Number(document.getElementById('serviceCharge').value);
+    const scDefault = parseVND(document.getElementById('serviceCharge').value);
     const paxDefault = Number(document.getElementById('noofpax').value);
-    const cashDef = Number(document.getElementById('cash').value);
-    const atmDef = Number(document.getElementById('atm').value);
-    const visaDef = Number(document.getElementById('visa').value);
-    const mcDef = Number(document.getElementById('mastercard').value);
-    const amexDef = Number(document.getElementById('amex').value);
-    const voucherDef = Number(document.getElementById('voucher').value);
+    const cashDef = parseVND(document.getElementById('cash').value);
+    const atmDef = parseVND(document.getElementById('atm').value);
+    const visaDef = parseVND(document.getElementById('visa').value);
+    const mcDef = parseVND(document.getElementById('mastercard').value);
+    const amexDef = parseVND(document.getElementById('amex').value);
+    const voucherDef = parseVND(document.getElementById('voucher').value);
     const vatReg = document.getElementById('vatRegistered').value;
 
     const hd = {};
@@ -1320,28 +1121,65 @@
     const map = {};
     (data.sales || []).forEach(s => { map[`${s.sale.date}-${s.sale.hour}`] = s.sale; });
 
-    let count = 0, rows = '';
+    let count = 0, totalGTO = 0, totalDisc = 0, totalCash = 0, totalReceipts = 0, rows = '';
     for (let i = 0; i < 24; i++) {
       const h = String(i).padStart(2, '0');
       const s = map[`${date}-${h}`];
       const hasData = s && parseFloat(s.gto) > 0;
-      if (hasData) count++;
-      rows += `<tr>
-        <td class="mono" style="font-weight:${hasData?'600':'400'}">${h}:00</td>
-        <td class="mono">${s ? s.receiptcount : '—'}</td>
-        <td class="mono">${s ? parseFloat(s.gto).toLocaleString('vi-VN',{minimumFractionDigits:2}) : '—'}</td>
-        <td class="mono">${s ? parseFloat(s.discount).toLocaleString('vi-VN',{minimumFractionDigits:2}) : '—'}</td>
-        <td class="mono">${s ? parseFloat(s.cash).toLocaleString('vi-VN',{minimumFractionDigits:2}) : '—'}</td>
-        <td><span class="dot ${hasData?'dot-data':'dot-empty'}"></span> <span style="font-size:12px;color:var(--text-muted)">${hasData?'Có dữ liệu':(s?'Trống':'Chưa có')}</span></td>
-        <td><button class="btn btn-ghost btn-sm" onclick="openEditEntryDrawer('${h}')">
-          <svg width="11" height="11" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-            <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
-            <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
-          </svg>
+      const inPayload = !!s;
+      if (hasData) {
+        count++;
+        totalGTO += parseFloat(s.gto) || 0;
+        totalDisc += parseFloat(s.discount) || 0;
+        totalCash += parseFloat(s.cash) || 0;
+        totalReceipts += parseInt(s.receiptcount) || 0;
+      }
+      const rowClass = hasData ? 'row-data' : (inPayload ? 'row-empty' : 'row-missing');
+      const statusHtml = hasData
+        ? `<span class="status-badge has-data">✓ Có dữ liệu</span>`
+        : (inPayload
+          ? `<span class="status-badge is-empty">— Trống</span>`
+          : `<span class="status-badge is-missing">✕ Thiếu</span>`);
+      const gtoFmt = s && parseFloat(s.gto) > 0 ? parseFloat(s.gto).toLocaleString('vi-VN') + ' ₫' : (s ? '<span style="color:var(--text-subtle)">0 ₫</span>' : '<span style="color:var(--text-subtle)">—</span>');
+      const discFmt = s ? (parseFloat(s.discount) > 0 ? parseFloat(s.discount).toLocaleString('vi-VN') + ' ₫' : '<span style="color:var(--text-subtle)">0 ₫</span>') : '<span style="color:var(--text-subtle)">—</span>';
+      const cashFmt = s ? (parseFloat(s.cash) > 0 ? parseFloat(s.cash).toLocaleString('vi-VN') + ' ₫' : '<span style="color:var(--text-subtle)">0 ₫</span>') : '<span style="color:var(--text-subtle)">—</span>';
+      rows += `<tr class="${rowClass}">
+        <td class="mono" style="font-weight:${hasData?'700':'400'};color:${hasData?'var(--text)':'var(--text-muted)'}">${h}:00</td>
+        <td class="mono center">${s ? s.receiptcount : '<span style="color:var(--text-subtle)">—</span>'}</td>
+        <td class="mono right">${gtoFmt}</td>
+        <td class="mono right">${discFmt}</td>
+        <td class="mono right">${cashFmt}</td>
+        <td>${statusHtml}</td>
+        <td style="text-align:right"><button class="btn-row-edit" onclick="openEditEntryDrawer('${h}')">
+          <svg width="10" height="10" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+          Sửa
         </button></td>
       </tr>`;
     }
     document.getElementById('hourTableBody').innerHTML = rows;
+
+    // Totals footer
+    const tfoot = document.getElementById('hourTableFoot');
+    if (tfoot) {
+      tfoot.innerHTML = `<tr class="total-row">
+        <td>Tổng / 24h</td>
+        <td class="mono center">${totalReceipts > 0 ? totalReceipts : '—'}</td>
+        <td class="mono right" style="color:var(--primary)">${totalGTO > 0 ? totalGTO.toLocaleString('vi-VN') + ' ₫' : '—'}</td>
+        <td class="mono right">${totalDisc > 0 ? totalDisc.toLocaleString('vi-VN') + ' ₫' : '—'}</td>
+        <td class="mono right">${totalCash > 0 ? totalCash.toLocaleString('vi-VN') + ' ₫' : '—'}</td>
+        <td colspan="2"></td>
+      </tr>`;
+    }
+
+    // Progress bar & badge
+    const pct = Math.round((count / 24) * 100);
+    const fill = document.getElementById('hourProgressFill');
+    const badge = document.getElementById('hourCountBadge');
+    if (fill) { fill.style.width = pct + '%'; fill.className = 'hour-progress-fill' + (count === 24 ? ' complete' : ''); }
+    if (badge) {
+      badge.textContent = `${count} / 24`;
+      badge.className = 'hour-count-badge ' + (count === 24 ? 'complete' : count > 0 ? 'partial' : 'empty');
+    }
     document.getElementById('hourTableSummary').textContent = `${count} / 24 giờ có dữ liệu`;
   }
 
@@ -1365,42 +1203,46 @@
   function openAddEntryDrawer() {
     document.getElementById('drawerTitle').textContent = 'Thêm dữ liệu giờ';
     populateHourSelect('00');
-    ['entryReceiptCount','entryGTO','entryDiscount','entryCash','entryATM','entryVisa','entryOthers'].forEach(id => document.getElementById(id).value = '0');
-    document.getElementById('entryVAT').value = '0.00';
+    document.getElementById('entryReceiptCount').value = '0';
+    ['entryGTO','entryDiscount','entryCash','entryATM','entryVisa','entryOthers'].forEach(id => setVNDValue(id, 0));
+    document.getElementById('entryVAT').value = '0 ₫';
     openDrawer();
   }
   function openEditEntryDrawer(hour) {
     document.getElementById('drawerTitle').textContent = `Chỉnh sửa giờ ${hour}:00`;
     populateHourSelect(hour);
+    // Always reset first so stale values never persist between rows
+    document.getElementById('entryReceiptCount').value = '0';
+    ['entryGTO','entryDiscount','entryCash','entryATM','entryVisa','entryOthers'].forEach(id => setVNDValue(id, 0));
+    document.getElementById('entryVAT').value = '0 ₫';
     const data = getSalesData();
     const date = formatDateForAPI(document.getElementById('reportDate').value);
     const entry = (data.sales || []).find(s => s.sale.date === date && s.sale.hour === hour);
     if (entry) {
       document.getElementById('entryReceiptCount').value = entry.sale.receiptcount || 0;
-      // Reconstruct gross GTO = nett GTO + discount (for user-friendly display)
       const storedNettGTO = parseFloat(entry.sale.gto || 0);
       const storedDiscount = parseFloat(entry.sale.discount || 0);
-      document.getElementById('entryGTO').value = fmtNum(storedNettGTO + storedDiscount);
-      document.getElementById('entryDiscount').value = fmtNum(storedDiscount);
-      document.getElementById('entryCash').value = entry.sale.cash || 0;
-      document.getElementById('entryATM').value = entry.sale.atm || 0;
-      document.getElementById('entryVisa').value = entry.sale.visa || 0;
-      document.getElementById('entryOthers').value = entry.sale.othersamount || 0;
-      calcDrawerVAT();
+      setVNDValue('entryGTO', storedNettGTO + storedDiscount);
+      setVNDValue('entryDiscount', storedDiscount);
+      setVNDValue('entryCash', parseFloat(entry.sale.cash || 0));
+      setVNDValue('entryATM', parseFloat(entry.sale.atm || 0));
+      setVNDValue('entryVisa', parseFloat(entry.sale.visa || 0));
+      setVNDValue('entryOthers', parseFloat(entry.sale.othersamount || 0));
     }
+    calcDrawerVAT();
     openDrawer();
   }
   function calcDrawerVAT() {
-    const gto = Number(document.getElementById('entryGTO').value) || 0;
-    const disc = Number(document.getElementById('entryDiscount').value) || 0;
+    const gto = getVNDValue('entryGTO');
+    const disc = getVNDValue('entryDiscount');
     const vat = Number(document.getElementById('vatPercent').value) || 7;
-    document.getElementById('entryVAT').value = fmtNum((gto - disc) * vat / 100);
+    setVNDValue('entryVAT', (gto - disc) * vat / 100);
   }
   function saveEntryFromDrawer() {
     const hour = document.getElementById('entryHour').value;
     if (!hour) { showToast('Vui lòng chọn giờ!', 'warning'); return; }
-    const gto = Number(document.getElementById('entryGTO').value) || 0;
-    const disc = Number(document.getElementById('entryDiscount').value) || 0;
+    const gto = getVNDValue('entryGTO');
+    const disc = getVNDValue('entryDiscount');
     const vat = Number(document.getElementById('vatPercent').value) || 7;
     const date = formatDateForAPI(document.getElementById('reportDate').value);
     const nettGTO = gto - disc;
@@ -1411,15 +1253,15 @@
         date, hour,
         receiptcount: document.getElementById('entryReceiptCount').value,
         gto: fmtNum(nettGTO), VAT: fmtNum(nettGTO * vat / 100), discount: fmtNum(disc),
-        servicecharge: document.getElementById('serviceCharge').value,
+        servicecharge: fmtNum(getVNDValue('serviceCharge')),
         noofpax: document.getElementById('noofpax').value,
-        cash: fmtNum(Number(document.getElementById('entryCash').value)),
-        atm: fmtNum(Number(document.getElementById('entryATM').value)),
-        visa: fmtNum(Number(document.getElementById('entryVisa').value)),
-        mastercard: document.getElementById('mastercard').value,
-        amex: document.getElementById('amex').value,
-        voucher: document.getElementById('voucher').value,
-        othersamount: fmtNum(Number(document.getElementById('entryOthers').value)),
+        cash: fmtNum(getVNDValue('entryCash')),
+        atm: fmtNum(getVNDValue('entryATM')),
+        visa: fmtNum(getVNDValue('entryVisa')),
+        mastercard: fmtNum(getVNDValue('mastercard')),
+        amex: fmtNum(getVNDValue('amex')),
+        voucher: fmtNum(getVNDValue('voucher')),
+        othersamount: fmtNum(getVNDValue('entryOthers')),
         vatregistered: document.getElementById('vatRegistered').value
       }
     };
@@ -1452,7 +1294,7 @@
     const data = getSalesData();
     const date = formatDateForAPI(document.getElementById('reportDate').value);
     const vatReg = document.getElementById('vatRegistered').value;
-    const sc = document.getElementById('serviceCharge').value;
+    const sc = fmtNum(parseVND(document.getElementById('serviceCharge').value));
     const pax = document.getElementById('noofpax').value;
     let filled = 0;
     for (let i = 0; i < 24; i++) {
@@ -1464,9 +1306,9 @@
             batchid: document.getElementById('batchId').value.trim(),
             date, hour: h, receiptcount: '0', gto: '0.00', VAT: '0.00', discount: '0.00',
             servicecharge: sc, noofpax: pax, cash: '0.00', atm: '0.00', visa: '0.00',
-            mastercard: document.getElementById('mastercard').value,
-            amex: document.getElementById('amex').value,
-            voucher: document.getElementById('voucher').value,
+            mastercard: fmtNum(parseVND(document.getElementById('mastercard').value)),
+            amex: fmtNum(parseVND(document.getElementById('amex').value)),
+            voucher: fmtNum(parseVND(document.getElementById('voucher').value)),
             othersamount: '0.00', vatregistered: vatReg
           }
         });
@@ -1496,7 +1338,7 @@
   // ── SUBMIT ─────────────────────────────────────────────────────
   async function submitSales() {
     const token = document.getElementById('token').value.trim();
-    if (!token) { showToast('Vui lòng lấy token trước khi gửi!', 'warning'); return; }
+    if (!token) { showToast('Vui lòng đăng nhập trước (Bước 1)!', 'warning'); return; }
     const payload = document.getElementById('salesData').value;
     try { JSON.parse(payload); } catch (err) { showToast(`JSON không hợp lệ: ${err.message}`, 'error'); return; }
 
@@ -1504,6 +1346,7 @@
     btn.disabled = true;
     document.getElementById('salesSpinner').classList.remove('hidden');
     document.getElementById('btnSalesText').textContent = 'Đang gửi…';
+    showLoader('Đang gửi báo cáo lên hệ thống…');
 
     const resultBox = document.getElementById('apiResultBox');
     resultBox.className = 'api-result idle';
@@ -1518,19 +1361,22 @@
       document.getElementById('apiResultPre').textContent = JSON.stringify(responseData, null, 2);
       resultBox.classList.remove('hidden');
 
-      if (!res.ok) {
+      const errs = responseData.errors || [];
+      const isApiError = !res.ok || responseData.status === 'error' || errs.length > 0;
+      if (isApiError) {
         resultBox.className = 'api-result error';
-        document.getElementById('apiResultHeader').innerHTML = `<svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg><span>Lỗi từ API (${res.status})</span>`;
-        const errs = responseData.errors || [];
+        const errLabel = errs[0]?.status_code || res.status;
+        const errMsg = errs.map(e => e.message || e.status_code).join('; ') || `${res.status} ${res.statusText}`;
+        document.getElementById('apiResultHeader').innerHTML = `<svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg><span>Gửi thất bại — ${errLabel}</span>`;
         if (errs.some(e => e.status_code === 'Daily records'))
           showToast('Lỗi Daily Records! Thiếu dữ liệu cho một số giờ. Dùng "Tự động điền giờ thiếu".', 'error', 6000);
         else
-          showToast(`Lỗi API: ${res.status} ${res.statusText}`, 'error');
+          showToast(`Lỗi: ${errMsg}`, 'error', 6000);
       } else {
         resultBox.className = 'api-result success';
         document.getElementById('apiResultHeader').innerHTML = `<svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg><span>Gửi thành công!</span>`;
         stepDone(3);
-        showToast('Gửi dữ liệu SalesHourly thành công!', 'success');
+        showToast('Báo cáo đã được gửi thành công! ✓', 'success', 6000);
       }
     } catch (err) {
       resultBox.className = 'api-result error';
@@ -1539,9 +1385,10 @@
       document.getElementById('apiResultPre').textContent = `Lỗi: ${err.message}\n\nNguyên nhân có thể:\n- Mất kết nối internet\n- Token hết hạn\n- Server không phản hồi\n- CORS policy`;
       showToast(`Lỗi kết nối: ${err.message}`, 'error');
     } finally {
+      hideLoader();
       btn.disabled = false;
       document.getElementById('salesSpinner').classList.add('hidden');
-      document.getElementById('btnSalesText').textContent = 'Gửi dữ liệu';
+      document.getElementById('btnSalesText').textContent = 'Gửi báo cáo';
     }
   }
 
@@ -1560,7 +1407,7 @@
   });
 
   // ── INIT ───────────────────────────────────────────────────────
-  window.addEventListener('load', () => {
+  window.addEventListener('load', async () => {
     const dateEl = document.getElementById('reportDate');
     if (!dateEl.value) dateEl.value = new Date().toISOString().slice(0, 10);
     if (localStorage.getItem('theme') === 'dark') {
@@ -1570,6 +1417,24 @@
     }
     renderHourTable();
     updatePaymentTotal();
+
+    // ── Auto-login on page load ────────────────────────────────
+    const sess = loadSession();
+    if (sess.token && sess.expires && (new Date(sess.expires) - Date.now()) / 1000 > 30) {
+      // Valid cached token — restore silently
+      applyToken(sess.token, sess.expires);
+      showToast('Đã khôi phục phiên đăng nhập.', 'info', 2500);
+    } else {
+      // No valid session — fetch fresh token automatically
+      showLoader('Đang đăng nhập…');
+      try {
+        await fetchToken();
+      } catch (err) {
+        showToast(`Không thể đăng nhập tự động: ${err.message}`, 'error', 6000);
+      } finally {
+        hideLoader();
+      }
+    }
   });
 </script>
 </body>
