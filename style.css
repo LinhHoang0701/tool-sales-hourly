@@ -733,186 +733,89 @@
       .hour-progress-wrap { min-width: 100%; }
     }
 
-    /* ── HEADER AUTH CHIP ───────────────────────────────────────── */
-    .header-auth-chip {
-      display: inline-flex; align-items: center; gap: 7px;
-      padding: 5px 12px; border-radius: 20px;
+    /* ── QUICK ENTRY CARD ──────────────────────────────────────── */
+    .qe-add-btn {
+      width: 100%; justify-content: center;
+      padding: 11px 18px; font-size: 14px; font-weight: 600;
+      margin-top: 14px; border-radius: var(--radius-xs);
+    }
+    .qe-add-btn:hover:not(:disabled) { opacity: 0.9; filter: brightness(1.05); }
+
+    /* ── SEND CONFIRMATION MODAL ───────────────────────────────── */
+    .confirm-modal-card {
+      background: var(--card);
       border: 1px solid var(--border);
-      background: var(--bg-subtle);
-      font-size: 12px; font-weight: 500; color: var(--text-muted);
-      transition: all var(--transition);
+      border-radius: 18px;
+      width: 100%;
+      max-width: 680px;
+      max-height: 92vh;
+      margin: 16px;
+      box-shadow: 0 24px 72px rgba(0,0,0,0.3);
+      animation: slideUp 0.25s ease;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
     }
-    .header-auth-chip.auth-ok {
-      border-color: var(--success-border);
-      background: var(--success-bg);
-      color: var(--success);
-    }
-    .header-auth-dot {
-      width: 7px; height: 7px; border-radius: 50%;
-      background: var(--text-subtle);
+    .confirm-modal-header {
+      display: flex; align-items: center; gap: 14px;
+      padding: 22px 28px 18px;
+      border-bottom: 1px solid var(--border);
       flex-shrink: 0;
     }
-    .header-auth-chip.auth-ok .header-auth-dot {
-      background: var(--success);
-      box-shadow: 0 0 0 2px rgba(22,163,74,0.2);
-      animation: pulse-dot 2s infinite;
-    }
-    @keyframes pulse-dot {
-      0%, 100% { box-shadow: 0 0 0 2px rgba(22,163,74,0.2); }
-      50% { box-shadow: 0 0 0 4px rgba(22,163,74,0.1); }
-    }
-    .header-auth-countdown {
-      font-family: var(--font-mono);
-      font-size: 11px;
-      opacity: 0.8;
-      letter-spacing: 0.3px;
-    }
-
-    /* ── SECTION ACCENT BORDER ──────────────────────────────────── */
-    .section {
-      border-top: 3px solid var(--primary);
-      position: relative;
-    }
-
-    /* ── REVENUE MINI-BAR ───────────────────────────────────────── */
-    .revenue-cell {
-      position: relative;
+    .confirm-modal-body {
+      overflow-y: auto;
+      flex: 1;
+      padding: 20px 28px;
       display: flex;
-      align-items: center;
+      flex-direction: column;
+      gap: 14px;
+      min-height: 0;
+    }
+    .confirm-modal-footer {
+      padding: 16px 28px;
+      border-top: 1px solid var(--border);
+      display: flex;
+      gap: 10px;
       justify-content: flex-end;
-      border-radius: 4px;
-      overflow: hidden;
-      min-width: 120px;
-      padding: 3px 0;
+      flex-shrink: 0;
     }
-    .revenue-bar-bg {
-      position: absolute;
-      left: 0; top: 0; bottom: 0;
-      background: linear-gradient(90deg, rgba(13,148,136,0.07), rgba(13,148,136,0.18));
-      border-radius: 4px;
-      transition: width 0.5s cubic-bezier(0.4,0,0.2,1);
-      pointer-events: none;
+    .confirm-stats-row {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 8px;
     }
-    .revenue-value {
-      position: relative;
-      z-index: 1;
-      font-size: 12px;
-    }
-    .tbl-zero { color: var(--text-subtle); font-family: var(--font-mono); font-size: 12px; }
-    .tbl-dash { color: var(--border); font-family: var(--font-mono); font-size: 12px; }
-
-    /* ── HOUR CHIP ──────────────────────────────────────────────── */
-    .hour-chip {
-      display: inline-flex; align-items: center;
-      font-family: var(--font-mono); font-size: 12px;
-      padding: 3px 8px; border-radius: 6px;
-      font-weight: 500; color: var(--text-muted);
+    .confirm-stat-card {
       background: var(--bg-subtle);
-      border: 1px solid transparent;
-      transition: all var(--transition);
-    }
-    .hour-chip-active {
-      color: var(--primary);
-      background: var(--primary-light);
-      border-color: var(--primary-border);
-      font-weight: 700;
-    }
-
-    /* ── TOTAL ROW ──────────────────────────────────────────────── */
-    .total-label {
-      font-size: 10px; font-weight: 700;
-      text-transform: uppercase; letter-spacing: 0.6px;
-      color: var(--text-muted);
-    }
-    .total-gto { color: var(--primary); }
-
-    /* ── SECTION CARD HOVER EFFECT ──────────────────────────────── */
-    .section {
-      transition: box-shadow var(--transition);
-    }
-
-    /* ── CONFIG CARD ENHANCEMENTS ───────────────────────────────── */
-    .config-card {
-      transition: box-shadow var(--transition), border-color var(--transition);
-    }
-    .config-card:hover {
-      box-shadow: var(--shadow-md);
-      border-color: var(--primary-border);
-    }
-
-    /* ── PAYMENT ITEM ICON LABEL ────────────────────────────────── */
-    .payment-item label {
-      display: flex; align-items: center; gap: 4px;
-    }
-
-    /* ── SEND SECTION POLISH ────────────────────────────────────── */
-    .send-section {
-      background: linear-gradient(135deg, var(--primary-light) 0%, var(--card) 60%);
-      border: 1px solid var(--primary-border);
-      border-radius: var(--radius-sm);
-      padding: 20px 24px;
-      display: flex; align-items: center; justify-content: space-between;
-      flex-wrap: wrap; gap: 16px;
-    }
-    .send-section-title {
-      font-size: 15px; font-weight: 600; margin-bottom: 4px;
-    }
-    .send-section-hint {
-      font-size: 12px; color: var(--text-muted); display: flex; align-items: center; gap: 5px;
-    }
-
-    /* ── WELCOME BANNER IMPROVEMENTS ───────────────────────────── */
-    .welcome-banner {
-      background: linear-gradient(135deg, rgba(13,148,136,0.06) 0%, var(--card) 100%);
-    }
-
-    /* ── HOUR PROGRESS ENHANCED ─────────────────────────────────── */
-    .hour-progress-bar { border-radius: 6px; height: 10px; }
-    .hour-progress-fill { border-radius: 6px; }
-
-    /* ── TABLE HEADER STICKY ────────────────────────────────────── */
-    .hour-table thead tr { position: sticky; top: 0; z-index: 1; }
-
-    /* ── ANIMATION: ROW FADE IN ─────────────────────────────────── */
-    .hour-table tbody tr {
-      animation: rowFadeIn 0.15s ease;
-    }
-    @keyframes rowFadeIn {
-      from { opacity: 0; transform: translateY(2px); }
-      to   { opacity: 1; transform: translateY(0); }
-    }
-
-    /* ── DARK MODE REVENUE BAR ──────────────────────────────────── */
-    [data-theme="dark"] .revenue-bar-bg {
-      background: linear-gradient(90deg, rgba(13,148,136,0.12), rgba(13,148,136,0.25));
-    }
-    [data-theme="dark"] .send-section {
-      background: linear-gradient(135deg, rgba(13,148,136,0.08) 0%, var(--card) 60%);
-    }
-
-    /* ── DRAWER SECTION ENHANCED ────────────────────────────────── */
-    .drawer-section-title {
-      display: flex; align-items: center; gap: 6px;
-    }
-
-    /* ── CODE BLOCK BORDER ──────────────────────────────────────── */
-    .code-block {
       border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 10px 12px;
+      display: flex; align-items: center; gap: 8px;
+    }
+    .confirm-stat-card.success { background: var(--success-bg); border-color: var(--success-border); }
+    .confirm-stat-card.warning { background: var(--warning-bg); border-color: var(--warning-border); }
+    .confirm-stat-card.is-primary { background: var(--primary); border-color: var(--primary-dark); }
+    .confirm-stat-icon { font-size: 14px; flex-shrink: 0; line-height: 1; }
+    .confirm-stat-label {
+      font-size: 10px; font-weight: 700; text-transform: uppercase;
+      letter-spacing: 0.4px; color: var(--text-muted); line-height: 1.2;
+    }
+    .confirm-stat-value {
+      font-size: 13px; font-weight: 700; font-family: var(--font-mono);
+      color: var(--text); margin-top: 3px; white-space: nowrap;
+    }
+    .confirm-stat-card.success .confirm-stat-value { color: var(--success); }
+    .confirm-stat-card.warning .confirm-stat-value { color: var(--warning); }
+    .confirm-stat-card.is-primary .confirm-stat-label { color: rgba(255,255,255,0.75); }
+    .confirm-stat-card.is-primary .confirm-stat-value { color: white; }
+    .confirm-table-wrap {
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
       overflow: hidden;
+      max-height: 320px;
+      overflow-y: auto;
     }
 
-    /* ── GLOBAL LOADER CARD BG FIX ──────────────────────────────── */
-    .global-loader-card { background: var(--card); }
-
-    /* ── STEP BAR POLISH ────────────────────────────────────────── */
-    .steps { background: linear-gradient(135deg, var(--card) 0%, var(--bg-subtle) 100%); }
-    .step.active .step-label { font-weight: 700; }
-
-    /* ── SECTION BODY RESPONSIVE ────────────────────────────────── */
-    @media (max-width: 900px) {
-      .form-grid { grid-template-columns: 1fr; }
-    }
-    @media (max-width: 640px) {
-      .send-section { flex-direction: column; align-items: stretch; }
-      .send-section .btn-lg { width: 100%; justify-content: center; }
+    @media (max-width: 600px) {
+      .confirm-stats-row { grid-template-columns: 1fr 1fr; }
+      .confirm-modal-card { margin: 8px; }
     }

@@ -42,6 +42,57 @@
   </div>
 </div>
 
+<!-- ── SEND CONFIRMATION MODAL ──────────────────────────────────── -->
+<div id="sendConfirmModal" class="modal-overlay" style="display:none">
+  <div class="confirm-modal-card">
+    <div class="confirm-modal-header">
+      <div class="modal-logo" style="background:#eff6ff">
+        <svg width="22" height="22" fill="none" stroke="#3b82f6" stroke-width="2" viewBox="0 0 24 24">
+          <line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/>
+        </svg>
+      </div>
+      <div style="flex:1">
+        <div class="modal-title">Xác nhận gửi báo cáo</div>
+        <div class="modal-subtitle" id="confirmModalSubtitle">Kiểm tra thông tin trước khi gửi</div>
+      </div>
+      <button class="btn btn-ghost btn-icon" onclick="closeSendConfirmModal()" style="margin-left:auto">
+        <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M18 6 6 18M6 6l12 12"/></svg>
+      </button>
+    </div>
+    <div class="confirm-modal-body">
+      <div class="confirm-stats-row" id="confirmStatsRow"></div>
+      <div id="confirmMissingWarn" class="hidden"></div>
+      <div style="font-size:12px;font-weight:600;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.5px">Chi tiết 24 giờ</div>
+      <div class="confirm-table-wrap">
+        <table class="hour-table">
+          <thead>
+            <tr>
+              <th>Giờ</th>
+              <th class="center">Phiếu</th>
+              <th class="right">Doanh thu</th>
+              <th class="right">Chiết khấu</th>
+              <th>Trạng thái</th>
+            </tr>
+          </thead>
+          <tbody id="confirmHoursBody"></tbody>
+          <tfoot id="confirmHoursFoot"></tfoot>
+        </table>
+      </div>
+    </div>
+    <div class="confirm-modal-footer">
+      <button class="btn btn-secondary" onclick="closeSendConfirmModal()">
+        <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M19 12H5"/><polyline points="12 19 5 12 12 5"/></svg>
+        Kiểm tra lại
+      </button>
+      <button class="btn btn-primary btn-lg" id="btnConfirmSend" onclick="confirmAndSend()">
+        <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+        Gửi báo cáo
+        <span class="spinner hidden" id="confirmSendSpinner"></span>
+      </button>
+    </div>
+  </div>
+</div>
+
 <!-- ── GLOBAL LOADING OVERLAY ─────────────────────────────────── -->
 <div id="globalLoader" class="global-loader hidden" aria-live="polite">
   <div class="global-loader-card">
@@ -157,6 +208,22 @@
         </div>
       </div>
     </div>
+
+    <!-- F&B -->
+    <div class="drawer-section">
+      <div class="drawer-section-title">F&amp;B (nếu có)</div>
+      <div class="form-grid">
+        <div class="field field-vnd">
+          <label>Phụ thu dịch vụ</label>
+          <input type="text" id="entrySC" inputmode="decimal" value="0 ₫"
+            onfocus="vndFocus(this)" onblur="vndBlur(this)">
+        </div>
+        <div class="field">
+          <label>Số khách</label>
+          <input type="number" id="entryPax" value="0" min="0">
+        </div>
+      </div>
+    </div>
   </div>
   <div class="drawer-footer">
     <button class="btn btn-secondary" onclick="closeDrawer()">Hủy</button>
@@ -221,6 +288,15 @@
     <span id="tokenCountdown" class="hidden"><span id="tokenCountdownText"></span></span>
     <pre id="tokenRawPre"></pre>
   </div>
+  <!-- Hidden compat inputs (used by transformToHourly, fillMissingHours etc.) -->
+  <input type="hidden" id="cash" value="0">
+  <input type="hidden" id="atm" value="0">
+  <input type="hidden" id="visa" value="0">
+  <input type="hidden" id="mastercard" value="0">
+  <input type="hidden" id="amex" value="0">
+  <input type="hidden" id="voucher" value="0">
+  <input type="hidden" id="serviceCharge" value="0">
+  <input type="hidden" id="noofpax" value="0">
 
   <!-- BƯỚC 2: CẤU HÌNH -->
   <div class="section" id="section-2">
@@ -229,7 +305,7 @@
         <div class="section-badge">1</div>
         <div>
           <span class="section-name">Thông tin báo cáo</span>
-          <div class="section-subtitle">Điền ngày, mã máy và số lô trước khi tải file</div>
+          <div class="section-subtitle">Điền thông tin cơ bản và nhập dữ liệu từng giờ báo cáo</div>
         </div>
       </div>
     </div>
@@ -258,75 +334,126 @@
           </div>
           <div class="field">
             <label for="vatPercent">Thuế VAT (%) <span class="required">*</span></label>
-            <input type="number" id="vatPercent" value="7" step="0.1" min="0" max="100" required>
-            <span class="field-hint">Thường là 7% — hỏi quản trị nếu không chắc</span>
+            <input type="number" id="vatPercent" value="10" step="0.1" min="0" max="100" required>
+            <span class="field-hint">Thường là 10% — hỏi quản trị nếu không chắc</span>
           </div>
           <div class="field">
             <label for="vatRegistered">Đã đăng ký VAT <span class="required">*</span></label>
             <select id="vatRegistered" required>
-              <option value="Y">Có (Y)</option>
-              <option value="N" selected>Không (N)</option>
+              <option value="Y" selected>Có (Y)</option>
+              <option value="N">Không (N)</option>
             </select>
             <span class="field-hint">Theo giấy phép đăng ký kinh doanh</span>
           </div>
         </div>
 
-        <!-- CỘT PHẢI: Phương thức thanh toán -->
+        <!-- CỘT PHẢI: Nhập giờ báo cáo -->
         <div class="config-card">
           <div class="config-card-title">
-            <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="1" y="4" width="22" height="16" rx="2" ry="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>
-            Phương thức thanh toán <span class="tag-opt" style="margin-left:6px">không bắt buộc</span>
-          </div>
-          <div class="guide-note">Để <strong>tất cả = 0</strong> nếu không cần phân tách. Hệ thống tự gán toàn bộ vào Tiền mặt.</div>
-          <div class="payment-grid-2">
-            <div class="payment-item">
-              <label>Tiền mặt</label>
-              <input type="text" id="cash" inputmode="decimal" value="0 ₫"
-                onfocus="vndFocus(this)" onblur="vndBlur(this)" oninput="updatePaymentTotal()">
-            </div>
-            <div class="payment-item">
-              <label>ATM</label>
-              <input type="text" id="atm" inputmode="decimal" value="0 ₫"
-                onfocus="vndFocus(this)" onblur="vndBlur(this)" oninput="updatePaymentTotal()">
-            </div>
-            <div class="payment-item">
-              <label>Visa</label>
-              <input type="text" id="visa" inputmode="decimal" value="0 ₫"
-                onfocus="vndFocus(this)" onblur="vndBlur(this)" oninput="updatePaymentTotal()">
-            </div>
-            <div class="payment-item">
-              <label>Mastercard</label>
-              <input type="text" id="mastercard" inputmode="decimal" value="0 ₫"
-                onfocus="vndFocus(this)" onblur="vndBlur(this)" oninput="updatePaymentTotal()">
-            </div>
-            <div class="payment-item">
-              <label>Amex</label>
-              <input type="text" id="amex" inputmode="decimal" value="0 ₫"
-                onfocus="vndFocus(this)" onblur="vndBlur(this)" oninput="updatePaymentTotal()">
-            </div>
-            <div class="payment-item">
-              <label>Voucher</label>
-              <input type="text" id="voucher" inputmode="decimal" value="0 ₫"
-                onfocus="vndFocus(this)" onblur="vndBlur(this)" oninput="updatePaymentTotal()">
-            </div>
-          </div>
-          <div class="payment-total">
-            <span class="payment-total-label">Tổng thanh toán đã cấu hình</span>
-            <span class="payment-total-value" id="paymentTotalDisplay">0 ₫</span>
+            <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+            Nhập dữ liệu giờ báo cáo
           </div>
 
-          <div class="divider-or"><span>Thông tin bổ sung (chỉ F&amp;B)</span></div>
           <div class="form-grid">
-            <div class="field field-vnd">
-              <label>Phụ thu dịch vụ (F&amp;B)</label>
-              <input type="text" id="serviceCharge" inputmode="decimal" value="0 ₫"
-                onfocus="vndFocus(this)" onblur="vndBlur(this)">
+            <div class="field">
+              <label>Giờ báo cáo <span class="required">*</span></label>
+              <select id="qeHour"></select>
             </div>
             <div class="field">
-              <label>Số khách (F&amp;B)</label>
-              <input type="number" id="noofpax" value="0" min="0">
+              <label>Số phiếu</label>
+              <input type="number" id="qeReceiptCount" value="0" min="0">
             </div>
           </div>
+
+          <div class="form-grid-3">
+            <div class="field field-vnd">
+              <label>Doanh thu (trước CK) <span class="required">*</span></label>
+              <input type="text" id="qeGTO" inputmode="decimal" value="0 ₫"
+                onfocus="vndFocus(this)" onblur="vndBlur(this)" oninput="calcQEVAT()">
+            </div>
+            <div class="field field-vnd">
+              <label>Chiết khấu</label>
+              <input type="text" id="qeDiscount" inputmode="decimal" value="0 ₫"
+                onfocus="vndFocus(this)" onblur="vndBlur(this)" oninput="calcQEVAT()">
+            </div>
+            <div class="field field-vnd">
+              <label>Thuế VAT (tự tính)</label>
+              <input type="text" id="qeVAT" readonly value="0 ₫"
+                style="background:var(--bg-subtle);color:var(--text-muted);cursor:default;padding-right:26px;text-align:right;font-family:var(--font-mono)">
+            </div>
+          </div>
+
+          <div class="mt-2">
+            <button class="collapse-btn" onclick="toggleCollapse('qePayment')" style="padding:8px 12px;font-size:12px">
+              <span>💳 Phân bổ thanh toán <span class="tag-opt">à lựa chọn</span></span>
+              <svg class="chevron" id="chevron-qePayment" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg>
+            </button>
+            <div class="collapse-body" id="qePayment">
+              <div class="collapse-inner" style="padding-top:10px">
+                <p style="font-size:12px;color:var(--text-muted);margin-bottom:10px">Mặc định = 0 → hệ thống tự gán toàn bộ vào Tiền mặt.</p>
+                <div class="payment-grid-2">
+                  <div class="payment-item">
+                    <label>Tiền mặt</label>
+                    <input type="text" id="qeCash" inputmode="decimal" value="0 ₫" onfocus="vndFocus(this)" onblur="vndBlur(this)" oninput="updatePaymentTotal()">
+                  </div>
+                  <div class="payment-item">
+                    <label>ATM</label>
+                    <input type="text" id="qeATM" inputmode="decimal" value="0 ₫" onfocus="vndFocus(this)" onblur="vndBlur(this)" oninput="updatePaymentTotal()">
+                  </div>
+                  <div class="payment-item">
+                    <label>Visa</label>
+                    <input type="text" id="qeVisa" inputmode="decimal" value="0 ₫" onfocus="vndFocus(this)" onblur="vndBlur(this)" oninput="updatePaymentTotal()">
+                  </div>
+                  <div class="payment-item">
+                    <label>Mastercard</label>
+                    <input type="text" id="qeMC" inputmode="decimal" value="0 ₫" onfocus="vndFocus(this)" onblur="vndBlur(this)" oninput="updatePaymentTotal()">
+                  </div>
+                  <div class="payment-item">
+                    <label>Amex</label>
+                    <input type="text" id="qeAmex" inputmode="decimal" value="0 ₫" onfocus="vndFocus(this)" onblur="vndBlur(this)" oninput="updatePaymentTotal()">
+                  </div>
+                  <div class="payment-item">
+                    <label>Voucher</label>
+                    <input type="text" id="qeVoucher" inputmode="decimal" value="0 ₫" onfocus="vndFocus(this)" onblur="vndBlur(this)" oninput="updatePaymentTotal()">
+                  </div>
+                  <div class="payment-item" style="grid-column:span 2">
+                    <label>Thanh toán khác</label>
+                    <input type="text" id="qeOthers" inputmode="decimal" value="0 ₫" onfocus="vndFocus(this)" onblur="vndBlur(this)" oninput="updatePaymentTotal()">
+                  </div>
+                </div>
+                <div class="payment-total" style="margin-top:8px">
+                  <span class="payment-total-label">Tổng thanh toán</span>
+                  <span class="payment-total-value" id="qePaymentTotal">0 ₫</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="mt-2">
+            <button class="collapse-btn" onclick="toggleCollapse('qeFnB')" style="padding:8px 12px;font-size:12px">
+              <span>🍽️ Thông tin F&amp;B <span class="tag-opt">chỉ F&amp;B</span></span>
+              <svg class="chevron" id="chevron-qeFnB" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg>
+            </button>
+            <div class="collapse-body" id="qeFnB">
+              <div class="collapse-inner" style="padding-top:10px">
+                <div class="form-grid">
+                  <div class="field field-vnd">
+                    <label>Phụ thu dịch vụ</label>
+                    <input type="text" id="qeSC" inputmode="decimal" value="0 ₫" onfocus="vndFocus(this)" onblur="vndBlur(this)">
+                  </div>
+                  <div class="field">
+                    <label>Số khách</label>
+                    <input type="number" id="qePax" value="0" min="0">
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <button class="btn btn-success qe-add-btn" onclick="addQuickEntry()">
+            <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+            Thêm vào bảng
+          </button>
         </div>
       </div>
 
@@ -380,17 +507,17 @@
       </div>
 
       <div class="mt-4 btn-group">
-        <button class="btn btn-secondary" onclick="resetForm()">
+        <button class="btn btn-secondary btn-sm" onclick="resetForm()">
           <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
             <polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 .49-3.5"/>
           </svg>
           Đặt lại
         </button>
-        <button class="btn btn-success" onclick="generateEmpty24Hours()">
+        <button class="btn btn-secondary btn-sm" onclick="generateEmpty24Hours()">
           <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-            <polyline points="20 6 9 17 4 12"/>
+            <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/>
           </svg>
-          Xác nhận &amp; Tiếp tục
+          Tạo 24h trống
         </button>
       </div>
     </div>
@@ -581,7 +708,7 @@
             Đảm bảo đã đăng nhập và tải đủ 24 giờ trước khi nhấn Gửi
           </div>
         </div>
-        <button class="btn btn-primary btn-lg" id="btnSales" onclick="submitSales()" style="min-width:180px">
+        <button class="btn btn-primary btn-lg" id="btnSales" onclick="openSendConfirmModal()" style="min-width:160px">
           <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
             <line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/>
           </svg>
@@ -760,11 +887,84 @@
     });
   }
 
-  // ── PAYMENT TOTAL ──────────────────────────────────────────────
+  // ── PAYMENT TOTAL (QE form) ────────────────────────────────────
   function updatePaymentTotal() {
-    const total = ['cash','atm','visa','mastercard','amex','voucher']
+    const total = ['qeCash','qeATM','qeVisa','qeMC','qeAmex','qeVoucher','qeOthers']
       .reduce((s, id) => s + getVNDValue(id), 0);
-    document.getElementById('paymentTotalDisplay').textContent = formatVND(total);
+    const el = document.getElementById('qePaymentTotal');
+    if (el) el.textContent = formatVND(total);
+  }
+
+  // ── QE HELPERS ─────────────────────────────────────────────────
+  function initQEHourSelect() {
+    document.getElementById('qeHour').innerHTML = Array.from({length:24}, (_,i) => {
+      const h = String(i).padStart(2,'0');
+      return `<option value="${h}">${h}:00</option>`;
+    }).join('');
+  }
+
+  function calcQEVAT() {
+    const gto = getVNDValue('qeGTO');
+    const disc = getVNDValue('qeDiscount');
+    const vat = Number(document.getElementById('vatPercent').value) || 7;
+    setVNDValue('qeVAT', (gto - disc) * vat / 100);
+  }
+
+  function addQuickEntry() {
+    const hour = document.getElementById('qeHour').value;
+    const date = formatDateForAPI(document.getElementById('reportDate').value);
+    const machineId = document.getElementById('machineId').value.trim();
+    const batchId = document.getElementById('batchId').value.trim();
+    if (!machineId || !batchId || !date) {
+      showToast('Vui lòng điền đủ Mã máy, Số lô và Ngày báo cáo trước!', 'warning'); return;
+    }
+    const gto  = getVNDValue('qeGTO');
+    const disc = getVNDValue('qeDiscount');
+    const vatPct = Number(document.getElementById('vatPercent').value) || 7;
+    const nett = Math.max(0, gto - disc);
+    const vatAmt = nett * vatPct / 100;
+    const newEntry = {
+      sale: {
+        machineid: machineId, batchid: batchId, date, hour,
+        receiptcount: String(document.getElementById('qeReceiptCount').value || 0),
+        gto: fmtNum(nett), VAT: fmtNum(vatAmt), discount: fmtNum(disc),
+        servicecharge: fmtNum(getVNDValue('qeSC')),
+        noofpax: String(document.getElementById('qePax').value || 0),
+        cash:        fmtNum(getVNDValue('qeCash')),
+        atm:         fmtNum(getVNDValue('qeATM')),
+        visa:        fmtNum(getVNDValue('qeVisa')),
+        mastercard:  fmtNum(getVNDValue('qeMC')),
+        amex:        fmtNum(getVNDValue('qeAmex')),
+        voucher:     fmtNum(getVNDValue('qeVoucher')),
+        othersamount:fmtNum(getVNDValue('qeOthers')),
+        vatregistered: document.getElementById('vatRegistered').value
+      }
+    };
+    const data = getSalesData();
+    const existIdx = (data.sales||[]).findIndex(s => s.sale.date === date && s.sale.hour === hour);
+    const isUpdate = existIdx !== -1;
+    if (isUpdate) data.sales[existIdx] = newEntry;
+    else data.sales.push(newEntry);
+    data.sales.sort((a, b) => a.sale.hour.localeCompare(b.sale.hour));
+    setSalesData(data);
+    stepDone(2); stepActive(3);
+
+    // Advance hour selector to next empty slot
+    const used = new Set((data.sales||[]).filter(s => s.sale.date === date).map(s => s.sale.hour));
+    let nextH = null;
+    for (let i = parseInt(hour)+1; i < 24; i++) {
+      const h = String(i).padStart(2,'0');
+      if (!used.has(h)) { nextH = h; break; }
+    }
+    if (!nextH) {
+      for (let i = 0; i < parseInt(hour); i++) {
+        const h = String(i).padStart(2,'0');
+        if (!used.has(h)) { nextH = h; break; }
+      }
+    }
+    if (nextH) document.getElementById('qeHour').value = nextH;
+
+    showToast(isUpdate ? `Đã cập nhật giờ ${hour}:00` : `Đã thêm giờ ${hour}:00 vào bảng!`, 'success', 2500);
   }
 
   // ── LOADING OVERLAY ────────────────────────────────────────────
@@ -944,14 +1144,17 @@
     document.getElementById('batchId').value = '1';
     document.getElementById('reportDate').value = new Date().toISOString().slice(0, 10);
     document.getElementById('vatPercent').value = '7';
-    ['serviceCharge','cash','atm','visa','mastercard','amex','voucher'].forEach(id => setVNDValue(id, 0));
-    document.getElementById('noofpax').value = '0';
     document.getElementById('vatRegistered').value = 'N';
+    // Reset QE form
+    document.getElementById('qeReceiptCount').value = '0';
+    document.getElementById('qePax').value = '0';
+    ['qeGTO','qeDiscount','qeVAT','qeCash','qeATM','qeVisa','qeMC','qeAmex','qeVoucher','qeOthers','qeSC'].forEach(id => setVNDValue(id, 0));
+    initQEHourSelect();
+    updatePaymentTotal();
     document.getElementById('fileInput').value = '';
     document.getElementById('fileMetaBox').classList.add('hidden');
     document.getElementById('colMappingBox').classList.add('hidden');
     setSalesData({ sales: [] });
-    updatePaymentTotal();
     showToast('Form đã được đặt lại.', 'info', 2000);
   }
 
@@ -1237,7 +1440,8 @@
     document.getElementById('drawerTitle').textContent = 'Thêm dữ liệu giờ';
     populateHourSelect('00');
     document.getElementById('entryReceiptCount').value = '0';
-    ['entryGTO','entryDiscount','entryCash','entryATM','entryVisa','entryOthers'].forEach(id => setVNDValue(id, 0));
+    document.getElementById('entryPax').value = '0';
+    ['entryGTO','entryDiscount','entryCash','entryATM','entryVisa','entryOthers','entrySC'].forEach(id => setVNDValue(id, 0));
     document.getElementById('entryVAT').value = '0 ₫';
     openDrawer();
   }
@@ -1246,13 +1450,15 @@
     populateHourSelect(hour);
     // Always reset first so stale values never persist between rows
     document.getElementById('entryReceiptCount').value = '0';
-    ['entryGTO','entryDiscount','entryCash','entryATM','entryVisa','entryOthers'].forEach(id => setVNDValue(id, 0));
+    document.getElementById('entryPax').value = '0';
+    ['entryGTO','entryDiscount','entryCash','entryATM','entryVisa','entryOthers','entrySC'].forEach(id => setVNDValue(id, 0));
     document.getElementById('entryVAT').value = '0 ₫';
     const data = getSalesData();
     const date = formatDateForAPI(document.getElementById('reportDate').value);
     const entry = (data.sales || []).find(s => s.sale.date === date && s.sale.hour === hour);
     if (entry) {
       document.getElementById('entryReceiptCount').value = entry.sale.receiptcount || 0;
+      document.getElementById('entryPax').value = entry.sale.noofpax || 0;
       const storedNettGTO = parseFloat(entry.sale.gto || 0);
       const storedDiscount = parseFloat(entry.sale.discount || 0);
       setVNDValue('entryGTO', storedNettGTO + storedDiscount);
@@ -1261,6 +1467,7 @@
       setVNDValue('entryATM', parseFloat(entry.sale.atm || 0));
       setVNDValue('entryVisa', parseFloat(entry.sale.visa || 0));
       setVNDValue('entryOthers', parseFloat(entry.sale.othersamount || 0));
+      setVNDValue('entrySC', parseFloat(entry.sale.servicecharge || 0));
     }
     calcDrawerVAT();
     openDrawer();
@@ -1286,14 +1493,14 @@
         date, hour,
         receiptcount: document.getElementById('entryReceiptCount').value,
         gto: fmtNum(nettGTO), VAT: fmtNum(nettGTO * vat / 100), discount: fmtNum(disc),
-        servicecharge: fmtNum(getVNDValue('serviceCharge')),
-        noofpax: document.getElementById('noofpax').value,
+        servicecharge: fmtNum(getVNDValue('entrySC')),
+        noofpax: String(document.getElementById('entryPax').value || 0),
         cash: fmtNum(getVNDValue('entryCash')),
         atm: fmtNum(getVNDValue('entryATM')),
         visa: fmtNum(getVNDValue('entryVisa')),
-        mastercard: fmtNum(getVNDValue('mastercard')),
-        amex: fmtNum(getVNDValue('amex')),
-        voucher: fmtNum(getVNDValue('voucher')),
+        mastercard: '0.00',
+        amex: '0.00',
+        voucher: '0.00',
         othersamount: fmtNum(getVNDValue('entryOthers')),
         vatregistered: document.getElementById('vatRegistered').value
       }
@@ -1425,6 +1632,108 @@
     }
   }
 
+  // ── SEND CONFIRMATION MODAL ────────────────────────────────────
+  function openSendConfirmModal() {
+    const data = getSalesData();
+    const date = formatDateForAPI(document.getElementById('reportDate').value);
+    const machineId = document.getElementById('machineId').value.trim() || '—';
+    const batchId   = document.getElementById('batchId').value.trim() || '—';
+    const dateDisp  = document.getElementById('reportDate').value
+      ? new Date(document.getElementById('reportDate').value + 'T00:00').toLocaleDateString('vi-VN')
+      : '—';
+
+    document.getElementById('confirmModalSubtitle').textContent =
+      `Ngày ${dateDisp} · Máy ${machineId} · Lô ${batchId}`;
+
+    // Gather stats
+    let countData = 0, totalReceipts = 0, totalGTO = 0, totalDisc = 0;
+    for (let i = 0; i < 24; i++) {
+      const h = String(i).padStart(2,'0');
+      const s = (data.sales||[]).find(e => e.sale.date === date && e.sale.hour === h);
+      if (s && parseFloat(s.gto) > 0) {
+        countData++;
+        totalReceipts += parseInt(s.receiptcount) || 0;
+        totalGTO  += parseFloat(s.gto) || 0;
+        totalDisc += parseFloat(s.discount) || 0;
+      }
+    }
+    const total24 = (data.sales||[]).filter(s => s.sale.date === date).length;
+    const complete = total24 >= 24;
+
+    // Stats row
+    document.getElementById('confirmStatsRow').innerHTML = `
+      <div class="confirm-stat-card ${complete ? 'success' : 'warning'}">
+        <div class="confirm-stat-icon">${complete ? '✅' : '⚠️'}</div>
+        <div><div class="confirm-stat-label">Độ đầy đủ</div><div class="confirm-stat-value">${total24} / 24 giờ</div></div>
+      </div>
+      <div class="confirm-stat-card">
+        <div class="confirm-stat-icon">📋</div>
+        <div><div class="confirm-stat-label">Có dữ liệu</div><div class="confirm-stat-value">${countData} giờ</div></div>
+      </div>
+      <div class="confirm-stat-card">
+        <div class="confirm-stat-icon">🧾</div>
+        <div><div class="confirm-stat-label">Tổng phiếu</div><div class="confirm-stat-value">${totalReceipts}</div></div>
+      </div>
+      <div class="confirm-stat-card is-primary">
+        <div class="confirm-stat-icon" style="color:white;font-weight:700">₫</div>
+        <div><div class="confirm-stat-label">Tổng doanh thu</div><div class="confirm-stat-value">${totalGTO > 0 ? totalGTO.toLocaleString('vi-VN') + ' ₫' : '0 ₫'}</div></div>
+      </div>`;
+
+    // Warning if incomplete
+    const warnEl = document.getElementById('confirmMissingWarn');
+    if (total24 < 24) {
+      const missing = [];
+      for (let i = 0; i < 24; i++) {
+        const h = String(i).padStart(2,'0');
+        if (!(data.sales||[]).some(s => s.sale.date === date && s.sale.hour === h)) missing.push(h + ':00');
+      }
+      warnEl.className = 'infobox danger';
+      warnEl.innerHTML = `<div class="infobox-title">⚠️ Thiếu ${24 - total24} giờ: ${missing.join(', ')}</div>
+        <p style="font-size:12px;margin-top:4px">API sẽ báo lỗi. Nhấn "Kiểm tra lại" → dùng "Tự động bổ sung giờ trống" trong bảng.</p>`;
+    } else {
+      warnEl.className = 'hidden';
+    }
+
+    // Hours detail table
+    let rows = '';
+    for (let i = 0; i < 24; i++) {
+      const h = String(i).padStart(2,'0');
+      const s = (data.sales||[]).find(e => e.sale.date === date && e.sale.hour === h);
+      const hasData = s && parseFloat(s.gto) > 0;
+      const inPayload = !!s;
+      const status = hasData
+        ? `<span class="status-badge has-data">✓</span>`
+        : (inPayload ? `<span class="status-badge is-empty">Trống</span>` : `<span class="status-badge is-missing">✕ Thiếu</span>`);
+      rows += `<tr class="${hasData ? 'row-data' : (inPayload ? '' : 'row-missing')}">
+        <td class="mono" style="font-weight:${hasData?700:400}">${h}:00</td>
+        <td class="mono center">${s ? s.receiptcount : '—'}</td>
+        <td class="mono right">${s && parseFloat(s.gto) > 0 ? parseFloat(s.gto).toLocaleString('vi-VN') + ' ₫' : (s ? '<span style="opacity:.5">0 ₫</span>' : '—')}</td>
+        <td class="mono right">${s && parseFloat(s.discount) > 0 ? parseFloat(s.discount).toLocaleString('vi-VN') + ' ₫' : (s ? '<span style="opacity:.5">0 ₫</span>' : '—')}</td>
+        <td>${status}</td>
+      </tr>`;
+    }
+    document.getElementById('confirmHoursBody').innerHTML = rows;
+    document.getElementById('confirmHoursFoot').innerHTML = `
+      <tr class="total-row">
+        <td>Tổng</td>
+        <td class="mono center">${totalReceipts || '—'}</td>
+        <td class="mono right" style="color:var(--primary);font-weight:700">${totalGTO > 0 ? totalGTO.toLocaleString('vi-VN') + ' ₫' : '—'}</td>
+        <td class="mono right">${totalDisc > 0 ? totalDisc.toLocaleString('vi-VN') + ' ₫' : '—'}</td>
+        <td></td>
+      </tr>`;
+
+    document.getElementById('sendConfirmModal').style.display = 'flex';
+  }
+
+  function closeSendConfirmModal() {
+    document.getElementById('sendConfirmModal').style.display = 'none';
+  }
+
+  async function confirmAndSend() {
+    closeSendConfirmModal();
+    await submitSales();
+  }
+
   // ── DRAG & DROP ────────────────────────────────────────────────
   const dz = document.getElementById('fileDropZone');
   dz.addEventListener('dragover', e => { e.preventDefault(); e.stopPropagation(); dz.classList.add('dragover'); });
@@ -1448,17 +1757,16 @@
       document.getElementById('themeIcon').innerHTML = '<circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>';
       document.getElementById('themeLabel').textContent = 'Sáng';
     }
+    initQEHourSelect();
     renderHourTable();
     updatePaymentTotal();
 
     // ── Auto-login on page load ────────────────────────────────
     const sess = loadSession();
     if (sess.token && sess.expires && (new Date(sess.expires) - Date.now()) / 1000 > 30) {
-      // Valid cached token — restore silently
       applyToken(sess.token, sess.expires);
       showToast('Đã khôi phục phiên đăng nhập.', 'info', 2500);
     } else {
-      // No valid session — fetch fresh token automatically
       showLoader('Đang đăng nhập…');
       try {
         await fetchToken();
