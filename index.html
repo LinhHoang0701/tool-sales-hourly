@@ -1420,6 +1420,7 @@
     }
 
     let count = 0, totalGTO = 0, totalDisc = 0, totalCash = 0, totalReceipts = 0, rows = '';
+    const addedHours = [];
     for (let i = 0; i < 24; i++) {
       const h = String(i).padStart(2, '0');
       const s = map[`${date}-${h}`];
@@ -1478,9 +1479,12 @@
         : (inPayload
           ? `<span class="status-badge is-empty">— Trống</span>`
           : `<span class="status-badge is-missing">✕ Thiếu</span>`);
-      const gtoFmt  = s && parseFloat(s.gto) > 0  ? parseFloat(s.gto).toLocaleString('vi-VN') + ' ₫' : (s ? '<span style="color:var(--text-subtle)">0 ₫</span>' : '<span style="color:var(--text-subtle)">—</span>');
+      const gtoVal  = s ? parseFloat(s.gto) || 0 : 0;
+      const gtoFmt  = gtoVal > 0 ? gtoVal.toLocaleString('vi-VN') + ' ₫' : (s ? '<span style="color:var(--text-subtle)">0 ₫</span>' : '<span style="color:var(--text-subtle)">—</span>');
       const discFmt = s && parseFloat(s.discount) > 0 ? parseFloat(s.discount).toLocaleString('vi-VN') + ' ₫' : (s ? '<span style="color:var(--text-subtle)">0 ₫</span>' : '<span style="color:var(--text-subtle)">—</span>');
       const cashFmt = s && parseFloat(s.cash) > 0  ? parseFloat(s.cash).toLocaleString('vi-VN') + ' ₫' : (s ? '<span style="color:var(--text-subtle)">0 ₫</span>' : '<span style="color:var(--text-subtle)">—</span>');
+      const barPct  = maxGTO > 0 ? Math.round((gtoVal / maxGTO) * 100) : 0;
+      const gtoFormatted = gtoFmt;
       rows += `<tr class="${rowClass}">
         <td><span class="hour-chip ${hasData ? 'hour-chip-active' : ''}">${h}:00</span></td>
         <td class="mono center">${s ? s.receiptcount : '<span class="tbl-dash">—</span>'}</td>

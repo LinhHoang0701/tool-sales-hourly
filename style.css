@@ -709,6 +709,30 @@
     }
     .btn-row-edit:hover { background: var(--primary); color: white; border-color: var(--primary); }
 
+    /* ── HOUR CHIP ──────────────────────────────────────────────── */
+    .hour-chip {
+      display: inline-block; padding: 2px 8px;
+      border-radius: 6px; font-size: 12px; font-weight: 500;
+      font-family: var(--font-mono); color: var(--text-muted);
+    }
+    .hour-chip.hour-chip-active {
+      background: var(--primary-light); color: var(--primary);
+      border: 1px solid var(--primary-border); font-weight: 700;
+    }
+
+    /* ── REVENUE CELL WITH MINI BAR ─────────────────────────────── */
+    .revenue-cell {
+      position: relative; display: flex; align-items: center;
+      justify-content: flex-end; min-width: 100px;
+    }
+    .revenue-bar-bg {
+      position: absolute; left: 0; top: 0; bottom: 0;
+      background: var(--primary-light); border-radius: 3px;
+      transition: width .3s ease; max-width: 100%;
+    }
+    .revenue-value { position: relative; z-index: 1; }
+    .tbl-dash { color: var(--text-subtle); }
+
     /* ── STATUS BADGE (inline) ──────────────────────────────────── */
     .status-badge {
       display: inline-flex; align-items: center; gap: 4px;
