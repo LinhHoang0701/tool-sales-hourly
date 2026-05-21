@@ -970,9 +970,8 @@
 
   function calcQEVAT() {
     const gto = getVNDValue('qeGTO');
-    const disc = getDiscountAmt('qe');
     const vat = Number(document.getElementById('vatPercent').value) || 7;
-    setVNDValue('qeVAT', (gto - disc) * vat / 100);
+    setVNDValue('qeVAT', gto * vat / 100);
   }
 
   function addQuickEntry() {
@@ -986,13 +985,11 @@
     const gto  = getVNDValue('qeGTO');
     const disc = getDiscountAmt('qe');
     const vatPct = Number(document.getElementById('vatPercent').value) || 7;
-    const nett = Math.max(0, gto - disc);
-    const vatAmt = nett * vatPct / 100;
     const newEntry = {
       sale: {
         machineid: machineId, batchid: batchId, date, hour,
         receiptcount: String(document.getElementById('qeReceiptCount').value || 0),
-        gto: fmtNum(nett), vat: fmtNum(vatAmt), discount: fmtNum(disc),
+        gto: fmtNum(gto), vat: fmtNum(gto * vatPct / 100), discount: fmtNum(disc),
         servicecharge: fmtNum(getVNDValue('qeSC')),
         noofpax: String(document.getElementById('qePax').value || 0),
         cash:        fmtNum(getVNDValue('qeCash')),
@@ -1373,20 +1370,19 @@
     const sales = Array.from({ length: 24 }, (_, i) => {
       const hour = String(i).padStart(2, '0');
       const d = hd[hour];
-      const net = d.gto - d.discount;
-      const gst = net * vatPercent / 100;
+      const gst = d.gto * vatPercent / 100;
       let cash = cashDef, atm = atmDef, visa = visaDef, mc = mcDef, amex = amexDef, voucher = voucherDef;
-      if (totalDef === 0) { cash = net; atm = visa = mc = amex = voucher = 0; }
-      else if (totalDef > net) {
-        const scale = net / totalDef;
+      if (totalDef === 0) { cash = d.gto; atm = visa = mc = amex = voucher = 0; }
+      else if (totalDef > d.gto) {
+        const scale = d.gto / totalDef;
         cash *= scale; atm *= scale; visa *= scale; mc *= scale; amex *= scale; voucher *= scale;
       }
-      const others = Math.max(0, net - (cash + atm + visa + mc + amex + voucher));
+      const others = Math.max(0, d.gto - (cash + atm + visa + mc + amex + voucher));
       return {
         sale: {
           machineid, batchid, date, hour,
           receiptcount: String(d.receiptcount),
-          gto: fmtNum(net), vat: fmtNum(gst), discount: fmtNum(d.discount),
+          gto: fmtNum(d.gto), vat: fmtNum(gst), discount: fmtNum(d.discount),
           servicecharge: fmtNum(scDefault), noofpax: String(paxDefault),
           cash: fmtNum(cash), atm: fmtNum(atm), visa: fmtNum(visa),
           mastercard: fmtNum(mc), amex: fmtNum(amex), voucher: fmtNum(voucher),
@@ -1584,7 +1580,7 @@
       document.getElementById('entryPax').value = entry.sale.noofpax || 0;
       const storedNettGTO = parseFloat(entry.sale.gto || 0);
       const storedDiscount = parseFloat(entry.sale.discount || 0);
-      setVNDValue('entryGTO', storedNettGTO + storedDiscount);
+      setVNDValue('entryGTO', storedNettGTO);
       setVNDValue('entryDiscount', storedDiscount);
       setVNDValue('entryCash', parseFloat(entry.sale.cash || 0));
       setVNDValue('entryATM', parseFloat(entry.sale.atm || 0));
@@ -1597,9 +1593,8 @@
   }
   function calcDrawerVAT() {
     const gto = getVNDValue('entryGTO');
-    const disc = getDiscountAmt('entry');
     const vat = Number(document.getElementById('vatPercent').value) || 7;
-    setVNDValue('entryVAT', (gto - disc) * vat / 100);
+    setVNDValue('entryVAT', gto * vat / 100);
   }
   function saveEntryFromDrawer() {
     const hour = document.getElementById('entryHour').value;
@@ -1608,14 +1603,13 @@
     const disc = getDiscountAmt('entry');
     const vat = Number(document.getElementById('vatPercent').value) || 7;
     const date = formatDateForAPI(document.getElementById('reportDate').value);
-    const nettGTO = gto - disc;
     const newEntry = {
       sale: {
         machineid: document.getElementById('machineId').value.trim(),
         batchid: document.getElementById('batchId').value.trim(),
         date, hour,
         receiptcount: document.getElementById('entryReceiptCount').value,
-        gto: fmtNum(nettGTO), vat: fmtNum(nettGTO * vat / 100), discount: fmtNum(disc),
+        gto: fmtNum(gto), vat: fmtNum(gto * vat / 100), discount: fmtNum(disc),
         servicecharge: fmtNum(getVNDValue('entrySC')),
         noofpax: String(document.getElementById('entryPax').value || 0),
         cash: fmtNum(getVNDValue('entryCash')),
