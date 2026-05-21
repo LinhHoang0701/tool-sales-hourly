@@ -75,6 +75,23 @@
     .logo-title { font-size: 15px; font-weight: 600; line-height: 1.2; }
     .logo-sub { font-size: 11px; color: var(--text-muted); }
 
+    /* HEADER AUTH CHIP */
+    .header-auth-chip {
+      display: inline-flex; align-items: center; gap: 6px;
+      padding: 4px 10px 4px 7px; border-radius: 20px;
+      font-size: 12px; font-weight: 500; color: var(--text-muted);
+      background: var(--bg-subtle); border: 1px solid var(--border);
+      transition: all var(--transition);
+    }
+    .header-auth-chip.auth-ok { color: var(--success); background: var(--success-bg); border-color: var(--success-border); }
+    .header-auth-dot {
+      width: 7px; height: 7px; border-radius: 50%;
+      background: var(--text-subtle); flex-shrink: 0;
+      transition: background var(--transition);
+    }
+    .header-auth-chip.auth-ok .header-auth-dot { background: var(--success); }
+    .header-auth-countdown { font-size: 11px; color: var(--text-muted); margin-left: 2px; font-family: var(--font-mono); }
+
     /* BUTTONS */
     .btn {
       display: inline-flex; align-items: center; gap: 6px;
@@ -338,6 +355,17 @@
 
     /* DIVIDER */
     .divider { height: 1px; background: var(--border); margin: 20px 0; }
+
+    /* SEND SECTION */
+    .send-section {
+      display: flex; align-items: center; justify-content: space-between;
+      gap: 16px; flex-wrap: wrap;
+    }
+    .send-section-title { font-size: 15px; font-weight: 600; color: var(--text); margin-bottom: 4px; }
+    .send-section-hint {
+      display: flex; align-items: center; gap: 6px;
+      font-size: 12px; color: var(--text-muted); line-height: 1.5;
+    }
     .divider-or {
       display: flex; align-items: center; gap: 10px; margin: 16px 0;
     }
@@ -671,6 +699,7 @@
     }
     .hour-count-badge.partial { background: var(--primary-light); border-color: var(--primary-border); color: var(--primary); }
     .hour-count-badge.complete { background: var(--success-bg); border-color: var(--success-border); color: var(--success); }
+    .hour-count-badge.empty { background: var(--bg-subtle); color: var(--text-muted); border-color: var(--border); }
 
     /* ── HOUR TABLE ROW STATES ──────────────────────────────────── */
     .hour-table tbody tr.row-data td { background: rgba(22,163,74,0.04); }
