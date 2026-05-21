@@ -62,11 +62,17 @@
     <div class="confirm-modal-body">
       <div class="confirm-stats-row" id="confirmStatsRow"></div>
       <div id="confirmMissingWarn" class="hidden"></div>
-      <div style="font-size:12px;font-weight:600;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.5px">Chi tiết 24 giờ</div>
+      <div class="confirm-table-header-row">
+        <span style="font-size:12px;font-weight:600;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.5px">Chọn bản ghi cần gửi</span>
+        <span class="confirm-sel-summary" id="confirmSelSummary"></span>
+      </div>
       <div class="confirm-table-wrap">
         <table class="hour-table">
           <thead>
             <tr>
+              <th style="width:36px">
+                <input type="checkbox" id="confirmSelectAll" title="Chọn tất cả" onchange="confirmToggleAll(this.checked)">
+              </th>
               <th>Giờ</th>
               <th class="center">Phiếu</th>
               <th class="right">Doanh thu</th>
@@ -1693,10 +1699,12 @@
   }
 
   // ── SUBMIT ─────────────────────────────────────────────────────
-  async function submitSales() {
+  async function submitSales(payloadOverride) {
     const token = document.getElementById('token').value.trim();
     if (!token) { showToast('Vui lòng đăng nhập trước (Bước 1)!', 'warning'); return; }
-    const payload = document.getElementById('salesData').value;
+    const payload = payloadOverride
+      ? JSON.stringify(payloadOverride)
+      : document.getElementById('salesData').value;
     try { JSON.parse(payload); } catch (err) { showToast(`JSON không hợp lệ: ${err.message}`, 'error'); return; }
 
     const btn = document.getElementById('btnSales');
@@ -1847,8 +1855,17 @@
   }
 
   async function confirmAndSend() {
+    // Build payload from only checked rows
+    const checked = Array.from(document.querySelectorAll('.confirm-row-chk:checked'))
+      .map(chk => chk.dataset.hour);
+    if (checked.length === 0) { showToast('Chưa chọn bản ghi nào để gửi!', 'warning'); return; }
+    const data = getSalesData();
+    const date = formatDateForAPI(document.getElementById('reportDate').value);
+    const filteredSales = (data.sales || []).filter(
+      e => e.sale.date === date && checked.includes(e.sale.hour)
+    );
     closeSendConfirmModal();
-    await submitSales();
+    await submitSales({ sales: filteredSales });
   }
 
   // ── DRAG & DROP ────────────────────────────────────────────────
