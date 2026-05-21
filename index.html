@@ -1758,95 +1758,109 @@
   }
 
   // ── SEND CONFIRMATION MODAL ────────────────────────────────────
+  function _confirmRecalcStats() {
+    const checkboxes = document.querySelectorAll('.confirm-row-chk');
+    let selCount = 0, selReceipts = 0, selGTO = 0, selDisc = 0;
+    checkboxes.forEach(chk => {
+      if (chk.checked) {
+        selCount++;
+        selReceipts += parseInt(chk.dataset.receipts) || 0;
+        selGTO      += parseFloat(chk.dataset.gto)    || 0;
+        selDisc     += parseFloat(chk.dataset.disc)   || 0;
+      }
+    });
+    const total = checkboxes.length;
+    const sa = document.getElementById('confirmSelectAll');
+    if (sa) { sa.checked = selCount === total && total > 0; sa.indeterminate = selCount > 0 && selCount < total; }
+    const sumEl = document.getElementById('confirmSelSummary');
+    if (sumEl) sumEl.textContent = `${selCount} / ${total} bản ghi được chọn · ${selGTO.toLocaleString('vi-VN')} ₫`;
+    document.getElementById('confirmStatsRow').innerHTML = `
+      <div class="confirm-stat-card ${selCount >= 24 ? 'success' : selCount > 0 ? '' : 'warning'}">
+        <div class="confirm-stat-icon">${selCount >= 24 ? '✅' : '📌'}</div>
+        <div><div class="confirm-stat-label">Đã chọn</div><div class="confirm-stat-value">${selCount} / ${total} giờ</div></div>
+      </div>
+      <div class="confirm-stat-card">
+        <div class="confirm-stat-icon">🧾</div>
+        <div><div class="confirm-stat-label">Tổng phiếu</div><div class="confirm-stat-value">${selReceipts}</div></div>
+      </div>
+      <div class="confirm-stat-card is-primary">
+        <div class="confirm-stat-icon" style="color:white;font-weight:700">₫</div>
+        <div><div class="confirm-stat-label">Tổng doanh thu</div><div class="confirm-stat-value">${selGTO > 0 ? selGTO.toLocaleString('vi-VN') + ' ₫' : '0 ₫'}</div></div>
+      </div>
+      <div class="confirm-stat-card">
+        <div class="confirm-stat-icon">🏷️</div>
+        <div><div class="confirm-stat-label">Chiết khấu</div><div class="confirm-stat-value">${selDisc > 0 ? selDisc.toLocaleString('vi-VN') + ' ₫' : '—'}</div></div>
+      </div>`;
+    const btn = document.getElementById('btnConfirmSend');
+    if (btn) btn.disabled = selCount === 0;
+  }
+
+  function confirmToggleAll(checked) {
+    document.querySelectorAll('.confirm-row-chk').forEach(chk => { chk.checked = checked; });
+    _confirmRecalcStats();
+  }
+
   function openSendConfirmModal() {
     const data = getSalesData();
     const date = formatDateForAPI(document.getElementById('reportDate').value);
     const machineId = document.getElementById('machineId').value.trim() || '—';
     const batchId   = document.getElementById('batchId').value.trim() || '—';
     const dateDisp  = document.getElementById('reportDate').value
-      ? new Date(document.getElementById('reportDate').value + 'T00:00').toLocaleDateString('vi-VN')
-      : '—';
+      ? new Date(document.getElementById('reportDate').value + 'T00:00').toLocaleDateString('vi-VN') : '—';
 
     document.getElementById('confirmModalSubtitle').textContent =
       `Ngày ${dateDisp} · Máy ${machineId} · Lô ${batchId}`;
 
-    // Gather stats
-    let countData = 0, totalReceipts = 0, totalGTO = 0, totalDisc = 0;
-    for (let i = 0; i < 24; i++) {
-      const h = String(i).padStart(2,'0');
-      const s = (data.sales||[]).find(e => e.sale.date === date && e.sale.hour === h);
-      if (s && parseFloat(s.gto) > 0) {
-        countData++;
-        totalReceipts += parseInt(s.receiptcount) || 0;
-        totalGTO  += parseFloat(s.gto) || 0;
-        totalDisc += parseFloat(s.discount) || 0;
-      }
-    }
-    const total24 = (data.sales||[]).filter(s => s.sale.date === date).length;
-    const complete = total24 >= 24;
+    // Only rows that exist in the payload for this date, sorted by hour
+    const payloadRows = (data.sales || [])
+      .filter(e => e.sale.date === date)
+      .sort((a, b) => a.sale.hour.localeCompare(b.sale.hour));
 
-    // Stats row
-    document.getElementById('confirmStatsRow').innerHTML = `
-      <div class="confirm-stat-card ${complete ? 'success' : 'warning'}">
-        <div class="confirm-stat-icon">${complete ? '✅' : '⚠️'}</div>
-        <div><div class="confirm-stat-label">Độ đầy đủ</div><div class="confirm-stat-value">${total24} / 24 giờ</div></div>
-      </div>
-      <div class="confirm-stat-card">
-        <div class="confirm-stat-icon">📋</div>
-        <div><div class="confirm-stat-label">Có dữ liệu</div><div class="confirm-stat-value">${countData} giờ</div></div>
-      </div>
-      <div class="confirm-stat-card">
-        <div class="confirm-stat-icon">🧾</div>
-        <div><div class="confirm-stat-label">Tổng phiếu</div><div class="confirm-stat-value">${totalReceipts}</div></div>
-      </div>
-      <div class="confirm-stat-card is-primary">
-        <div class="confirm-stat-icon" style="color:white;font-weight:700">₫</div>
-        <div><div class="confirm-stat-label">Tổng doanh thu</div><div class="confirm-stat-value">${totalGTO > 0 ? totalGTO.toLocaleString('vi-VN') + ' ₫' : '0 ₫'}</div></div>
-      </div>`;
-
-    // Warning if incomplete
+    // Missing-hours warning
     const warnEl = document.getElementById('confirmMissingWarn');
-    if (total24 < 24) {
-      const missing = [];
-      for (let i = 0; i < 24; i++) {
-        const h = String(i).padStart(2,'0');
-        if (!(data.sales||[]).some(s => s.sale.date === date && s.sale.hour === h)) missing.push(h + ':00');
-      }
+    if (payloadRows.length < 24) {
+      const payloadHours = new Set(payloadRows.map(e => e.sale.hour));
+      const missing = Array.from({length:24}, (_,i) => String(i).padStart(2,'0'))
+        .filter(h => !payloadHours.has(h));
       warnEl.className = 'infobox danger';
-      warnEl.innerHTML = `<div class="infobox-title">⚠️ Thiếu ${24 - total24} giờ: ${missing.join(', ')}</div>
-        <p style="font-size:12px;margin-top:4px">API sẽ báo lỗi. Nhấn "Kiểm tra lại" → dùng "Tự động bổ sung giờ trống" trong bảng.</p>`;
+      warnEl.innerHTML = `<div class="infobox-title">⚠️ Thiếu ${missing.length} giờ: ${missing.map(h=>h+':00').join(', ')}</div>
+        <p style="font-size:12px;margin-top:4px">API sẽ báo lỗi nếu thiếu giờ. Nhấn "Kiểm tra lại" → dùng <strong>Tự động bổ sung giờ trống</strong>.</p>`;
     } else {
       warnEl.className = 'hidden';
     }
 
-    // Hours detail table
+    // Build checkbox rows — all checked by default
     let rows = '';
-    for (let i = 0; i < 24; i++) {
-      const h = String(i).padStart(2,'0');
-      const s = (data.sales||[]).find(e => e.sale.date === date && e.sale.hour === h);
-      const hasData = s && parseFloat(s.gto) > 0;
-      const inPayload = !!s;
-      const status = hasData
-        ? `<span class="status-badge has-data">✓</span>`
-        : (inPayload ? `<span class="status-badge is-empty">Trống</span>` : `<span class="status-badge is-missing">✕ Thiếu</span>`);
-      rows += `<tr class="${hasData ? 'row-data' : (inPayload ? '' : 'row-missing')}">
-        <td class="mono" style="font-weight:${hasData?700:400}">${h}:00</td>
-        <td class="mono center">${s ? s.receiptcount : '—'}</td>
-        <td class="mono right">${s && parseFloat(s.gto) > 0 ? parseFloat(s.gto).toLocaleString('vi-VN') + ' ₫' : (s ? '<span style="opacity:.5">0 ₫</span>' : '—')}</td>
-        <td class="mono right">${s && parseFloat(s.discount) > 0 ? parseFloat(s.discount).toLocaleString('vi-VN') + ' ₫' : (s ? '<span style="opacity:.5">0 ₫</span>' : '—')}</td>
-        <td>${status}</td>
-      </tr>`;
+    if (payloadRows.length === 0) {
+      rows = `<tr><td colspan="6" style="text-align:center;padding:28px;color:var(--text-muted)">
+        Chưa có dữ liệu. Vui lòng nhập dữ liệu trước khi gửi.</td></tr>`;
+    } else {
+      payloadRows.forEach(e => {
+        const s = e.sale;
+        const hasData = parseFloat(s.gto) > 0;
+        const gtoVal  = parseFloat(s.gto) || 0;
+        const discVal = parseFloat(s.discount) || 0;
+        const status  = hasData
+          ? `<span class="status-badge has-data">✓ Có dữ liệu</span>`
+          : `<span class="status-badge is-empty">— Trống</span>`;
+        rows += `<tr class="${hasData ? 'row-data' : 'row-empty'} confirm-sel-row">
+          <td><input type="checkbox" class="confirm-row-chk"
+            data-hour="${s.hour}" data-receipts="${s.receiptcount||0}"
+            data-gto="${gtoVal}" data-disc="${discVal}"
+            checked onchange="_confirmRecalcStats()"></td>
+          <td class="mono" style="font-weight:${hasData?700:400}">${s.hour}:00</td>
+          <td class="mono center">${s.receiptcount || 0}</td>
+          <td class="mono right">${gtoVal > 0 ? gtoVal.toLocaleString('vi-VN')+' ₫' : '<span style="opacity:.4">0 ₫</span>'}</td>
+          <td class="mono right">${discVal > 0 ? discVal.toLocaleString('vi-VN')+' ₫' : '<span style="opacity:.4">—</span>'}</td>
+          <td>${status}</td>
+        </tr>`;
+      });
     }
     document.getElementById('confirmHoursBody').innerHTML = rows;
-    document.getElementById('confirmHoursFoot').innerHTML = `
-      <tr class="total-row">
-        <td>Tổng</td>
-        <td class="mono center">${totalReceipts || '—'}</td>
-        <td class="mono right" style="color:var(--primary);font-weight:700">${totalGTO > 0 ? totalGTO.toLocaleString('vi-VN') + ' ₫' : '—'}</td>
-        <td class="mono right">${totalDisc > 0 ? totalDisc.toLocaleString('vi-VN') + ' ₫' : '—'}</td>
-        <td></td>
-      </tr>`;
+    document.getElementById('confirmHoursFoot').innerHTML = '';
 
+    // Init select-all state + stats
+    _confirmRecalcStats();
     document.getElementById('sendConfirmModal').style.display = 'flex';
   }
 
