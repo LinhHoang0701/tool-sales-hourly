@@ -992,7 +992,7 @@
       sale: {
         machineid: machineId, batchid: batchId, date, hour,
         receiptcount: String(document.getElementById('qeReceiptCount').value || 0),
-        gto: fmtNum(nett), VAT: fmtNum(vatAmt), discount: fmtNum(disc),
+        gto: fmtNum(nett), vat: fmtNum(vatAmt), discount: fmtNum(disc),
         servicecharge: fmtNum(getVNDValue('qeSC')),
         noofpax: String(document.getElementById('qePax').value || 0),
         cash:        fmtNum(getVNDValue('qeCash')),
@@ -1240,7 +1240,7 @@
       sale: {
         machineid: machineId, batchid: batchId, date,
         hour: String(i).padStart(2, '0'),
-        receiptcount: '0', gto: '0.00', VAT: '0.00', discount: '0.00',
+        receiptcount: '0', gto: '0.00', vat: '0.00', discount: '0.00',
         servicecharge: sc, noofpax: pax,
         cash: '0.00', atm: '0.00', visa: '0.00', mastercard: '0.00',
         amex: '0.00', voucher: '0.00', othersamount: '0.00', vatregistered: vatReg
@@ -1386,7 +1386,7 @@
         sale: {
           machineid, batchid, date, hour,
           receiptcount: String(d.receiptcount),
-          gto: fmtNum(net), VAT: fmtNum(gst), discount: fmtNum(d.discount),
+          gto: fmtNum(net), vat: fmtNum(gst), discount: fmtNum(d.discount),
           servicecharge: fmtNum(scDefault), noofpax: String(paxDefault),
           cash: fmtNum(cash), atm: fmtNum(atm), visa: fmtNum(visa),
           mastercard: fmtNum(mc), amex: fmtNum(amex), voucher: fmtNum(voucher),
@@ -1615,7 +1615,7 @@
         batchid: document.getElementById('batchId').value.trim(),
         date, hour,
         receiptcount: document.getElementById('entryReceiptCount').value,
-        gto: fmtNum(nettGTO), VAT: fmtNum(nettGTO * vat / 100), discount: fmtNum(disc),
+        gto: fmtNum(nettGTO), vat: fmtNum(nettGTO * vat / 100), discount: fmtNum(disc),
         servicecharge: fmtNum(getVNDValue('entrySC')),
         noofpax: String(document.getElementById('entryPax').value || 0),
         cash: fmtNum(getVNDValue('entryCash')),
