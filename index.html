@@ -1088,11 +1088,12 @@
         txt.textContent = 'Hết hạn'; chip.className = 'token-countdown danger';
         clearInterval(_countdownTimer); return;
       }
-      const m = Math.floor(secsLeft / 60), s = secsLeft % 60;
-      txt.textContent = `Hết hạn sau ${m}:${String(s).padStart(2,'0')}`;
+      const h = Math.floor(secsLeft / 3600), m = Math.floor((secsLeft % 3600) / 60), s = secsLeft % 60;
+      const fmt = `${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
+      txt.textContent = `Hết hạn sau ${fmt}`;
       chip.className = 'token-countdown' + (secsLeft < 300 ? ' danger' : secsLeft < 600 ? ' warn' : '');
       const hcd = document.getElementById('headerAuthCountdown');
-      if (hcd) hcd.textContent = secsLeft > 0 ? `${m}:${String(s).padStart(2,'0')}` : '';
+      if (hcd) hcd.textContent = secsLeft > 0 ? fmt : '';
     }
     tick();
     _countdownTimer = setInterval(tick, 1000);
