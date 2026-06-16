@@ -333,7 +333,7 @@
           </div>
           <div class="field">
             <label for="machineId">Mã máy POS <span class="required">*</span></label>
-            <input type="text" id="machineId" value="50100904" required>
+            <input type="text" id="machineId" value="13000008" required>
             <span class="field-hint">Do quản trị viên cấp — không tự sửa</span>
           </div>
           <div class="field">
@@ -501,7 +501,7 @@
   "sales": [
     {
       "sale": {
-        "machineid":    "50100904",
+        "machineid":    "13000008",
         "batchid":      "1",
         "date":         "20220125",   // yyyyMMdd
         "hour":         "01",         // HH (24 giờ)
@@ -767,7 +767,7 @@
 </div><!-- /container -->
 
 <script>
-  const BASE_URL = 'https://staging.synthesis.bz/posvn/v1/api';
+  const BASE_URL = 'https://tangent.hanoicentre.com.vn/pos/v1/api';
   let _rawData = [];
   let _detectedCols = [];
 
@@ -1039,8 +1039,8 @@
   }
 
   // ── HARDCODED CREDENTIALS ──────────────────────────────────────
-  const CRED_USER = 'postestuservn';
-  const CRED_PASS = '@APITest1234';
+  const CRED_USER = '13000008';
+  const CRED_PASS = 'iRUnbYU1';
 
   // ── TOKEN STORAGE KEYS ─────────────────────────────────────────
   const LS_TOKEN   = 'pos_access_token';
@@ -1202,7 +1202,7 @@
 
   // ── RESET FORM ─────────────────────────────────────────────────
   function resetForm() {
-    document.getElementById('machineId').value = '50100904';
+    document.getElementById('machineId').value = '13000008';
     document.getElementById('batchId').value = '1';
     document.getElementById('reportDate').value = new Date().toISOString().slice(0, 10);
     document.getElementById('vatPercent').value = '10';
