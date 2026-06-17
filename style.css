@@ -738,6 +738,102 @@
     }
     .btn-row-edit:hover { background: var(--primary); color: white; border-color: var(--primary); }
 
+    /* ── INLINE DELETE BUTTON ────────────────────────────────────── */
+    .btn-row-delete {
+      display: inline-flex; align-items: center; gap: 4px;
+      padding: 4px 10px; font-size: 11px; font-weight: 500;
+      color: var(--danger); background: var(--danger-bg);
+      border: 1px solid var(--danger-border); border-radius: 5px;
+      cursor: pointer; transition: all var(--transition);
+      white-space: nowrap; font-family: var(--font); line-height: 1.4;
+      margin-left: 6px;
+    }
+    .btn-row-delete:hover { background: var(--danger); color: white; border-color: var(--danger); }
+
+    /* ── DELETE CONFIRMATION MODAL ───────────────────────────────── */
+    .delete-modal-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      width: 100%;
+      max-width: 400px;
+      margin: 20px;
+      box-shadow: 0 24px 72px rgba(0,0,0,0.25), 0 0 0 1px rgba(0,0,0,0.03);
+      animation: slideUp 0.25s ease;
+      text-align: center;
+      padding: 32px 28px 24px;
+    }
+    .delete-modal-icon-wrap {
+      display: flex;
+      justify-content: center;
+      margin-bottom: 18px;
+    }
+    .delete-modal-icon {
+      width: 56px; height: 56px;
+      background: var(--danger-bg);
+      border: 2px solid var(--danger-border);
+      border-radius: 16px;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .delete-modal-title {
+      font-size: 18px;
+      font-weight: 700;
+      color: var(--text);
+      margin-bottom: 6px;
+    }
+    .delete-modal-subtitle {
+      font-size: 13px;
+      color: var(--text-muted);
+      margin-bottom: 20px;
+    }
+    .delete-modal-info {
+      background: var(--bg-subtle);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 14px 16px;
+      margin-bottom: 24px;
+      text-align: left;
+    }
+    .delete-info-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px 16px;
+    }
+    .delete-info-item {
+      display: flex;
+      flex-direction: column;
+      gap: 3px;
+    }
+    .delete-info-label {
+      font-size: 11px;
+      font-weight: 500;
+      color: var(--text-subtle);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    .delete-info-value {
+      font-size: 14px;
+      color: var(--text);
+    }
+    .delete-modal-actions {
+      display: flex;
+      gap: 10px;
+    }
+    .delete-modal-btn-confirm {
+      display: inline-flex; align-items: center; justify-content: center; gap: 6px;
+      padding: 10px 20px; border-radius: var(--radius-xs);
+      font-size: 13px; font-weight: 600; font-family: var(--font);
+      border: none; cursor: pointer;
+      transition: all var(--transition);
+      background: var(--danger); color: white;
+    }
+    .delete-modal-btn-confirm:hover { background: #b91c1c; }
+    .delete-modal-btn-confirm:active { transform: scale(0.98); }
+    @media (max-width: 480px) {
+      .delete-modal-card { max-width: 100%; margin: 12px; padding: 24px 20px 20px; }
+      .delete-info-grid { grid-template-columns: 1fr; }
+    }
+
     /* ── HOUR CHIP ──────────────────────────────────────────────── */
     .hour-chip {
       display: inline-block; padding: 2px 8px;
